@@ -1,0 +1,27 @@
+{
+  "name": "@repo/auth",
+  "type": "module",
+  "exports": {
+    ".": {
+      "default": "./src/index.ts"
+    },
+    "./*": {
+      "default": "./src/*.ts"
+    }
+  },
+  "scripts": {
+    "db:seed": "bun --env-file=../../apps/web/.env scripts/seed-demo.ts"
+  },
+  "dependencies": {
+    "@repo/db": "workspace:*",
+    "@repo/env": "workspace:*",
+    "better-auth": "catalog:",
+    "dotenv": "catalog:",
+    "drizzle-orm": "^0.45.2",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@repo/config": "workspace:*",
+    "typescript": "catalog:"
+  }
+}
