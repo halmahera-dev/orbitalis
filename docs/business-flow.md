@@ -56,7 +56,7 @@ flowchart TB
     G --> M[Pass digest email per role, and area watch messages]
 ```
 
-Exit of the cycle: the Overview lists rank up, rank down, new bowls, slowing bowls, and sites that changed. The same list goes out as one digest email per role (F20), so users do not need to open the app to know they must act. Each desk starts its own flow from there.
+Exit of the cycle: the Overview lists rank up, rank down, new bowls, slowing bowls, and sites that changed. The same list goes out as one digest email per role (F20), so users do not need to open the app to know they must act. Each user starts their flow from there, on the map layer for their role.
 
 ## 4. Flow N1: from pumping hint to enforcement
 

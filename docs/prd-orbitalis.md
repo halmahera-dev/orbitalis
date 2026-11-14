@@ -81,7 +81,7 @@ One platform that turns NISAR and Sentinel-1 radar motion into groundwater decis
 2. **3D visualization**: a digital twin of the ground under a bowl, a site, or a parcel, with soil layers, buildings, high tide, and a year timeline.
 3. **Groundwater use projection**: two independent estimates of groundwater extraction per area (from people and from ground motion), their ratio, and scenarios to 2050.
 
-On top of these, each user group has a desk: pumping leads with an inspection workflow (built), recharge priority, pipe priority, water farming monitoring, a developer site report, and a public area check.
+New features go into the pages that exist. The map gets four priority layers (pumping leads, recharge priority, pipe priority, water farming) and one priority filter (sinking rate, population, economic activity). Each role opens the map on its own layer. The bowl page and the Bowls desk keep the inspection workflow (built) and add the case report and water farming site visits. The developer site report opens from the map. Only the public area check is a new page.
 
 ### Needs and features
 
@@ -189,7 +189,10 @@ Each feature has a state: Built, Partial, or Not built.
 - Each bowl is a stack of three round tiers. Height and width grow with the rate. Color follows the rate. Buildings show in 3D.
 - The legend states the rate in mm/yr.
 - A 2D view is available with the same numbers.
-- **New:** layers switch per desk: velocity raster, lead score, recharge priority, pipe priority, water farming sites, population. **Not built.**
+- **New:** the "Show" picker has five layers: pumping leads (the bowls today), recharge priority, pipe priority, water farming, and radar passes. One layer shows at a time. **Not built.**
+- **New:** a priority filter in the legend panel with three factors: sinking rate (mm/yr), population (people per km² and people without pipes), and economic activity (low, medium, high). Each factor has a minimum. "Rank by" sets the order of the list and the colors: combined, sinking rate, population, or economic activity. The filter is in the URL. **Not built.**
+- **New:** the ranked list follows the active layer and the filter. A click on a pumping lead opens the bowl page. A click on any other layer opens an area panel on the map with its numbers and actions. **Not built.**
+- **New:** each role opens the map on its own layer. No new desk pages for recharge, pipes, or water farming. **Not built.**
 
 #### F2. Watch NISAR passes over time — Built
 
@@ -331,6 +334,7 @@ Gap: the clean-signal share comes from a roughness rule on the browse image (`RO
 
 **Acceptance criteria:**
 
+- A layer on the map (F1), not a new page. The area panel holds the details and actions.
 - The score uses vertical rate, people and buildings exposed, the year below high tide, and recharge suitability. The weights are visible.
 - Each area shows a suggested method: recharge well, biopore field, or injection well, with the reason (soil, water table depth, aquifer access).
 - Unsuitable areas say why and suggest the other remedy (pipes or enforcement).
@@ -343,6 +347,7 @@ Gap: the clean-signal share comes from a roughness rule on the browse image (`RO
 
 **Acceptance criteria:**
 
+- A layer on the map (F1), not a new page. The area panel holds the details and actions.
 - Each area shows the population (WorldPop scaled to BPS totals), the unserved population, the demand gap (F12 estimate A), the sinking rate, and the distance to the existing main.
 - The list sorts by people served, groundwater avoided per year, or the combined score.
 - The planner can add areas to the pipe plan and export the plan as CSV.
@@ -354,7 +359,8 @@ Gap: the clean-signal share comes from a roughness rule on the browse image (`RO
 
 **Acceptance criteria:**
 
-- An officer can register a site: polygon, scale (micro: housing and offices, macro: industry and business), required measures, declared measures, start date.
+- A layer on the map (F1), not a new page. Sites show as polygons colored by status. The site panel holds the details and actions. The site list with visits is in the existing Bowls desk, with a type filter.
+- An officer can register a site by drawing it on the map: polygon, scale (micro: housing and offices, macro: industry and business), required measures, declared measures, start date.
 - The system turns declared measures into an expected recharge volume per year.
 - A monthly optical check (Sentinel-2) tests an embung for open water and a vegetation area for green cover.
 - Site status comes from declared vs required measures (F21), the optical check, and field visits. NISAR never decides the status of a single site.
@@ -372,10 +378,10 @@ Gap: the clean-signal share comes from a roughness rule on the browse image (`RO
 
 **Acceptance criteria:**
 
-- The developer draws a parcel or picks an address.
+- The developer draws a parcel on the map (F1) or picks an address. The report opens in the area panel. No new page.
 - The report shows the sinking rate and trend, projected depth to 2050, the year below high tide, the local groundwater balance (F12), the rules that apply (permit above 100 m³ per month, water farming scale and measures), and suggested measures.
 - The report opens the parcel twin (F4).
-- The report can be shared as a link and printed.
+- The report can be shared as a link (map URL with the parcel) and printed with the print stylesheet.
 - The report states it is a screening document, not a geotechnical survey or a legal opinion.
 
 #### F17. Public area check (N6) — Not built
@@ -384,7 +390,7 @@ Gap: the clean-signal share comes from a roughness rule on the browse image (`RO
 
 **Acceptance criteria:**
 
-- Public page. Type an address or tap the map.
+- Public page at `/check`, the only new route. It reuses the map component in 2D with one coarse layer. Type an address or tap the map.
 - The result is a coarse cell (no single building): rate class, trend since 2023, projection to 2035, in plain words.
 - The page says what the result means and what it does not mean. It never says "do not buy".
 - Links to how subsidence works, how to save groundwater, and how to get a PAM Jaya connection.
@@ -396,7 +402,7 @@ Gap: the clean-signal share comes from a roughness rule on the browse image (`RO
 **Acceptance criteria:**
 
 - Roles: `dki_regulator`, `badan_geologi`, `pam_jaya`, `kemenlh`, `dlh`, `developer`.
-- Each role opens its own desk by default. Permit and site data follow the role rules in HLD section 9.
+- Each role opens the map on its own layer by default. Permit and site data follow the role rules in HLD section 9.
 - Accounts are still created by an admin, except developer accounts.
 
 #### F19. Case report (N1) — Not built
@@ -514,7 +520,7 @@ flowchart LR
     DB[(Neon PostgreSQL: auth, roles, inspections, permits, sites, plans)] <--> W
     OSM[OpenStreetMap] --> W
     W --> P[Public: landing, area check]
-    W --> D[Desks: leads, recharge, pipes, water farming, site report]
+    W --> D[Map with 4 priority layers and filter, bowl page, desks: Overview, Bowls, Team]
 ```
 
 - **Batch jobs** are idempotent.
@@ -526,23 +532,24 @@ flowchart LR
 
 ### Integration Points
 
-| Source                                       | Use                                                                | State                                                                                                                                                                                                                                 |
-| -------------------------------------------- | ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| NISAR L2 GUNW                                | 2026 displacement, coherence, pass timeline                        | Browse images for 8 pairs on track 10 ascending. One HDF5 pair read by `detect_bowls.py`. Descending track 18 not loaded. HDF5 needs an Earthdata login. [ASF availability](https://nisar-docs.asf.alaska.edu/availability-overview/) |
-| NISAR GCOV                                   | Optional: water and fish ponds from polarizations                  | Not used                                                                                                                                                                                                                              |
-| Sentinel-1                                   | Rate 2015–2023, C-band side of the split view                      | Synthetic series in the seed                                                                                                                                                                                                          |
-| Sentinel-2                                   | Optical check for water farming sites                              | Not used                                                                                                                                                                                                                              |
-| WorldPop and BPS                             | Population per cell and per kelurahan (F12, F14)                   | Not used                                                                                                                                                                                                                              |
-| PAM Jaya                                     | Service area, coverage, network (F12, F14)                         | Not used. Needs a data agreement. City coverage 82% (May 2026) as a public fallback                                                                                                                                                   |
-| Groundwater permits (Badan Geologi, DKI)     | Permitted wells and volumes (F3, F12)                              | Not used. Needs a data agreement. Synthetic seed until then                                                                                                                                                                           |
-| Water farming registry (KemenLH, DLH)        | Sites and declared measures (F15)                                  | Not used. Entered in the app                                                                                                                                                                                                          |
-| Hydrogeology map                             | Recharge suitability (F13)                                         | Not used                                                                                                                                                                                                                              |
-| Groundwater monitoring wells (Badan Geologi) | Direct evidence of recharge for the water farming area check (F15) | Not used. Needs a data agreement                                                                                                                                                                                                      |
-| DEMNAS (BIG)                                 | Ground height for the projection                                   | Example heights in the seed                                                                                                                                                                                                           |
-| High-tide level                              | Sea level in the twin                                              | Example value 0.9 m in the seed                                                                                                                                                                                                       |
-| Ina-CORS (BIG)                               | Ground check                                                       | Not used. Fallback: published station rates                                                                                                                                                                                           |
-| OpenStreetMap                                | Basemap and buildings                                              | Built                                                                                                                                                                                                                                 |
-| Administrative boundaries                    | Kecamatan and kelurahan                                            | Kecamatan names in the seed                                                                                                                                                                                                           |
+| Source                                                                                               | Use                                                                     | State                                                                                                                                                                                                                                 |
+| ---------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| NISAR L2 GUNW                                                                                        | 2026 displacement, coherence, pass timeline                             | Browse images for 8 pairs on track 10 ascending. One HDF5 pair read by `detect_bowls.py`. Descending track 18 not loaded. HDF5 needs an Earthdata login. [ASF availability](https://nisar-docs.asf.alaska.edu/availability-overview/) |
+| NISAR GCOV                                                                                           | Optional: water and fish ponds from polarizations                       | Not used                                                                                                                                                                                                                              |
+| Sentinel-1                                                                                           | Rate 2015–2023, C-band side of the split view                           | Synthetic series in the seed                                                                                                                                                                                                          |
+| Sentinel-2                                                                                           | Optical check for water farming sites                                   | Not used                                                                                                                                                                                                                              |
+| WorldPop and BPS                                                                                     | Population per cell and per kelurahan (F12, F14, priority filter)       | Not used                                                                                                                                                                                                                              |
+| Economic activity: OpenStreetMap land use and building types, VIIRS night lights, BPS Sensus Ekonomi | Economic activity factor in the priority filter (F1): low, medium, high | OSM building types are already read by the building layer. Night lights and Sensus Ekonomi not used                                                                                                                                   |
+| PAM Jaya                                                                                             | Service area, coverage, network (F12, F14)                              | Not used. Needs a data agreement. City coverage 82% (May 2026) as a public fallback                                                                                                                                                   |
+| Groundwater permits (Badan Geologi, DKI)                                                             | Permitted wells and volumes (F3, F12)                                   | Not used. Needs a data agreement. Synthetic seed until then                                                                                                                                                                           |
+| Water farming registry (KemenLH, DLH)                                                                | Sites and declared measures (F15)                                       | Not used. Entered in the app                                                                                                                                                                                                          |
+| Hydrogeology map                                                                                     | Recharge suitability (F13)                                              | Not used                                                                                                                                                                                                                              |
+| Groundwater monitoring wells (Badan Geologi)                                                         | Direct evidence of recharge for the water farming area check (F15)      | Not used. Needs a data agreement                                                                                                                                                                                                      |
+| DEMNAS (BIG)                                                                                         | Ground height for the projection                                        | Example heights in the seed                                                                                                                                                                                                           |
+| High-tide level                                                                                      | Sea level in the twin                                                   | Example value 0.9 m in the seed                                                                                                                                                                                                       |
+| Ina-CORS (BIG)                                                                                       | Ground check                                                            | Not used. Fallback: published station rates                                                                                                                                                                                           |
+| OpenStreetMap                                                                                        | Basemap and buildings                                                   | Built                                                                                                                                                                                                                                 |
+| Administrative boundaries                                                                            | Kecamatan and kelurahan                                                 | Kecamatan names in the seed                                                                                                                                                                                                           |
 
 **Regulation context.**
 

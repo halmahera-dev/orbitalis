@@ -87,10 +87,9 @@ flowchart TB
 
     subgraph Web[apps/web, Next.js 16 on Cloudflare Workers]
         PUBLIC[Public pages: landing, area check]
-        MAP[Map: layers, passes, 2D and 3D]
-        TWIN[3D twin: bowl and site]
-        DESK[Desks: leads, recharge, pipes, water farming, team]
-        REPORT[Site report]
+        MAP[Map: 4 priority layers, radar passes, priority filter, area panel, site report]
+        TWIN[Bowl page: 3D twin, projection, case report print]
+        DESK[Desks: Overview, Bowls with leads and sites, Team]
     end
 
     subgraph Data[packages/db, Drizzle on Neon]
@@ -102,8 +101,9 @@ flowchart TB
     end
 
     X --> J & R & IMG
-    J & R & IMG --> MAP & TWIN & DESK & REPORT & PUBLIC
-    DESK <--> CASES & WF & PERM & PLAN
+    J & R & IMG --> MAP & TWIN & DESK & PUBLIC
+    DESK <--> CASES & WF & PERM
+    MAP <--> WF & PLAN
     Web <--> AUTH
 ```
 
@@ -137,27 +137,51 @@ Aggregated values (per bowl, per kelurahan, per 100 m cell for the area check) s
 
 Next.js 16 App Router, React Server Components, deployed to Cloudflare Workers with OpenNext. It follows `.agents/skills/nextjs-app-architecture`. Features live in `src/features/<name>`.
 
-| Area                              | Route (under `/[locale]`)                   | Access              | Built on `main`                               |
-| --------------------------------- | ------------------------------------------- | ------------------- | --------------------------------------------- |
-| Landing                           | `/landing`                                  | Public              | Yes                                           |
-| Area check (N6)                   | `/check`                                    | Public, coarse data | No                                            |
-| Map                               | `/map`                                      | Sign-in             | Yes (bowls, NISAR passes, 3D buildings)       |
-| Bowl twin                         | `/bowls/[id]`                               | Sign-in             | Yes                                           |
-| Overview                          | `/` desk home                               | Sign-in             | Yes                                           |
-| Pumping leads (N1)                | `/bowls` desk                               | Regulator           | Yes as inspection table. Lead score not built |
-| Recharge priority (N2)            | `/recharge`                                 | Regulator, KemenLH  | No                                            |
-| Pipe priority (N3)                | `/pipes`                                    | PAM Jaya            | No                                            |
-| Water farming (N4)                | `/water-farming`, `/water-farming/[siteId]` | KemenLH, DLH        | No                                            |
-| Site report (N5)                  | `/report`                                   | Developer account   | No                                            |
-| Team                              | `/team`                                     | Regulator           | Yes                                           |
-| Case report (N1)                  | `/bowls/[id]/report`                        | Agency roles        | No                                            |
-| Water farming calculator (N4, N5) | `/water-farming/calculator`                 | Public              | No                                            |
+New features go into the pages that exist. Only one new route is needed: the public area check.
+
+| Page            | Route (under `/[locale]`) | Access       | Built on `main`                                                        | What it gains                                                                                         |
+| --------------- | ------------------------- | ------------ | ---------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| Landing         | `/landing`                | Public       | Yes                                                                    | Link to the area check                                                                                |
+| Map             | `/map`                    | Sign-in      | Yes: bowls, NISAR passes, 3D buildings, ranked list, legend, 2D switch | Four priority layers, the priority filter, an area panel, parcel drawing for the site report (N1–N5)  |
+| Bowl page       | `/bowls/[id]`             | Sign-in      | Yes: 3D twin, year timeline, chart                                     | Projection panel (F12). "Print case report" with a print stylesheet (F19), no new route               |
+| Overview        | `/` desk home             | Sign-in      | Yes                                                                    | Changes per role, the same list as the pass digest (F20)                                              |
+| Bowls desk      | `/bowls`                  | Agency roles | Yes: inspection table                                                  | A type filter: pumping lead or water farming site. Site visits use the same inspection flow (F9, F15) |
+| Team            | `/team`                   | Regulator    | Yes                                                                    | Nothing                                                                                               |
+| Area check (N6) | `/check`                  | Public       | No                                                                     | New. The same map component in 2D with one coarse layer and the calculator (F21)                      |
+
+### 3.3.1 Map layers and priority filter
+
+The map header has a "Show" picker today with two options (bowls, radar passes). It grows to five options. One layer shows at a time, so the legend, the ranked list, and the colors always belong to one question.
+
+| Layer             | Answers                                                | Shape on the map                                       | Click opens                                                       | Need |
+| ----------------- | ------------------------------------------------------ | ------------------------------------------------------ | ----------------------------------------------------------------- | ---- |
+| Pumping leads     | Where may a hidden pump be?                            | Bowl stacks (existing `BowlLayer`)                     | The bowl page (existing)                                          | N1   |
+| Recharge priority | Where should water go back into the ground first?      | Area cells colored by score                            | Area panel: suitability, suggested method, add to plan            | N2   |
+| Pipe priority     | Which areas should get pipes first?                    | Area cells colored by score                            | Area panel: people without pipes, demand gap, add to plan, export | N3   |
+| Water farming     | Who does their measures, and does it slow the sinking? | Site polygons colored by status, area cells for impact | Site panel: declared vs required, optical check, schedule visit   | N4   |
+| Radar passes      | Is the data fresh?                                     | NISAR browse images (existing `InterferogramLayer`)    | Pass timeline (existing `BarTimeline`)                            | All  |
+
+The **priority filter** is one panel that works on the four priority layers. It sits in the existing legend panel (top left). It has three factors:
+
+| Factor                          | Meaning                                       | Source                                                                                                                                                             |
+| ------------------------------- | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Sinking rate (_laju penurunan_) | Vertical rate in mm/yr                        | Processing step 3                                                                                                                                                  |
+| Population                      | People per km² and people without piped water | WorldPop scaled to BPS totals                                                                                                                                      |
+| Economic activity               | Low, medium, or high                          | OpenStreetMap commercial and industrial land use and building types (the building layer already reads types), VIIRS night lights, BPS Sensus Ekonomi per kecamatan |
+
+- Each factor has a minimum filter. Areas below the minimum fade out.
+- "Rank by" picks the order: combined score, sinking rate, population, or economic activity. The ranked list (existing `MapBowlList`, made generic) and the colors follow it.
+- The combined score uses the layer weights from section 6. The panel shows them.
+- The filter and the layer are in the URL, as the map position is today (F8), so a filtered view can be shared.
+- Economic activity matters for two reasons: large users (industry, malls, hotels) pump the most, and Handika et al. 2024 rank economic and industrial activity as a relay driver of subsidence.
+
+The **area panel** is one component for recharge, pipe, and water farming clicks. It reuses the card style of `BowlDepthView`. It shows the factor values, the projection panel (F12), and the actions for that layer. The developer **site report** (F16) opens from the same panel after the user draws a parcel, and prints with the same print stylesheet as the case report.
 
 Pass digest (F20): after the publish step, one job reads what changed per role and sends one email per user through a transactional email service. It runs outside the Worker, next to the processing jobs. The digest reads the same change list as the Overview, so the two never disagree.
 
 Shared map and 3D parts:
 
-- **Map** (MapLibre, mapcn): one map component with switchable layers: bowls, velocity raster, NISAR passes, lead score, recharge priority, pipe priority, water farming sites, population. Each desk opens the map with its own default layers.
+- **Map** (MapLibre, mapcn): one map component, section 3.3.1. Each role opens it with its own default layer: regulators on pumping leads, PAM Jaya on pipe priority, KemenLH on water farming.
 - **3D twin**: today it shows one bowl. The same scene shows a water farming site or a developer parcel: soil layers, buildings, high tide, and the year timeline.
 - **Projection panel**: one component that shows the two extraction estimates, their ratio, and the scenario timeline. Used on the bowl page, the area page, the site report, and the area check.
 
@@ -232,11 +256,14 @@ All scores are fixed formulas with visible weights. No machine learning model. E
 
 | Score                  | Inputs                                                                                                                                                                                                       | Output                                                                                                                          |
 | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------- |
-| Pumping lead (N1)      | Bowl peak rate and depth, change after the 2023 ban, B/A ratio, no permitted well within the bowl radius, permitted volume exceeded                                                                          | Ranked bowls. Label: "lead for inspection, not proof of a pump"                                                                 |
+| Pumping lead (N1)      | Bowl peak rate and depth, change after the 2023 ban, B/A ratio, no permitted well within the bowl radius, permitted volume exceeded, economic activity (large users pump the most)                           | Ranked bowls. Label: "lead for inspection, not proof of a pump"                                                                 |
 | Recharge priority (N2) | Vertical rate, people and buildings exposed, year below high tide, recharge suitability (shallow soil permeability and depth to water table for recharge wells; confined aquifer access for injection wells) | Ranked areas with a suggested method: recharge well, biopore field, or injection well. Label: "screening, needs a field survey" |
+| Water farming (N4)     | Site status, economic activity (macro sites first), area impact vs control areas                                                                                                                             | Sites ranked for a visit                                                                                                        |
 | Pipe priority (N3)     | Unserved population, demand gap A, vertical rate, distance to the existing main                                                                                                                              | Ranked areas with people served and groundwater avoided per year                                                                |
 
 Handika et al. 2024 (MICMAC) rank the drivers of Jakarta subsidence: groundwater over-extraction and natural alluvial compaction are the key drivers; building load, population density, and industrial activity are relay drivers; land use is a dependent factor; tectonics has little effect. The scores follow this order: pumping inputs carry the most weight, building and population inputs act as exposure, tectonics is left out.
+
+Every score splits into the three factors of the priority filter (section 3.3.1): sinking rate, population, and economic activity. "Rank by combined" uses the weights above. "Rank by" one factor sorts by that factor alone.
 
 ## 7. Water farming monitoring
 
