@@ -30,6 +30,7 @@
     "build": "turbo run build",
     "check-types": "turbo run check-types",
     "dev:web": "turbo run dev -F web --",
+    "deploy:web": "bun run --cwd apps/web deploy",
     "db:push": "turbo run db:push -F @repo/db --",
     "db:studio": "turbo run db:studio -F @repo/db --",
     "db:generate": "turbo run db:generate -F @repo/db --",

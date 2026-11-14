@@ -11,6 +11,7 @@ This monorepo holds the Next.js web app, shared packages under the `@repo` scope
 - **Tailwind CSS 4** and shadcn/ui in `@repo/ui`
 - **PostgreSQL** with Drizzle (`@repo/db`)
 - **Better Auth** (`@repo/auth`)
+- **Cloudflare Workers** via OpenNext (`@opennextjs/cloudflare`)
 - **Oxlint** and **Oxfmt**
 - **Python** jobs in `apps/jobs` (NISAR browse fetch)
 
@@ -93,6 +94,7 @@ npx shadcn@latest add accordion dialog popover sheet table -c packages/ui
 | `bun run dev` | Start all apps in development |
 | `bun run build` | Build all apps |
 | `bun run dev:web` | Start only the web app |
+| `bun run deploy:web` | Build with OpenNext and deploy to Cloudflare |
 | `bun run check-types` | Typecheck the workspace |
 | `bun run check` | Oxlint and Oxfmt |
 | `bun run db:push` | Push Drizzle schema to the database |
@@ -107,29 +109,48 @@ npx shadcn@latest add accordion dialog popover sheet table -c packages/ui
 
 ## Deploy
 
-### Vercel
+### Cloudflare Workers
 
-Root `vercel.json` uses [Vercel Services](https://vercel.com/docs/services). Import this repository as one project and keep the Root Directory at the repo root. The `web` service builds `apps/web` and serves public paths, including `/api/auth/*`.
+The web app deploys with [OpenNext for Cloudflare](https://opennext.js.org/cloudflare). Config lives in `apps/web/wrangler.jsonc` (worker name `prioka`).
 
-Shared code in `packages/` is not a separate service. The web app talks to Neon through `DATABASE_URL`.
-
-Set these for each Vercel environment:
-
-| Variable | Purpose |
-| --- | --- |
-| `DATABASE_URL` | Neon PostgreSQL URL |
-| `BETTER_AUTH_SECRET` | Secret, at least 32 characters |
-| `BETTER_AUTH_URL` | Public origin of that environment, including `https://` (also used for canonical links, share previews, and the sitemap) |
-
-The home page is in `/sitemap.xml`. Pages use `noindex`. `/robots.txt` blocks only `/api/` and points to the sitemap.
-
-Local Vercel routing from the repo root:
+1. Log in once:
 
 ```bash
-npx vercel@latest dev
+cd apps/web && bunx wrangler login
 ```
 
-Without a Vercel login: `npx vercel@latest dev -L`. Keep secrets in `apps/web/.env` and set `BETTER_AUTH_URL` to the local origin the CLI prints.
+2. Set Worker secrets (same values as local `.env`, but `BETTER_AUTH_URL` must be the public Worker origin):
+
+```bash
+cd apps/web
+bunx wrangler secret put DATABASE_URL
+bunx wrangler secret put BETTER_AUTH_SECRET
+bunx wrangler secret put BETTER_AUTH_URL
+```
+
+Optional: `NODE_ENV=production`.
+
+3. Deploy from the repo root:
+
+```bash
+bun run deploy:web
+```
+
+Or from `apps/web`:
+
+```bash
+bun run deploy
+```
+
+Preview locally as a Worker:
+
+```bash
+cd apps/web && bun run preview
+```
+
+After the first deploy, set `BETTER_AUTH_URL` to the printed `*.workers.dev` URL (or your custom domain), then redeploy if auth redirects fail.
+
+The home page is in `/sitemap.xml`. Pages use `noindex`. `/robots.txt` blocks only `/api/` and points to the sitemap.
 
 ### Docker Compose
 

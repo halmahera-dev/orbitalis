@@ -11,7 +11,7 @@ const config: NextConfig = {
     "@repo/db",
   ],
   images: {
-    // Serve local assets directly because the Vercel service image endpoint returns 404.
+    // Local and Worker builds serve assets as static files.
     unoptimized: true,
     qualities: [75, 90],
   },
