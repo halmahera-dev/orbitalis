@@ -65,7 +65,7 @@ orbitalis/
 │   ├── db/           # @repo/db — Drizzle schema and client
 │   ├── env/          # @repo/env — validated environment variables
 │   └── ui/           # @repo/ui — shared components and design tokens
-├── docs/             # Product docs and PRD
+├── docs/             # Product docs, start at docs/README.md
 └── plans/            # Implementation plans
 ```
 
@@ -89,23 +89,23 @@ npx shadcn@latest add accordion dialog popover sheet table -c packages/ui
 
 ## Scripts
 
-| Script | What it does |
-| --- | --- |
-| `bun run dev` | Start all apps in development |
-| `bun run build` | Build all apps |
-| `bun run dev:web` | Start only the web app |
-| `bun run deploy:web` | Build with OpenNext and deploy to Cloudflare |
-| `bun run check-types` | Typecheck the workspace |
-| `bun run check` | Oxlint and Oxfmt |
-| `bun run db:push` | Push Drizzle schema to the database |
-| `bun run db:generate` | Generate migrations |
-| `bun run db:migrate` | Run migrations |
-| `bun run db:seed` | Create or reset synthetic demo accounts |
-| `bun run db:studio` | Open Drizzle Studio |
-| `bun run docker:build` | Build Docker Compose images |
-| `bun run docker:up` | Build and start Docker Compose |
-| `bun run docker:logs` | Tail Compose logs |
-| `bun run docker:down` | Stop Compose |
+| Script                 | What it does                                 |
+| ---------------------- | -------------------------------------------- |
+| `bun run dev`          | Start all apps in development                |
+| `bun run build`        | Build all apps                               |
+| `bun run dev:web`      | Start only the web app                       |
+| `bun run deploy:web`   | Build with OpenNext and deploy to Cloudflare |
+| `bun run check-types`  | Typecheck the workspace                      |
+| `bun run check`        | Oxlint and Oxfmt                             |
+| `bun run db:push`      | Push Drizzle schema to the database          |
+| `bun run db:generate`  | Generate migrations                          |
+| `bun run db:migrate`   | Run migrations                               |
+| `bun run db:seed`      | Create or reset synthetic demo accounts      |
+| `bun run db:studio`    | Open Drizzle Studio                          |
+| `bun run docker:build` | Build Docker Compose images                  |
+| `bun run docker:up`    | Build and start Docker Compose               |
+| `bun run docker:logs`  | Tail Compose logs                            |
+| `bun run docker:down`  | Stop Compose                                 |
 
 ## Deploy
 
