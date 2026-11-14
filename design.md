@@ -2,7 +2,7 @@
 
 Live showcase: `/design-system` in `apps/web`. When the tokens in `packages/ui/src/styles/globals.css` change, update this file in the same change.
 
-This file maps the Hollou design language to shadcn/ui tokens. The values match `packages/ui/src/styles/globals.css`. Dark is the source scheme. Light is near-white paper (street-proof). The landing page (`data-page="landing"`) overrides light `--background` to warm cream `#f2f1ed`. The app defaults to dark.
+This file maps the Prioka design language to shadcn/ui tokens. The values match `packages/ui/src/styles/globals.css`. Dark is the source scheme. Light is near-white paper (street-proof). The landing page (`data-page="landing"`) overrides light `--background` to warm cream `#f2f1ed`. The app defaults to dark.
 
 ## 1. Character
 

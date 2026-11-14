@@ -1,7 +1,7 @@
 [project]
-name = "hollou-jobs"
+name = "prioka-jobs"
 version = "0.1.0"
-description = "Radar data jobs for Hollou."
+description = "Radar data jobs for Prioka."
 requires-python = ">=3.11"
 dependencies = [
     "numpy>=2.4.6",

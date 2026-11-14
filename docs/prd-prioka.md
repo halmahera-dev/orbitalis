@@ -1,6 +1,6 @@
-# PRD: Landas — Jakarta subsidence and pumping leads from NISAR radar
+# PRD: Prioka — Jakarta subsidence and pumping leads from NISAR radar
 
-Status: Draft. Updated 13 November 2026 to match the code on `main` (commit `3fe6cdc`) and the challenge page (last published 13 November 2026, 03:46 UTC). The repo name is `hollou`. The product name in the app is Landas.
+Status: Draft. Updated 13 November 2026 to match the code on `main` (commit `3fe6cdc`) and the challenge page (last published 13 November 2026, 03:46 UTC). The repo name is `prioka`. The product name in the app is Prioka.
 
 This PRD targets the NASA Space Apps Challenge 2026 challenge [Dancing with the SARs](https://www.spaceappschallenge.org/2026/challenges/dancing-with-the-sars/). The challenge levels are Intermediate and Advanced. The skill is Earth Science. The hackathon is on 14–15 November 2026. Judges score Impact, Creativity, Validity, Relevance, and Presentation. [Judging guide](https://spaceappschallenge.org/resources/judging-awards-guide)
 
@@ -18,9 +18,9 @@ The challenge gives three steps:
 
 Optional considerations: other polarizations or other frequencies from other sensors, a time series from different dates, ancillary data (for example population), human drivers such as industry, data storytelling, personal context for a hometown, and interactive parts such as image sliders and web maps.
 
-### How Landas answers each item
+### How Prioka answers each item
 
-| Challenge item | Landas answer | State on `main` |
+| Challenge item | Prioka answer | State on `main` |
 | --- | --- | --- |
 | Interactive application | Next.js web app: map, bowl page with a 3D digital twin, desk pages | Built |
 | NISAR data | NISAR L2 GUNW browse images, track 10 ascending, 8 pairs from 26 June 2026 | Built (browse images only, not HDF5 values) |
@@ -40,7 +40,7 @@ Optional considerations: other polarizations or other frequencies from other sen
 
 NASA does not endorse non-U.S. Government sites. Each site has its own data use terms.
 
-| Resource | Provider | Use in Landas |
+| Resource | Provider | Use in Prioka |
 | --- | --- | --- |
 | [NASA Earthdata Search](https://search.earthdata.nasa.gov/search) | NASA | Find NISAR products. Earthdata login for HDF5 download |
 | [ASF Data Search Vertex](https://search.asf.alaska.edu/) | ASF DAAC | NISAR GUNW search. `apps/jobs/fetch_nisar_browse.py` uses the ASF search API |
@@ -101,7 +101,7 @@ These targets are for the hackathon submission. They follow the judging criteria
 | 2 | User understanding | At least 4 of 5 test users can say why a bowl is a lead and not proof of a pump, and what the "below high tide" year assumes. | Impact, Validity | One question after the task. Two team members score the answer against the evidence panel. |
 | 3 | Radar check | At every CORS station in the area, the radar rate and the station rate have the same sign, and the difference is inside the stated uncertainty. | Validity | The GNSS chart and a table of station rates. If CORS data is not available, compare with published rates and say so. |
 | 4 | Evidence tracing | 100% of numbers in the map, charts, bowl list, bowl twin, and desk link to a source, period, scale, and method. | Validity | An audit of every panel, including 10 random bowls. |
-| 5 | Challenge fit | Every row in section 0 "How Landas answers each item" is Built, or the gap is stated in the demo. | Relevance | A checklist review of the demo path. |
+| 5 | Challenge fit | Every row in section 0 "How Prioka answers each item" is Built, or the gap is stated in the demo. | Relevance | A checklist review of the demo path. |
 | 6 | Real data | At least one number in the demo comes from a real NISAR HDF5 product, not a browse image or a seed value. | Validity | The evidence panel names the product file. |
 
 Secondary targets:
@@ -430,4 +430,4 @@ Built on `main`: the NISAR browse path, the static seed, the database, and the w
 8. Set the team size, the test users, and the device targets.
 9. Decide whether GCOV polarizations or SAOCOM add enough to include them.
 10. Decide how judges reach the signed-in map: a shared demo account or a public map.
-11. Decide the product name for the submission: Landas (app) or Hollou (repo).
+11. Decide the product name for the submission: Prioka (app) or Prioka (repo).

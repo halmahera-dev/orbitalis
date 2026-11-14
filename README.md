@@ -139,6 +139,6 @@ Without a Vercel login: `npx vercel@latest dev -L`. Keep secrets in `apps/web/.e
 
 ## Docs
 
-- Product PRD: `docs/prd-hollou.md`
+- Product PRD: `docs/prd-prioka.md`
 - Design rules: `design.md`
 - Agent guidance: `AGENTS.md`

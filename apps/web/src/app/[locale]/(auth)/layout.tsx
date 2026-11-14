@@ -16,7 +16,7 @@ export default function AuthLayout({ children, params }: LayoutProps<"/[locale]"
             <header className="flex w-full max-w-sm justify-center gap-2">
               <Link href={`/${locale}/landing`} className="flex items-center gap-2 font-medium">
                 <AppLogo />
-                LANDAS
+                PRIOKA
               </Link>
               <div className="ml-auto">
                 <ModeToggle />

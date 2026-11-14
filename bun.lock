@@ -3,7 +3,7 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "hollou",
+      "name": "prioka",
       "dependencies": {
         "@repo/env": "workspace:*",
         "dotenv": "catalog:",

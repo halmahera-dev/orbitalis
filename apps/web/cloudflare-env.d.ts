@@ -9,7 +9,7 @@ interface __BaseEnv_CloudflareEnv {
 	BETTER_AUTH_SECRET: string;
 	BETTER_AUTH_URL: string;
 	DATABASE_URL: string;
-	WORKER_SELF_REFERENCE: Fetcher /* hollou */;
+	WORKER_SELF_REFERENCE: Fetcher /* prioka */;
 }
 declare namespace Cloudflare {
 	interface Env extends __BaseEnv_CloudflareEnv {}

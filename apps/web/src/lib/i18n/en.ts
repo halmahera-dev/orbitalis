@@ -1,6 +1,6 @@
 export const en = {
   meta: {
-    description: "LANDAS uses NISAR radar to show where North Jakarta sinks the fastest.",
+    description: "PRIOKA uses NISAR radar to show where North Jakarta sinks the fastest.",
   },
   common: {
     signIn: "Sign in",
@@ -47,7 +47,7 @@ export const en = {
     map: "Map",
   },
   landing: {
-    brand: "LANDAS",
+    brand: "PRIOKA",
     nav: {
       map: "Map",
       how: "How it works",
@@ -68,7 +68,7 @@ export const en = {
       blurb: "NISAR radar for groundwater regulators in North Jakarta.",
       pages: "Pages",
       data: "Data",
-      copyright: "© 2026 LANDAS",
+      copyright: "© 2026 PRIOKA",
     },
     problem: {
       title: "The ground sinks. The pumps stay hidden.",
@@ -213,7 +213,7 @@ export const en = {
     },
     team: {
       title: "The five people on the work.",
-      lead: "Five people build LANDAS together.",
+      lead: "Five people build PRIOKA together.",
       chooseLabel: "Choose a team member",
       showMember: "Show {name}",
       portraitOf: "Portrait of {name}",
@@ -239,7 +239,7 @@ export const en = {
           answer: "Anyone. The public map needs no account.",
         },
         {
-          question: "What radar does LANDAS use?",
+          question: "What radar does PRIOKA use?",
           answer:
             "NISAR L2 GUNW pairs for 2026 motion, plus published Sentinel-1 rates for the years before the ban.",
         },

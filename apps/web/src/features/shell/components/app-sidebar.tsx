@@ -56,7 +56,7 @@ export function AppSidebar({
           <SidebarMenuItem className="mt-1">
             <SidebarMenuButton render={<Link href={home} />}>
               <AppLogo />
-              <span className="font-heading text-sm font-semibold">LANDAS</span>
+              <span className="font-heading text-sm font-semibold">PRIOKA</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

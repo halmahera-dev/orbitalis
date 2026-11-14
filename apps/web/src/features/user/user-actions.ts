@@ -9,8 +9,8 @@ import { defaultLocale, hasLocale } from "@/lib/i18n";
 // The guest account is public by design, so its password is not a secret.
 const guest = {
   name: "Guest regulator",
-  email: "guest@landas.demo",
-  password: "landas-guest-demo",
+  email: "guest@prioka.demo",
+  password: "prioka-guest-demo",
 };
 
 export async function signInAsGuest(locale: string) {

@@ -136,7 +136,7 @@ function HeaderSelect({
   );
 }
 
-export function LandasMap({
+export function PriokaMap({
   locale,
   bowls,
   labels,
@@ -243,7 +243,7 @@ export function LandasMap({
       <header className="flex flex-wrap items-center gap-x-4 gap-y-2 border-b px-4 py-3">
         <Link href={`/${locale}/landing`} className="flex items-center gap-2 text-sm font-medium">
           <AppLogo />
-          LANDAS
+          PRIOKA
         </Link>
         <HeaderSelect
           label={t.show}
@@ -361,7 +361,7 @@ export function LandasMap({
   );
 }
 
-export function LandasMapSkeleton() {
+export function PriokaMapSkeleton() {
   return (
     <div className="flex h-svh flex-col">
       <div className="flex items-center gap-4 border-b px-4 py-3">
