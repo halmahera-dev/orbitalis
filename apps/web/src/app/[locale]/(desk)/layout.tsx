@@ -7,6 +7,8 @@ import { NavUser } from "@/features/shell/components/nav-user";
 import { requireSession } from "@/features/user/user-queries";
 import { getDictionary, toLocale } from "@/lib/i18n";
 
+export const dynamic = "force-dynamic";
+
 export default function DeskLayout({ children, params }: LayoutProps<"/[locale]">) {
   return params.then(async ({ locale: rawLocale }) => {
     const locale = toLocale(rawLocale);

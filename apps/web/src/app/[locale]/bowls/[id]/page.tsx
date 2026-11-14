@@ -5,6 +5,8 @@ import { Suspense } from "react";
 import { BowlTwin, BowlTwinSkeleton } from "@/features/bowls/components/bowl-twin";
 import { toLocale } from "@/lib/i18n";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Bowl",
 };
