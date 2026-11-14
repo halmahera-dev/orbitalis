@@ -4,6 +4,8 @@ import type { NextConfig } from "next";
 initOpenNextCloudflareForDev();
 
 const config: NextConfig = {
+  cacheComponents: true,
+  partialPrefetching: false,
   transpilePackages: [
     "@repo/ui",
     "@repo/auth",

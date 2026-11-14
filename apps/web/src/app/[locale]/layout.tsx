@@ -35,8 +35,6 @@ export const metadata: Metadata = {
   },
 };
 
-export const dynamicParams = false;
-
 export function generateStaticParams() {
   return locales.map((locale) => {
     return { locale };
