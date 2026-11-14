@@ -2,6 +2,7 @@ import "server-only";
 import { db } from "@repo/db";
 import { inspector } from "@repo/db/schema/inspector";
 import { asc, eq } from "drizzle-orm";
+import { connection } from "next/server";
 import { cache } from "react";
 
 import { getBowls } from "@/features/bowls/bowls-queries";
@@ -53,6 +54,7 @@ async function seedDefaultInspectors() {
 }
 
 async function loadInspectors() {
+  await connection();
   const rows = await db.select().from(inspector).orderBy(asc(inspector.name));
   if (rows.length > 0) {
     return rows;
@@ -117,6 +119,7 @@ export const getTeamInsights = cache(async (): Promise<TeamInsights> => {
 });
 
 export async function getInspectorById(id: string) {
+  await connection();
   const [row] = await db.select().from(inspector).where(eq(inspector.id, id)).limit(1);
   return row ?? null;
 }

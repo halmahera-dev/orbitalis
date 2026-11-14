@@ -1,6 +1,7 @@
 import "server-only";
 import { db } from "@repo/db";
 import { inspection } from "@repo/db/schema/inspection";
+import { connection } from "next/server";
 import { cache } from "react";
 
 import seed from "./bowls-seed.json";
@@ -45,6 +46,7 @@ export function getBowlSeriesById() {
 }
 
 async function loadBowls(): Promise<Bowl[]> {
+  await connection();
   const rows = await db.select().from(inspection);
   const rowByBowlId = new Map(rows.map((row) => [row.bowlId, row]));
 
