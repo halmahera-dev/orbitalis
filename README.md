@@ -1,6 +1,6 @@
-# Landas
+# Prioka
 
-Landas helps groundwater regulators in North Jakarta turn NISAR radar motion into inspection leads. A public landing page explains coastal subsidence. After sign-in, the desk shows a 3D map of subsidence bowls, a digital twin per bowl, and a visit workflow for the team.
+Prioka helps groundwater regulators in North Jakarta turn NISAR radar motion into inspection leads. A public landing page explains coastal subsidence. After sign-in, the desk shows a 3D map of subsidence bowls, a digital twin per bowl, and a visit workflow for the team.
 
 This monorepo holds the Next.js web app, shared packages under the `@repo` scope, and Python jobs that fetch NISAR browse images.
 
@@ -54,7 +54,7 @@ bun run dev:web
 ## Project structure
 
 ```
-landas/
+prioka/
 ├── apps/
 │   ├── web/          # Next.js app (landing, desk, map, bowl twin)
 │   └── jobs/         # Python NISAR browse jobs
