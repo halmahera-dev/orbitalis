@@ -761,7 +761,7 @@ export function BowlTwinView({
           >
             <div
               ref={layerRef}
-              className="pointer-events-auto absolute inset-0 -z-10 overflow-hidden rounded-4xl border xl:fixed xl:rounded-none xl:border-0"
+              className="pointer-events-auto absolute inset-0 -z-10 overflow-hidden rounded-4xl border bg-card xl:fixed xl:rounded-none xl:border-0 xl:bg-transparent"
             >
               {view === "plan" ? (
                 <BowlPlan
@@ -801,7 +801,7 @@ export function BowlTwinView({
                 />
               )}
             </div>
-            <div className={cn(overlay, "absolute top-0 right-0 flex items-center gap-1")}>
+            <div className={cn(overlay, "absolute top-3 right-3 flex items-center gap-1 xl:top-0 xl:right-0")}>
               <IconSegmented
                 label={t.banScenario}
                 value={withBan ? "with" : "without"}
