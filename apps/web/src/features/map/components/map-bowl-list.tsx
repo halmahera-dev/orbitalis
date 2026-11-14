@@ -55,6 +55,7 @@ export function MapBowlList({
               <li key={bowl.id}>
                 <Link
                   href={`/${locale}/bowls/${bowl.id}`}
+                  prefetch={false}
                   aria-label={`${bowl.name}, ${fill(rankTemplate, { rank: bowl.rank })}`}
                   className="flex w-full pressable items-center gap-3 rounded-2xl px-3 py-2 text-left text-sm transition-colors outline-none hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/40"
                 >

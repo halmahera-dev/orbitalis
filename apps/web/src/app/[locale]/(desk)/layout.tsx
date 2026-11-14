@@ -1,8 +1,11 @@
 import { SidebarInset, SidebarProvider } from "@repo/ui/components/sidebar";
+import { Suspense } from "react";
 
-import { getBowls } from "@/features/bowls/bowls-queries";
 import { AppSidebar } from "@/features/shell/components/app-sidebar";
-import { CommandPalette } from "@/features/shell/components/command-palette";
+import {
+  DeskCommandPalette,
+  DeskCommandPaletteSkeleton,
+} from "@/features/shell/components/desk-command-palette";
 import { NavUser } from "@/features/shell/components/nav-user";
 import { requireSession } from "@/features/user/user-queries";
 import { getDictionary, toLocale } from "@/lib/i18n";
@@ -12,7 +15,7 @@ export const dynamic = "force-dynamic";
 export default function DeskLayout({ children, params }: LayoutProps<"/[locale]">) {
   return params.then(async ({ locale: rawLocale }) => {
     const locale = toLocale(rawLocale);
-    const [session, bowls] = await Promise.all([requireSession(locale), getBowls()]);
+    const session = await requireSession(locale);
     const t = getDictionary(locale);
 
     return (
@@ -33,15 +36,9 @@ export default function DeskLayout({ children, params }: LayoutProps<"/[locale]"
         <SidebarInset className="overflow-x-hidden overflow-y-auto overscroll-contain">
           {children}
         </SidebarInset>
-        <CommandPalette
-          locale={locale}
-          bowls={bowls.map((bowl) => ({
-            id: bowl.id,
-            name: bowl.name,
-            kecamatan: bowl.kecamatan,
-          }))}
-          labels={{ ...t.desk, nav: t.nav }}
-        />
+        <Suspense fallback={<DeskCommandPaletteSkeleton />}>
+          <DeskCommandPalette locale={locale} />
+        </Suspense>
       </SidebarProvider>
     );
   });

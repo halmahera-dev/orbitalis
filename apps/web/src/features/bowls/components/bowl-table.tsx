@@ -121,6 +121,7 @@ export function BowlTable({
             <>
               <Link
                 href={`/${locale}/bowls/${row.original.id}`}
+                prefetch={false}
                 className="font-medium transition-colors duration-160 ease-out hover:text-brand-text focus-visible:ring-3 focus-visible:ring-ring/40 focus-visible:outline-none"
               >
                 {row.original.name}

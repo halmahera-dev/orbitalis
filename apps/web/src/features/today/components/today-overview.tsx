@@ -17,7 +17,7 @@ import Link from "next/link";
 import { getBowlSeries, getBowls, type Bowl } from "@/features/bowls/bowls-queries";
 import { interferogramCatalog } from "@/features/nisar/nisar-catalog";
 import { PassChart, Sparkline } from "@/features/today/components/today-charts";
-import { TodayMiniMap } from "@/features/today/components/today-mini-map";
+import { TodayMiniMapLazy } from "@/features/today/components/today-mini-map-lazy";
 import {
   Card,
   CountList,
@@ -275,7 +275,7 @@ export async function TodayOverview({ locale }: { locale: Locale }) {
 
       <div className="grid grid-cols-1 items-stretch gap-3 xl:grid-cols-3">
         <div className="min-h-56 h-full xl:col-span-2">
-          <TodayMiniMap
+          <TodayMiniMapLazy
             locale={locale}
             bowls={bowlsBySpeed.slice(0, mapPinLimit)}
             title={t.mapCardTitle}
@@ -300,6 +300,7 @@ export async function TodayOverview({ locale }: { locale: Locale }) {
                     <TableCell>
                       <Link
                         href={`${bowlsPath}/${change.bowl.id}`}
+                        prefetch={false}
                         className="flex flex-col transition-colors duration-160 ease-out hover:text-brand-text"
                       >
                         <span className="font-medium">{change.bowl.name}</span>

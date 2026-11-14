@@ -62,6 +62,7 @@ export function Metric({
     return (
       <Link
         href={href}
+        prefetch={false}
         className="flex min-w-0 flex-col justify-between gap-3 overflow-hidden rounded-4xl bg-card pt-3 shadow-card transition-colors duration-160 ease-out hover:bg-surface-raised"
       >
         {body}
@@ -124,6 +125,7 @@ export function CountList({
             {row.href ? (
               <Link
                 href={row.href}
+                prefetch={false}
                 className="grid grid-cols-3 items-center gap-4 text-sm transition-colors duration-160 ease-out hover:text-brand-text"
               >
                 {content}
@@ -176,6 +178,7 @@ export function SplitRows({
               {row.href ? (
                 <Link
                   href={row.href}
+                  prefetch={false}
                   className="flex items-center justify-between gap-4 transition-colors duration-160 ease-out hover:text-brand-text"
                 >
                   {body}
@@ -273,6 +276,7 @@ export function Dumbbells({
               {row.href ? (
                 <Link
                   href={row.href}
+                  prefetch={false}
                   className="flex items-center gap-4 text-sm transition-colors duration-160 ease-out hover:text-brand-text"
                 >
                   {content}

@@ -979,7 +979,9 @@ export function BowlTwinView({
                   {otherBowls.map((option) => (
                     <DropdownMenuItem
                       key={option.value}
-                      render={<Link replace href={`/${locale}/bowls/${option.value}`} />}
+                      render={
+                        <Link replace prefetch={false} href={`/${locale}/bowls/${option.value}`} />
+                      }
                     >
                       {option.label}
                     </DropdownMenuItem>
