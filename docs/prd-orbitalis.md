@@ -479,7 +479,7 @@ The product uses no language model and trains no model. Fixed, tested processing
 
 - **Time series (NISAR GUNW).** MintPy `smallbaselineApp.py` on the GUNW stack, as in the ARSET 2023 notebook `Calif_CentralValley_time_series.ipynb` (ARIA GUNW, which mimics NISAR GUNW): load, network check, connected-component mask, inversion, troposphere correction, reference point, velocity. The Central Valley is a groundwater subsidence case, the same driver as Jakarta.
 - **Chain and quality layers.** From the ARSET 2026 OPERA DISP-S1 notebooks: chain ministacks (the last date of one stack is the reference of the next) and use the recommended mask, temporal coherence, and connected components. OPERA DISP-S1 covers North America only, so Orbitalis makes its own chain for Jakarta.
-- **Long-term C-band rate.** PS-InSAR on Sentinel-1 as in Handika et al. 2024: at least 20 images, amplitude stability index 0.8 or more, temporal coherence 0.9 or more. Their result (mean −5.71 cm/yr, 2021–2022) is a known-case check.
+- **Long-term C-band rate.** PS-InSAR on Sentinel-1 as in Handika et al. 2024: at least 20 images, amplitude stability index 0.8 or more, temporal coherence 0.9 or more. Their result (mean −5.71 cm/yr, 2021–2022) is a known-case check. The paper used SARPROZ (licensed), so we use open tools: ISCE2, MiaplPy, and MintPy (Path A), or LiCSBAS on LiCSAR as a cheaper fallback (Path B). The paper does not detect bowls. The bowl detector is our own step. Details in [Services](services.md).
 - **Driver weights.** Handika et al. 2024 (MICMAC with 7 experts): groundwater over-extraction and natural alluvial compaction are key drivers. Building load, population density, and industrial activity are relay drivers. Tectonics has little effect. The scores in F3, F13, and F14 follow this order.
 
 ### Tool Requirements
@@ -488,7 +488,10 @@ The product uses no language model and trains no model. Fixed, tested processing
 - **Bowl detector (started).** `apps/jobs/detect_bowls.py` reads one GUNW HDF5 pair, masks low coherence, removes the regional trend, and finds local minimums above a signal-to-noise limit. Next: run it on the stack velocity, not one pair.
 - **Ingestion adapters (not built).** One adapter per source. Each checks units, dates, grid, and reference, and rejects a file with missing metadata.
 - **NISAR time series (not built).** MintPy on the GUNW stack per track.
+- **Sentinel-1 rate (not built).** `sentinel1_rate.py`, Path A or B above.
+- **Points to grid (not built).** `grid_points.py` turns PS points into a velocity grid for the bowl detector, with the point count per cell.
 - **Vertical motion (not built).** Combine ascending track 10 and descending track 18.
+- **Rate check (not built).** `validate_rates.py` compares our rates with CORS stations and with Handika et al. 2024 (same geometry, same period) each pass. A fail stops the pass at the quality gate.
 - **Groundwater balance (not built).** Estimates A and B, ratio, scenarios (F12).
 - **Priority scores (not built).** Lead, recharge, and pipe scores (F3, F13, F14).
 - **Optical check (not built).** Monthly Sentinel-2 NDWI and NDVI per water farming site (F15).
@@ -612,7 +615,7 @@ Each phase ships a working product. The next phase starts only when the last one
 
 1. Method details: chain, atmosphere handling, reference point, vertical conversion.
 2. Which CORS stations and published rates count, and the tolerance for agreement.
-3. Sentinel-1 path: own PS-InSAR or SBAS, or a published product.
+3. Sentinel-1 path: A (ISCE2, MiaplPy, MintPy, same PS method as the BRIN paper) or B (LiCSBAS on LiCSAR, cheaper). Decide after a test run on one Jakarta frame.
 4. High-tide source and the vertical datum for DEMNAS.
 5. Bowl detector thresholds and all score weights.
 6. Grid for the projection and scores: kelurahan or 500 m cells.
