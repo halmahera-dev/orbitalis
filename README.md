@@ -111,7 +111,7 @@ npx shadcn@latest add accordion dialog popover sheet table -c packages/ui
 
 ### Cloudflare Workers
 
-The web app deploys with [OpenNext for Cloudflare](https://opennext.js.org/cloudflare). Config lives in `apps/web/wrangler.jsonc` (worker name `orbitalis`).
+The web app deploys with [OpenNext for Cloudflare](https://opennext.js.org/cloudflare). Config lives in `apps/web/wrangler.jsonc` (worker name `prioka`, public origin `https://prioka.halmahera.site`).
 
 1. Log in once:
 
