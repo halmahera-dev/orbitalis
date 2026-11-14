@@ -1,0 +1,1201 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Orbitalis Feature Map</title>
+    <style>
+      :root {
+        --background: #fffbf2;
+        --foreground: #2a1a17;
+        --muted-foreground: #7a6863;
+        --border: #eaded6;
+        --card: #ffffff;
+        --popover: #ffffff;
+        --radius: 12px;
+        --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --background: #171211;
+          --foreground: #f4ece8;
+          --muted-foreground: #a8968f;
+          --border: #3a2e2b;
+          --card: #211a18;
+          --popover: #2a211f;
+        }
+      }
+      :root {
+        --red: #d63a2b;
+        --orange: #f25a2a;
+        --red-shadow: #9e2a1f;
+        --orange-shadow: #c2441d;
+        --line: color-mix(in srgb, var(--red) 75%, var(--foreground));
+        --soft: color-mix(in srgb, var(--orange) 10%, transparent);
+        --map-bg: color-mix(in srgb, var(--foreground) 5%, transparent);
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0 auto;
+        max-width: 1040px;
+        padding: 32px 16px;
+        font-family: var(--font-sans);
+        color: var(--foreground);
+        background: var(--background);
+      }
+      h2 {
+        font-size: 15px;
+        font-weight: 590;
+        margin: 0 0 4px;
+      }
+      .lead {
+        font-size: 13px;
+        color: var(--muted-foreground);
+        margin: 0 0 14px;
+        line-height: 1.45;
+      }
+      section {
+        margin-bottom: 32px;
+      }
+      .scroll {
+        overflow-x: auto;
+        padding: 4px 2px 8px;
+      }
+
+      .row {
+        display: flex;
+        align-items: center;
+      }
+      .box {
+        flex: none;
+        color: #fff;
+        font-size: 12.5px;
+        font-weight: 590;
+        line-height: 1.2;
+        padding: 8px 12px;
+        border-radius: 9px;
+        text-align: center;
+        background: var(--red);
+        box-shadow: 0 3px 0 var(--red-shadow);
+      }
+      .box small {
+        display: block;
+        font-weight: 400;
+        font-size: 10.5px;
+        opacity: 0.88;
+        margin-top: 2px;
+      }
+      .box.branch {
+        background: var(--orange);
+        box-shadow: 0 3px 0 var(--orange-shadow);
+        width: 136px;
+      }
+      .box.planned {
+        background: transparent;
+        color: var(--orange);
+        box-shadow: none;
+        border: 1.5px dashed var(--orange);
+      }
+      .box.engine {
+        background: var(--foreground);
+        color: var(--background);
+        box-shadow: none;
+      }
+
+      .arrow {
+        flex: none;
+        width: 22px;
+        height: 2px;
+        background: var(--line);
+        position: relative;
+        margin: 0 2px;
+      }
+      .arrow::after {
+        content: "";
+        position: absolute;
+        right: -1px;
+        top: -4px;
+        border-left: 7px solid var(--line);
+        border-top: 5px solid transparent;
+        border-bottom: 5px solid transparent;
+      }
+
+      .tree {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+      .tree > li {
+        position: relative;
+        padding: 4px 0 4px 16px;
+      }
+      .tree > li::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        border-left: 2px solid var(--line);
+      }
+      .tree > li:first-child::before {
+        top: 50%;
+      }
+      .tree > li:last-child::before {
+        bottom: 50%;
+      }
+      .tree > li:only-child::before {
+        display: none;
+      }
+      .tree > li::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 50%;
+        width: 16px;
+        border-top: 2px solid var(--line);
+      }
+      .tree .box.branch.small {
+        width: 124px;
+        padding: 6px 10px;
+        font-size: 12px;
+      }
+
+      .adds {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        padding-left: 10px;
+        max-width: 250px;
+      }
+      .tag {
+        font-size: 10.5px;
+        padding: 2px 7px;
+        border-radius: 99px;
+        color: var(--orange);
+        border: 1px dashed var(--orange);
+        white-space: nowrap;
+      }
+      .tag.ok {
+        border-style: solid;
+        border-color: var(--border);
+        color: var(--muted-foreground);
+      }
+
+      .legend {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+        font-size: 12px;
+        color: var(--muted-foreground);
+        margin-top: 12px;
+      }
+      .legend span {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .swatch {
+        width: 18px;
+        height: 12px;
+        border-radius: 3px;
+        background: var(--orange);
+      }
+      .swatch.planned {
+        background: transparent;
+        border: 1.5px dashed var(--orange);
+      }
+      .swatch.engine {
+        background: var(--foreground);
+      }
+
+      .engine-band {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        align-items: center;
+        margin-top: 14px;
+        padding: 12px 16px;
+        border-radius: var(--radius);
+        background: var(--soft);
+        font-size: 12px;
+      }
+      .engine-band b {
+        font-weight: 590;
+        margin-right: 4px;
+      }
+
+      /* map wireframe */
+      .wire {
+        min-width: 640px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        overflow: hidden;
+      }
+      .wire-head {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 14px;
+        border-bottom: 1px solid var(--border);
+        font-size: 12px;
+      }
+      .wire-head .logo {
+        font-weight: 590;
+        letter-spacing: 0.04em;
+      }
+      .picker {
+        position: relative;
+      }
+      .picker-btn {
+        border: 1.5px dashed var(--orange);
+        border-radius: 8px;
+        padding: 4px 10px;
+        color: var(--foreground);
+      }
+      .picker-btn b {
+        font-weight: 590;
+      }
+      .wire-head .right {
+        margin-left: auto;
+        display: flex;
+        gap: 10px;
+        color: var(--muted-foreground);
+      }
+      .wire-body {
+        position: relative;
+        height: 460px;
+        background:
+          radial-gradient(
+            circle at 30% 60%,
+            color-mix(in srgb, var(--red) 30%, transparent) 0 18px,
+            transparent 19px
+          ),
+          radial-gradient(
+            circle at 46% 42%,
+            color-mix(in srgb, var(--orange) 30%, transparent) 0 26px,
+            transparent 27px
+          ),
+          radial-gradient(
+            circle at 58% 70%,
+            color-mix(in srgb, var(--red) 25%, transparent) 0 14px,
+            transparent 15px
+          ),
+          linear-gradient(var(--map-bg), var(--map-bg));
+      }
+      .menu {
+        position: absolute;
+        top: 4px;
+        left: 96px;
+        z-index: 2;
+        width: 178px;
+        padding: 6px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: var(--popover);
+        font-size: 12px;
+      }
+      .menu div {
+        padding: 5px 8px;
+        border-radius: 6px;
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+      }
+      .menu div.on {
+        background: var(--soft);
+        font-weight: 590;
+      }
+      .menu em {
+        font-style: normal;
+        font-size: 10px;
+        color: var(--orange);
+      }
+      .menu em.ok {
+        color: var(--muted-foreground);
+      }
+      .panel {
+        position: absolute;
+        border-radius: 14px;
+        padding: 12px;
+        font-size: 11.5px;
+        background: var(--card);
+      }
+      .panel.exists {
+        border: 1.5px solid var(--border);
+      }
+      .panel.new {
+        border: 1.5px dashed var(--orange);
+      }
+      .panel h5 {
+        margin: 0 0 8px;
+        font-size: 12px;
+        font-weight: 590;
+        display: flex;
+        justify-content: space-between;
+        gap: 6px;
+      }
+      .panel h5 em {
+        font-style: normal;
+        font-weight: 400;
+        font-size: 10px;
+        color: var(--orange);
+      }
+      .panel h5 em.ok {
+        color: var(--muted-foreground);
+      }
+      .legend-panel {
+        top: 170px;
+        left: 14px;
+        width: 220px;
+      }
+      .filter {
+        top: 238px;
+        left: 14px;
+        width: 220px;
+      }
+      .rate-bar {
+        height: 6px;
+        border-radius: 9px;
+        background: linear-gradient(90deg, #f2c94c, var(--orange), var(--red));
+        margin-bottom: 4px;
+      }
+      .slider {
+        margin-bottom: 8px;
+      }
+      .slider .lbl {
+        display: flex;
+        justify-content: space-between;
+        color: var(--muted-foreground);
+        margin-bottom: 3px;
+      }
+      .track {
+        height: 4px;
+        border-radius: 9px;
+        background: var(--border);
+        position: relative;
+      }
+      .track i {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        right: 0;
+        border-radius: 9px;
+        background: var(--orange);
+      }
+      .track i::before {
+        content: "";
+        position: absolute;
+        left: -5px;
+        top: -4px;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: var(--background);
+        border: 2px solid var(--orange);
+      }
+      .rankby {
+        display: flex;
+        gap: 4px;
+        flex-wrap: wrap;
+        margin-top: 4px;
+      }
+      .rankby span {
+        padding: 2px 7px;
+        border-radius: 99px;
+        border: 1px solid var(--border);
+        font-size: 10.5px;
+      }
+      .rankby span.on {
+        background: var(--orange);
+        border-color: var(--orange);
+        color: #fff;
+      }
+      .list {
+        top: 14px;
+        right: 14px;
+        width: 196px;
+      }
+      .list ol {
+        margin: 0;
+        padding-left: 16px;
+        line-height: 1.7;
+      }
+      .list ol li span {
+        color: var(--muted-foreground);
+      }
+      .area {
+        top: 166px;
+        right: 14px;
+        width: 196px;
+      }
+      .area p {
+        margin: 0 0 4px;
+      }
+      .area .btns {
+        display: flex;
+        gap: 4px;
+        margin-top: 8px;
+        flex-wrap: wrap;
+      }
+      .area .btns span {
+        padding: 3px 8px;
+        border-radius: 99px;
+        background: var(--foreground);
+        color: var(--background);
+        font-size: 10.5px;
+      }
+      .area .btns span.alt {
+        background: transparent;
+        color: var(--foreground);
+        border: 1px solid var(--border);
+      }
+      .pin {
+        position: absolute;
+        left: 46%;
+        top: 42%;
+        transform: translate(-50%, -50%);
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background: var(--red);
+        border: 2px solid #fff;
+      }
+
+      /* layer cards */
+      .cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 10px;
+      }
+      .card {
+        padding: 14px 16px;
+        border-radius: var(--radius);
+        border: 1px solid var(--border);
+      }
+      .card header {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 8px;
+        margin-bottom: 6px;
+      }
+      .card h4 {
+        margin: 0;
+        font-size: 13.5px;
+        font-weight: 590;
+      }
+      .card p {
+        margin: 0;
+        font-size: 12.5px;
+        line-height: 1.5;
+      }
+      .card dl {
+        margin: 8px 0 0;
+        font-size: 11.5px;
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 3px 8px;
+      }
+      .card dt {
+        color: var(--muted-foreground);
+      }
+      .card dd {
+        margin: 0;
+      }
+      .card .who {
+        margin-top: 8px;
+        font-size: 11.5px;
+        color: var(--muted-foreground);
+      }
+      .chip {
+        flex: none;
+        font-size: 10.5px;
+        padding: 2px 8px;
+        border-radius: 99px;
+        font-weight: 590;
+      }
+      .chip.ready {
+        background: var(--orange);
+        color: #fff;
+      }
+      .chip.soon {
+        border: 1px dashed var(--orange);
+        color: var(--orange);
+      }
+      .group-title {
+        font-size: 12px;
+        font-weight: 590;
+        color: var(--muted-foreground);
+        margin: 16px 0 8px;
+      }
+
+      .factors {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+      }
+      @media (max-width: 560px) {
+        .factors {
+          grid-template-columns: 1fr;
+        }
+      }
+      .factor {
+        padding: 14px 16px;
+        border-radius: var(--radius);
+        background: var(--soft);
+      }
+      .factor h4 {
+        margin: 0 0 4px;
+        font-size: 13.5px;
+        font-weight: 590;
+      }
+      .factor .id {
+        font-size: 11px;
+        color: var(--muted-foreground);
+        font-style: italic;
+        margin-bottom: 6px;
+      }
+      .factor p {
+        margin: 0;
+        font-size: 12.5px;
+        line-height: 1.5;
+      }
+
+      /* journeys */
+      .journey {
+        margin-bottom: 18px;
+      }
+      .journey h3 {
+        font-size: 13px;
+        font-weight: 590;
+        margin: 0 0 8px;
+      }
+      .journey .box {
+        max-width: 124px;
+      }
+      .diamond-wrap {
+        flex: none;
+        width: 104px;
+        height: 104px;
+        display: grid;
+        place-items: center;
+        margin: 0 2px;
+      }
+      .diamond {
+        width: 74px;
+        height: 74px;
+        transform: rotate(45deg);
+        border-radius: 12px;
+        background: var(--red);
+        display: grid;
+        place-items: center;
+      }
+      .diamond span {
+        transform: rotate(-45deg);
+        color: #fff;
+        font-size: 11.5px;
+        font-weight: 590;
+        text-align: center;
+        line-height: 1.2;
+        width: 84px;
+      }
+      .yn > li {
+        padding-left: 34px;
+      }
+      .yn > li::after {
+        width: 34px;
+      }
+      .yn > li > i {
+        position: absolute;
+        left: 2px;
+        font-style: normal;
+        font-size: 10px;
+        font-weight: 590;
+        color: var(--red);
+        letter-spacing: 0.04em;
+      }
+      .yn > li:first-child > i {
+        top: calc(50% - 15px);
+      }
+      .yn > li:last-child > i {
+        top: calc(50% + 3px);
+      }
+    </style>
+  </head>
+  <body>
+    <section>
+      <h2>Feature map</h2>
+      <p class="lead">
+        We keep the pages we have and add to them. The map becomes the main work page: every team
+        opens it on its own layer. Only the public area check is a new page.
+      </p>
+      <div class="scroll">
+        <div class="row">
+          <div class="box">Landing</div>
+          <div class="arrow"></div>
+          <ul class="tree">
+            <li>
+              <div class="row">
+                <div class="box branch planned">Area check<small>new page, public</small></div>
+                <div class="adds">
+                  <span class="tag">coarse sinking cells</span
+                  ><span class="tag">water farming calculator</span>
+                </div>
+              </div>
+            </li>
+            <li>
+              <div class="row">
+                <div class="box">Sign in</div>
+                <div class="arrow"></div>
+                <ul class="tree">
+                  <li>
+                    <div class="row">
+                      <div class="box branch">Overview</div>
+                      <div class="adds"><span class="tag">changes for my role</span></div>
+                    </div>
+                  </li>
+                  <li>
+                    <div class="row">
+                      <div class="box branch">Map</div>
+                      <div class="arrow"></div>
+                      <ul class="tree">
+                        <li>
+                          <div class="row">
+                            <div class="box branch small">
+                              Pumping leads<small>bowls today</small>
+                            </div>
+                          </div>
+                        </li>
+                        <li>
+                          <div class="row">
+                            <div class="box branch small planned">Recharge priority</div>
+                          </div>
+                        </li>
+                        <li>
+                          <div class="row">
+                            <div class="box branch small planned">Pipe priority</div>
+                          </div>
+                        </li>
+                        <li>
+                          <div class="row">
+                            <div class="box branch small planned">Water farming</div>
+                          </div>
+                        </li>
+                        <li>
+                          <div class="row"><div class="box branch small">Radar passes</div></div>
+                        </li>
+                      </ul>
+                      <div class="adds">
+                        <span class="tag">priority filter</span><span class="tag">area panel</span
+                        ><span class="tag">draw a parcel for a site report</span>
+                      </div>
+                    </div>
+                  </li>
+                  <li>
+                    <div class="row">
+                      <div class="box branch">Bowl page<small>3D scene</small></div>
+                      <div class="adds">
+                        <span class="tag">groundwater use estimate</span
+                        ><span class="tag">print case report</span>
+                      </div>
+                    </div>
+                  </li>
+                  <li>
+                    <div class="row">
+                      <div class="box branch">Bowls desk<small>visits</small></div>
+                      <div class="adds"><span class="tag">water farming site visits</span></div>
+                    </div>
+                  </li>
+                  <li>
+                    <div class="row">
+                      <div class="box branch">Team</div>
+                      <div class="adds"><span class="tag ok">no change</span></div>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="engine-band">
+        <b>Under every part:</b>
+        <div class="box engine">Groundwater use estimate</div>
+        <div class="box engine">Evidence for every number</div>
+        <div class="box engine">Email after each satellite pass</div>
+      </div>
+      <div class="legend">
+        <span><i class="swatch"></i>Exists now</span>
+        <span><i class="swatch planned"></i>To add</span>
+        <span><i class="swatch engine"></i>Runs in the background</span>
+      </div>
+    </section>
+
+    <section>
+      <h2>Inside the map</h2>
+      <p class="lead">
+        The parts in solid lines are on the map today. The parts in dashed lines are new. Here a PAM
+        Jaya planner picks the pipe layer and ranks areas by population.
+      </p>
+      <div class="scroll">
+        <div class="wire">
+          <div class="wire-head">
+            <span class="logo">ORBITALIS</span>
+            <span class="picker"
+              ><span class="picker-btn">Show: <b>Pipe priority</b></span></span
+            >
+            <span class="right"><span>2D</span><span>EN / ID</span><span>Open desk</span></span>
+          </div>
+          <div class="wire-body">
+            <div class="menu">
+              <div>Pumping leads <em class="ok">exists</em></div>
+              <div>Recharge priority <em>new</em></div>
+              <div class="on">Pipe priority <em>new</em></div>
+              <div>Water farming <em>new</em></div>
+              <div>Radar passes <em class="ok">exists</em></div>
+            </div>
+            <div class="panel exists legend-panel">
+              <h5>Legend <em class="ok">exists</em></h5>
+              <div class="rate-bar"></div>
+              <div
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  color: var(--muted-foreground);
+                "
+              >
+                <span>low</span><span>high priority</span>
+              </div>
+            </div>
+            <div class="panel new filter">
+              <h5>Priority filter <em>new</em></h5>
+              <div class="slider">
+                <div class="lbl"><span>Sinking rate</span><span>from 30 mm/yr</span></div>
+                <div class="track"><i style="left: 30%"></i></div>
+              </div>
+              <div class="slider">
+                <div class="lbl"><span>Population</span><span>from 10,000 /km²</span></div>
+                <div class="track"><i style="left: 45%"></i></div>
+              </div>
+              <div class="slider">
+                <div class="lbl"><span>Economic activity</span><span>any</span></div>
+                <div class="track"><i style="left: 0%"></i></div>
+              </div>
+              <div style="color: var(--muted-foreground)">Rank by</div>
+              <div class="rankby">
+                <span>Combined</span><span>Sinking</span><span class="on">Population</span
+                ><span>Economy</span>
+              </div>
+            </div>
+            <div class="panel exists list">
+              <h5>Ranked list <em class="ok">exists</em></h5>
+              <ol>
+                <li>Penjaringan <span>41,200 people</span></li>
+                <li>Cilincing <span>36,800 people</span></li>
+                <li>Pademangan <span>22,500 people</span></li>
+              </ol>
+            </div>
+            <div class="panel new area">
+              <h5>Area panel <em>new</em></h5>
+              <p><b>Penjaringan</b></p>
+              <p>41,200 people without pipes</p>
+              <p>Sinking 62 mm/yr</p>
+              <p>Pumping about 3,700 m³ a day</p>
+              <div class="btns"><span>Add to pipe plan</span><span class="alt">Export</span></div>
+            </div>
+            <div class="pin"></div>
+          </div>
+        </div>
+      </div>
+      <p class="lead" style="margin-top: 8px">Example values. They are not measurements.</p>
+    </section>
+
+    <section>
+      <h2>Priority filter</h2>
+      <p class="lead">
+        One filter works on all four priority layers. Set a minimum for each factor to hide what
+        does not matter. Then pick what sorts the list: one factor, or all three together.
+      </p>
+      <div class="factors">
+        <div class="factor">
+          <h4>Sinking rate</h4>
+          <div class="id">laju penurunan</div>
+          <p>
+            How many millimeters the ground drops each year. Faster sinking means less time before
+            the street floods at high tide.
+          </p>
+        </div>
+        <div class="factor">
+          <h4>Population</h4>
+          <div class="id">populasi</div>
+          <p>
+            How many people live there, and how many still have no piped water. More people means
+            more harm, and more pumping to replace.
+          </p>
+        </div>
+        <div class="factor">
+          <h4>Economic activity</h4>
+          <div class="id">aktivitas ekonomi</div>
+          <p>
+            How much business and industry is there: low, medium, or high. Factories, malls, and
+            hotels pump the most water, so they matter most for leads and water farming.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>The four priority layers</h2>
+      <p class="lead">
+        Pick one in the "Show" menu. The colors, the list, and the panel then answer one question.
+      </p>
+      <div class="cards">
+        <div class="card">
+          <header>
+            <h4>Pumping leads</h4>
+            <span class="chip ready">Exists</span>
+          </header>
+          <p>
+            Spots where the ground sinks in a bowl shape, the shape a big hidden pump leaves. A
+            reason to go and look, never proof.
+          </p>
+          <dl>
+            <dt>Click opens</dt>
+            <dd>The bowl page with the 3D scene</dd>
+            <dt>For</dt>
+            <dd>Dinas SDA, Badan Geologi</dd>
+          </dl>
+        </div>
+        <div class="card">
+          <header>
+            <h4>Recharge priority</h4>
+            <span class="chip soon">New</span>
+          </header>
+          <p>
+            Places where putting water back into the ground helps most: fast sinking, many people,
+            and soil that can take the water.
+          </p>
+          <dl>
+            <dt>Click opens</dt>
+            <dd>Area panel: best method, add to plan</dd>
+            <dt>For</dt>
+            <dd>KemenLH, Dinas SDA</dd>
+          </dl>
+        </div>
+        <div class="card">
+          <header>
+            <h4>Pipe priority</h4>
+            <span class="chip soon">New</span>
+          </header>
+          <p>
+            Neighborhoods that should get water pipes first, with how many people would get piped
+            water and how much pumping it would stop.
+          </p>
+          <dl>
+            <dt>Click opens</dt>
+            <dd>Area panel: people, add to plan, export</dd>
+            <dt>For</dt>
+            <dd>PAM Jaya</dd>
+          </dl>
+        </div>
+        <div class="card">
+          <header>
+            <h4>Water farming</h4>
+            <span class="chip soon">New</span>
+          </header>
+          <p>
+            Sites that must put water back into the ground, colored by whether they do it. Areas
+            show if water farming slows the sinking compared with similar areas.
+          </p>
+          <dl>
+            <dt>Click opens</dt>
+            <dd>Site panel: built vs needed, schedule a visit</dd>
+            <dt>For</dt>
+            <dd>KemenLH, DLH</dd>
+          </dl>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Main journeys</h2>
+      <p class="lead">Every journey starts on the map, on the layer for that team.</p>
+      <div class="scroll">
+        <div class="journey">
+          <h3>Find an illegal pump</h3>
+          <div class="row">
+            <div class="box">Pumping leads layer</div>
+            <div class="arrow"></div>
+            <div class="box">Bowl page and evidence</div>
+            <div class="arrow"></div>
+            <div class="diamond-wrap">
+              <div class="diamond"><span>Worth a visit?</span></div>
+            </div>
+            <div class="arrow"></div>
+            <ul class="tree yn">
+              <li>
+                <i>YES</i>
+                <div class="box branch">Send an inspector</div>
+              </li>
+              <li>
+                <i>NO</i>
+                <div class="box branch">Dismiss with a reason</div>
+              </li>
+            </ul>
+          </div>
+          <div class="row" style="margin-top: 6px">
+            <div class="box">Inspector visits</div>
+            <div class="arrow"></div>
+            <div class="diamond-wrap">
+              <div class="diamond"><span>Pump found?</span></div>
+            </div>
+            <div class="arrow"></div>
+            <ul class="tree yn">
+              <li>
+                <i>YES</i>
+                <div class="box branch planned">Print case report for Badan Geologi</div>
+              </li>
+              <li>
+                <i>NO</i>
+                <div class="box branch">Close, check again next pass</div>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="journey">
+          <h3>Plan water pipes</h3>
+          <div class="row">
+            <div class="box">Pipe layer, rank by population</div>
+            <div class="arrow"></div>
+            <div class="box">Add areas to the pipe plan</div>
+            <div class="arrow"></div>
+            <div class="diamond-wrap">
+              <div class="diamond"><span>Still sinking after pipes?</span></div>
+            </div>
+            <div class="arrow"></div>
+            <ul class="tree yn">
+              <li>
+                <i>YES</i>
+                <div class="box branch planned">Someone still pumps: shows on pumping leads</div>
+              </li>
+              <li>
+                <i>NO</i>
+                <div class="box branch planned">Shown as a success</div>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="journey">
+          <h3>Put water back into the ground</h3>
+          <div class="row">
+            <div class="box">Recharge layer, rank by sinking</div>
+            <div class="arrow"></div>
+            <div class="diamond-wrap">
+              <div class="diamond"><span>Soil takes water?</span></div>
+            </div>
+            <div class="arrow"></div>
+            <ul class="tree yn">
+              <li>
+                <i>YES</i>
+                <div class="box branch planned">Field survey, then build</div>
+              </li>
+              <li>
+                <i>NO</i>
+                <div class="box branch planned">Use pipes or stop pumping</div>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="journey">
+          <h3>Check water farming</h3>
+          <div class="row">
+            <div class="box">Water farming layer, rank by economy</div>
+            <div class="arrow"></div>
+            <div class="box">Site panel: built vs needed</div>
+            <div class="arrow"></div>
+            <div class="diamond-wrap">
+              <div class="diamond"><span>Enough, and seen from space?</span></div>
+            </div>
+            <div class="arrow"></div>
+            <ul class="tree yn">
+              <li>
+                <i>YES</i>
+                <div class="box branch planned">Verified</div>
+              </li>
+              <li>
+                <i>NO</i>
+                <div class="box branch planned">Visit from the Bowls desk</div>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Everything in plain words</h2>
+
+      <div class="group-title">Exists now</div>
+      <div class="cards">
+        <div class="card">
+          <header>
+            <h4>Map</h4>
+            <span class="chip ready">Exists</span>
+          </header>
+          <p>
+            A 3D map of Jakarta. Today it shows the sinking spots as tall red stacks, and it can
+            play the satellite passes like a short film.
+          </p>
+        </div>
+        <div class="card">
+          <header>
+            <h4>Bowl page</h4>
+            <span class="chip ready">Exists</span>
+          </header>
+          <p>
+            A cut-away 3D model of the ground under one spot: soil layers, buildings, the sea at
+            high tide. Slide the years to see how deep it gets by 2050, with and without the pumping
+            ban.
+          </p>
+        </div>
+        <div class="card">
+          <header>
+            <h4>Bowls desk</h4>
+            <span class="chip ready">Exists</span>
+          </header>
+          <p>
+            A table of spots. Send an inspector on a date, then write down what they found: a pump,
+            no pump, or soil that sinks on its own.
+          </p>
+        </div>
+        <div class="card">
+          <header>
+            <h4>Team</h4>
+            <span class="chip ready">Exists</span>
+          </header>
+          <p>The inspectors, their next visit, and who has too much work.</p>
+        </div>
+        <div class="card">
+          <header>
+            <h4>Overview</h4>
+            <span class="chip ready">Exists</span>
+          </header>
+          <p>One page that says what changed since the satellite last flew over.</p>
+        </div>
+      </div>
+
+      <div class="group-title">Added to the map</div>
+      <div class="cards">
+        <div class="card">
+          <header>
+            <h4>Three new layers</h4>
+            <span class="chip soon">New</span>
+          </header>
+          <p>
+            Recharge priority, pipe priority, and water farming join the pumping leads in the "Show"
+            menu.
+          </p>
+        </div>
+        <div class="card">
+          <header>
+            <h4>Priority filter</h4>
+            <span class="chip soon">New</span>
+          </header>
+          <p>
+            Hide what does not matter and sort by sinking rate, population, economic activity, or
+            all three.
+          </p>
+        </div>
+        <div class="card">
+          <header>
+            <h4>Area panel</h4>
+            <span class="chip soon">New</span>
+          </header>
+          <p>
+            Click an area to see its numbers and act: add it to a plan, export it, or schedule a
+            visit.
+          </p>
+        </div>
+        <div class="card">
+          <header>
+            <h4>Site report</h4>
+            <span class="chip soon">New</span>
+          </header>
+          <p>
+            For developers: draw a piece of land and print one report on how fast it sinks, which
+            rules apply, and what water measures to plan. A first check, not a soil survey.
+          </p>
+        </div>
+      </div>
+
+      <div class="group-title">Added to other pages</div>
+      <div class="cards">
+        <div class="card">
+          <header>
+            <h4>Case report</h4>
+            <span class="chip soon">New</span>
+          </header>
+          <p>
+            On the bowl page: print one page with the evidence after a pump is found, ready for
+            Badan Geologi. It names no person.
+          </p>
+        </div>
+        <div class="card">
+          <header>
+            <h4>Site visits</h4>
+            <span class="chip soon">New</span>
+          </header>
+          <p>In the Bowls desk: water farming sites use the same visit steps as pumping leads.</p>
+        </div>
+        <div class="card">
+          <header>
+            <h4>Changes for my role</h4>
+            <span class="chip soon">New</span>
+          </header>
+          <p>On the Overview: each team sees only the changes for its own job.</p>
+        </div>
+      </div>
+
+      <div class="group-title">New page and background work</div>
+      <div class="cards">
+        <div class="card">
+          <header>
+            <h4>Area check</h4>
+            <span class="chip soon">New page</span>
+          </header>
+          <p>
+            For people who buy or sell a house: type an address and see if the area sinks slowly,
+            medium, or fast. Areas, not single houses. It never says "do not buy". It also has the
+            water farming calculator.
+          </p>
+        </div>
+        <div class="card">
+          <header>
+            <h4>Groundwater use estimate</h4>
+            <span class="chip soon">Background</span>
+          </header>
+          <p>
+            We guess how much water an area pumps in two ways: from the people who live there
+            without pipes, and from how fast the ground sinks. If the ground says much more, someone
+            pumps more than we know.
+          </p>
+        </div>
+        <div class="card">
+          <header>
+            <h4>Pass email</h4>
+            <span class="chip soon">Background</span>
+          </header>
+          <p>
+            One short email every 12 days, after each satellite pass, with only the changes that
+            matter for your job.
+          </p>
+        </div>
+      </div>
+    </section>
+  </body>
+</html>

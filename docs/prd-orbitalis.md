@@ -2,7 +2,7 @@
 
 Status: Draft. Updated 15 November 2026. This version moves the scope from the hackathon prototype to the product after the hackathon. It adds six user needs (section 1, "Needs and features"), new users (PAM Jaya, KemenLH, developers, the public), and the groundwater use projection. The repo name is `orbitalis`. The product name in the app is Orbitalis.
 
-Related documents: [HLD](hld-orbitalis.md) (system design) and [Business Flow](business-flow.md) (who does what, in what order).
+Related documents: [HLD](hld-orbitalis.md) (system design), [Business Flow](business-flow.md) (who does what, in what order), [Services](services.md) (what runs in `apps/`), and [Feature map](feature-map.html) (pages, layers, and journeys in plain words).
 
 The prototype was built for the NASA Space Apps Challenge 2026 challenge [Dancing with the SARs](https://www.spaceappschallenge.org/2026/challenges/dancing-with-the-sars/) (14–15 November 2026). Section 0 keeps the challenge fit. Judges score Impact, Creativity, Validity, Relevance, and Presentation. [Judging guide](https://spaceappschallenge.org/resources/judging-awards-guide)
 

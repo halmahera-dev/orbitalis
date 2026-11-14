@@ -1,6 +1,6 @@
 # HLD: Orbitalis
 
-Status: Draft. Date: 15 November 2026. Scope: the product after the NASA Space Apps hackathon. Source documents: [PRD](prd-orbitalis.md) and [Business Flow](business-flow.md).
+Status: Draft. Date: 15 November 2026. Scope: the product after the NASA Space Apps hackathon. Source documents: [PRD](prd-orbitalis.md) and [Business Flow](business-flow.md). Services per app: [Services](services.md). Visual summary: [Feature map](feature-map.html).
 
 This document describes the high-level design. It tells what parts the system has, what each part owns, how data moves between them, and which parts exist on `main` today. It does not give code-level design.
 
