@@ -152,16 +152,19 @@ sequenceDiagram
     loop Every month
         O->>O: Optical check: open water in embung, vegetation cover
     end
-    loop Every NISAR pass
-        O->>O: Ground check: local rate before and after the start date
-    end
     O->>K: Site status: verified, needs visit, or non-compliant
+    loop Every NISAR pass
+        O->>O: Area check: rate change in high-adoption areas vs control areas
+    end
+    O->>K: Impact per area: slowed by X mm/yr more than control areas
     alt Needs visit
         K->>O: Schedule visit
         I->>O: Record result
     end
     K->>U: Confirmation or sanction (outside Orbitalis)
 ```
+
+Site status and impact are separate. Site status says whether one user does the measures. Impact says whether the policy slows the sinking, and only area groups can show it. Success means the sinking slows, not that the ground rises.
 
 The rule is a draft in November 2026. The flow uses the press release terms. Update this flow when KemenLH publishes the final regulation.
 

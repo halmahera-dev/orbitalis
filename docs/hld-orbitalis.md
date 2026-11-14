@@ -242,11 +242,31 @@ Handika et al. 2024 (MICMAC) rank the drivers of Jakarta subsidence: groundwater
 
 The KemenLH rule (press release SR.107/HUMAS/KLH-BPLH/6/2026, 2 June 2026) is a draft. It requires each groundwater user to have a permit and to return water to the ground. Micro scale (housing and offices): rainwater harvest, runoff capture, biopores. Macro scale (industry and business): an embung or artificial lake near the site, or vegetation over a set area.
 
-The monitor checks each registered site in three ways:
+The monitor works at two levels.
 
-1. **Declared measures** from the site registry (tank volume, biopore count, embung area, vegetation area). The system turns them into an expected recharge volume per year.
+**Site level: is the site doing its measures?** This decides the site status.
+
+1. **Declared measures** from the site registry (tank volume, biopore count, embung area, vegetation area). The system turns them into an expected recharge volume per year and compares them with the required measures from the calculator.
 2. **Optical check** with Sentinel-2: an embung shows open water (NDWI), required vegetation shows green cover (NDVI). Run each month.
-3. **Ground check** with NISAR: the vertical rate in the site and a ring around it, before and after the declared start date. A site that recharges should slow its local sinking over time. This check is slow (months to years) and noisy, so it supports the other two and never decides alone.
+3. **Field visit** when the first two disagree or show a gap.
+
+**Area level: does water farming slow the sinking?** This measures impact. NISAR does not judge single sites, for four reasons:
+
+- Compacted clay does not swell back. Recharge slows the sinking. It rarely makes the ground rise. Expect a smaller negative rate, not uplift.
+- Micro measures (biopores, rain tanks) recharge the shallow aquifer. The pumping that drives the bowls takes water from deep confined aquifers below clay layers.
+- A housing plot is smaller than one GUNW pixel, and a stacked rate still has a few mm/yr of noise.
+- Clay responds to a pressure change over months to years.
+
+So the area check compares groups of areas:
+
+| Check                  | Method                                                                                                                                                                                                                                                                                                                                               | Role                                                    |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
+| Rate change vs control | Vertical rate before and after the start of water farming, in areas (kelurahan or 500 m cells) with high adoption, compared with matched control areas with low adoption (same soil class, same ban zone, similar pumping lead score). The difference of the two changes is the effect. Both groups share the same atmosphere noise and the same ban | Main impact number                                      |
+| Seasonal amplitude     | Size of the wet-season rise in the time series, before and after. More recharge gives a larger rise in sandy layers                                                                                                                                                                                                                                  | Support. Needs more than one year of NISAR              |
+| Uplift                 | Positive vertical rate near large injection wells or embungs                                                                                                                                                                                                                                                                                         | Strong support where seen. Not expected for micro sites |
+| Groundwater level      | Water level in monitoring wells (Badan Geologi)                                                                                                                                                                                                                                                                                                      | Direct evidence of recharge where wells exist           |
+
+The output is one number per area group: "areas with high water farming adoption slowed by X ± Y mm/yr more than control areas, over the period P". This tests the policy, not each user.
 
 Status per site: registered, measures declared, verified, needs visit, non-compliant. A field visit uses the same visit flow as inspections (F9).
 
