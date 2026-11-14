@@ -723,45 +723,6 @@ export function BowlTwinView({
         className="scene-backdrop bento-grid isolate min-h-svh gap-4 p-4"
       >
         <div className="pointer-events-none relative order-2 flex min-h-0 flex-col gap-4 xl:order-none xl:col-start-1 xl:row-start-1">
-          <div ref={layerRef} className="pointer-events-auto absolute inset-0 -z-10 xl:fixed">
-            {view === "plan" ? (
-              <BowlPlan
-                radiusM={bowl.radiusM}
-                depthMeters={projectedMeters}
-                label={fill(twin.planDescription, {
-                  name: bowl.name,
-                  count: Math.floor(projectedMeters / 0.1),
-                  year: shownYear,
-                })}
-                scaleLabel={twin.scaleBar}
-                part={part}
-                seaDepthMeters={seaDepthMeters}
-                insets={insets}
-              />
-            ) : (
-              <BowlScene
-                bowl={bowl}
-                depthMeters={projectedMeters}
-                exaggeration={exaggeration}
-                view={view}
-                part={part}
-                onPick={pickPart}
-                deepestDepthMeters={deepestMeters}
-                seaDepthMeters={seaDepthMeters}
-                ghostDepthMeters={hasGhost ? ghostDepthMeters : null}
-                isRadarYear={shownYear === radarYear}
-                label={sceneLabel}
-                insets={insets}
-                layers={layers}
-                labels={{
-                  layers: twin.layers,
-                  well: twin.wellLabel,
-                  pressure: twin.pressureLabel,
-                  highTide: sea.highTideLabel,
-                }}
-              />
-            )}
-          </div>
           <div className="pointer-events-auto relative flex items-stretch gap-4">
             <Link
               href={mapReturn}
@@ -798,6 +759,48 @@ export function BowlTwinView({
             ref={stageRef}
             className="pointer-events-none relative h-96 min-h-0 xl:h-auto xl:flex-1"
           >
+            <div
+              ref={layerRef}
+              className="pointer-events-auto absolute inset-0 -z-10 overflow-hidden rounded-4xl border xl:fixed xl:rounded-none xl:border-0"
+            >
+              {view === "plan" ? (
+                <BowlPlan
+                  radiusM={bowl.radiusM}
+                  depthMeters={projectedMeters}
+                  label={fill(twin.planDescription, {
+                    name: bowl.name,
+                    count: Math.floor(projectedMeters / 0.1),
+                    year: shownYear,
+                  })}
+                  scaleLabel={twin.scaleBar}
+                  part={part}
+                  seaDepthMeters={seaDepthMeters}
+                  insets={insets}
+                />
+              ) : (
+                <BowlScene
+                  bowl={bowl}
+                  depthMeters={projectedMeters}
+                  exaggeration={exaggeration}
+                  view={view}
+                  part={part}
+                  onPick={pickPart}
+                  deepestDepthMeters={deepestMeters}
+                  seaDepthMeters={seaDepthMeters}
+                  ghostDepthMeters={hasGhost ? ghostDepthMeters : null}
+                  isRadarYear={shownYear === radarYear}
+                  label={sceneLabel}
+                  insets={insets}
+                  layers={layers}
+                  labels={{
+                    layers: twin.layers,
+                    well: twin.wellLabel,
+                    pressure: twin.pressureLabel,
+                    highTide: sea.highTideLabel,
+                  }}
+                />
+              )}
+            </div>
             <div className={cn(overlay, "absolute top-0 right-0 flex items-center gap-1")}>
               <IconSegmented
                 label={t.banScenario}
