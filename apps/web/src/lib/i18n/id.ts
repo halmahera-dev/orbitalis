@@ -3,7 +3,7 @@ import type { Dictionary } from "./en";
 export const id: Dictionary = {
   meta: {
     description:
-      "PRIOKA memakai radar NISAR untuk menunjukkan bagian Jakarta Utara yang paling cepat turun.",
+      "ORBITALIS memakai radar NISAR untuk menunjukkan bagian Jakarta Utara yang paling cepat turun.",
   },
   common: {
     signIn: "Masuk",
@@ -50,7 +50,7 @@ export const id: Dictionary = {
     map: "Peta",
   },
   landing: {
-    brand: "PRIOKA",
+    brand: "ORBITALIS",
     nav: {
       map: "Peta",
       how: "Cara kerja",
@@ -71,7 +71,7 @@ export const id: Dictionary = {
       blurb: "Radar NISAR untuk regulator air tanah di Jakarta Utara.",
       pages: "Halaman",
       data: "Data",
-      copyright: "© 2026 PRIOKA",
+      copyright: "© 2026 ORBITALIS",
     },
     problem: {
       title: "Tanah turun. Pompa tetap tersembunyi.",
@@ -218,7 +218,7 @@ export const id: Dictionary = {
     },
     team: {
       title: "Lima orang di balik karya ini.",
-      lead: "Lima orang membangun PRIOKA bersama.",
+      lead: "Lima orang membangun ORBITALIS bersama.",
       chooseLabel: "Pilih anggota tim",
       showMember: "Tampilkan {name}",
       portraitOf: "Potret {name}",
@@ -244,7 +244,7 @@ export const id: Dictionary = {
           answer: "Siapa saja. Peta publik tidak membutuhkan akun.",
         },
         {
-          question: "Radar apa yang dipakai PRIOKA?",
+          question: "Radar apa yang dipakai ORBITALIS?",
           answer:
             "Pasangan NISAR L2 GUNW untuk gerak 2026, plus laju Sentinel-1 terbitan untuk tahun sebelum larangan.",
         },

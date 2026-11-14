@@ -20,10 +20,10 @@ const favicon = faviconByEnvironment[process.env.VERCEL_ENV ?? ""] ?? "/favicon-
 
 export const metadata: Metadata = {
   metadataBase: siteUrl,
-  applicationName: "PRIOKA",
+  applicationName: "ORBITALIS",
   title: {
-    default: "PRIOKA",
-    template: "%s | PRIOKA",
+    default: "ORBITALIS",
+    template: "%s | ORBITALIS",
   },
   description: siteDescription,
   icons: {

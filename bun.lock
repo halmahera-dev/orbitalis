@@ -3,7 +3,7 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "prioka",
+      "name": "orbitalis",
       "dependencies": {
         "@repo/env": "workspace:*",
         "dotenv": "catalog:",

@@ -28,7 +28,7 @@ export default function DesignSystemPage() {
       <header className="sticky top-0 z-40 px-4 pt-4">
         <nav className="mx-auto flex max-w-6xl items-center justify-between gap-4 rounded-full border glass py-2 pr-2 pl-6">
           <Link href="/landing" className="flex items-center gap-2 font-heading text-sm font-semibold">
-            PRIOKA
+            ORBITALIS
           </Link>
           <div className="hidden items-center gap-4 lg:flex">
             {sectionLinks.map((link) => (
@@ -56,7 +56,7 @@ export default function DesignSystemPage() {
             <span className="text-muted-foreground">Color is data.</span>
           </h1>
           <p className="max-w-2xl type-lead text-muted-foreground">
-            The PRIOKA design system. Cream and near-black surfaces, 8% hairlines, 510-weight
+            The ORBITALIS design system. Cream and near-black surfaces, 8% hairlines, 510-weight
             Inter, pill controls, and one emerald accent for state.
           </p>
         </section>

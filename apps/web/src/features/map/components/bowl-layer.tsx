@@ -16,7 +16,7 @@ import { useMap } from "@/components/ui/map";
 import { dropMeters, fastRateMmYr, middleRateMmYr, slowRateMmYr } from "@/features/map/bowl-rates";
 import { firstSymbolLayerId, themeColor } from "@/features/nisar/components/nisar-layers";
 
-const sourceId = "prioka-bowls";
+const sourceId = "orbitalis-bowls";
 const glowLayerId = `${sourceId}-glow`;
 const ringLayerId = `${sourceId}-rings`;
 const tierLayerId = `${sourceId}-tiers`;

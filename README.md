@@ -1,6 +1,6 @@
-# Prioka
+# Orbitalis
 
-Prioka helps groundwater regulators in North Jakarta turn NISAR radar motion into inspection leads. A public landing page explains coastal subsidence. After sign-in, the desk shows a 3D map of subsidence bowls, a digital twin per bowl, and a visit workflow for the team.
+Orbitalis helps groundwater regulators in North Jakarta turn NISAR radar motion into inspection leads. A public landing page explains coastal subsidence. After sign-in, the desk shows a 3D map of subsidence bowls, a digital twin per bowl, and a visit workflow for the team.
 
 This monorepo holds the Next.js web app, shared packages under the `@repo` scope, and Python jobs that fetch NISAR browse images.
 
@@ -55,7 +55,7 @@ bun run dev:web
 ## Project structure
 
 ```
-prioka/
+orbitalis/
 ├── apps/
 │   ├── web/          # Next.js app (landing, desk, map, bowl twin)
 │   └── jobs/         # Python NISAR browse jobs
@@ -111,7 +111,7 @@ npx shadcn@latest add accordion dialog popover sheet table -c packages/ui
 
 ### Cloudflare Workers
 
-The web app deploys with [OpenNext for Cloudflare](https://opennext.js.org/cloudflare). Config lives in `apps/web/wrangler.jsonc` (worker name `prioka`).
+The web app deploys with [OpenNext for Cloudflare](https://opennext.js.org/cloudflare). Config lives in `apps/web/wrangler.jsonc` (worker name `orbitalis`).
 
 1. Log in once:
 
@@ -160,6 +160,6 @@ The home page is in `/sitemap.xml`. Pages use `noindex`. `/robots.txt` blocks on
 
 ## Docs
 
-- Product PRD: `docs/prd-prioka.md`
+- Product PRD: `docs/prd-orbitalis.md`
 - Design rules: `design.md`
 - Agent guidance: `AGENTS.md`

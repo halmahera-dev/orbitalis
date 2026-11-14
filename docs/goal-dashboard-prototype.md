@@ -1,6 +1,6 @@
 # Goal: Finish the dashboard prototype, map first
 
-Status: Draft. Date: 7 November 2026. Source: PRD `docs/prd-prioka.md` (F1–F8, G1) and the code in `apps/web/src/features/map`.
+Status: Draft. Date: 7 November 2026. Source: PRD `docs/prd-orbitalis.md` (F1–F8, G1) and the code in `apps/web/src/features/map`.
 
 ## Goal
 
@@ -66,7 +66,7 @@ The split layout is replaced. The map and the desk open the same page, `/[locale
 The left panel shows how deep the bowl is, for the year on the timeline.
 
 - A cross-section: ground line, the bowl curve, and the old ground level as a dashed line. The gap between them is the depth.
-- A person next to it for scale (the map already has this gauge in `prioka-map.tsx`; reuse it).
+- A person next to it for scale (the map already has this gauge in `orbitalis-map.tsx`; reuse it).
 - The depth number in m (and cm for small values), with the year and the ban on/off setting.
 - It updates when the user picks a year in the Prediction section. With reduced motion, it changes with no tween.
 

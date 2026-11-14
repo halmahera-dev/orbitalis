@@ -1,7 +1,7 @@
 [project]
-name = "prioka-jobs"
+name = "orbitalis-jobs"
 version = "0.1.0"
-description = "Radar data jobs for Prioka."
+description = "Radar data jobs for Orbitalis."
 requires-python = ">=3.11"
 dependencies = [
     "numpy>=2.4.6",

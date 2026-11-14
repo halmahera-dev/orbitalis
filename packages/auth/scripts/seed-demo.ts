@@ -6,12 +6,12 @@ import { inArray } from "drizzle-orm";
 import { randomUUID } from "node:crypto";
 
 // Synthetic demo data only. Every demo account shares this local test password.
-const demoPassword = "prioka-demo";
+const demoPassword = "orbitalis-demo";
 
 const demoUsers = [
-  { name: "Dewi Regulator", email: "regulator@prioka.test" },
-  { name: "Budi Inspector", email: "inspector@prioka.test" },
-  { name: "Sari Planner", email: "planner@prioka.test" },
+  { name: "Dewi Regulator", email: "regulator@orbitalis.test" },
+  { name: "Budi Inspector", email: "inspector@orbitalis.test" },
+  { name: "Sari Planner", email: "planner@orbitalis.test" },
 ];
 
 await db.delete(user).where(

@@ -31,7 +31,7 @@ export function HeroDashboard({ nav }: { nav: Dictionary["nav"] }) {
             <div className="hidden flex-col gap-1 border-r p-3 md:flex">
               <p className="flex items-center gap-2 px-2 pt-1 pb-4 font-heading text-sm font-semibold">
                 <AppLogo />
-                PRIOKA
+                ORBITALIS
               </p>
               {items.map((item) => {
                 return (
