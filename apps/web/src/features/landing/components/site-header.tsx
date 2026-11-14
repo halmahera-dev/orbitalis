@@ -35,6 +35,9 @@ export function SiteHeader({
         >
           {t.nav.map}
         </Button>
+        <Button variant="ghost" size="sm" nativeButton={false} render={<Link href="#questions" />}>
+          {t.nav.who}
+        </Button>
         <Button variant="ghost" size="sm" nativeButton={false} render={<Link href="#services" />}>
           {t.nav.how}
         </Button>

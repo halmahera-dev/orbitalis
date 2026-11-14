@@ -53,6 +53,7 @@ export const id: Dictionary = {
     brand: "ORBITALIS",
     nav: {
       map: "Peta",
+      who: "Siapa yang memakai",
       how: "Cara kerja",
       faq: "Tanya jawab",
     },
@@ -61,14 +62,15 @@ export const id: Dictionary = {
       body: {
         before: "Radar ",
         nisar: "NISAR",
-        after: " mengurutkan cekungan Jakarta Utara yang paling cepat turun.",
+        after:
+          " menunjukkan seberapa cepat tanah Jakarta turun, sehingga tim air bisa memutuskan ke mana harus bertindak lebih dulu.",
       },
     },
     seeMap: "Lihat peta publik",
     attribution:
       "Data radar berasal dari NASA, JPL, dan ISRO melalui ASF DAAC. Peta dasar berasal dari kontributor OpenStreetMap.",
     footer: {
-      blurb: "Radar NISAR untuk regulator air tanah di Jakarta Utara.",
+      blurb: "Radar NISAR untuk tim yang mengelola air tanah di Jakarta.",
       pages: "Halaman",
       data: "Data",
       copyright: "© 2026 ORBITALIS",
@@ -96,7 +98,7 @@ export const id: Dictionary = {
         {
           label: "Celah",
           name: "Larangan sulit ditegakkan",
-          body: "Pemompaan dilarang di zona luas (Pergub 93/2021). Air perpipaan baru menjangkau sekitar 60% kota.",
+          body: "Pemompaan dilarang di zona luas (Pergub 93/2021). Air perpipaan menjangkau sekitar 82% kota, sehingga sebagian orang masih memompa air sendiri.",
         },
         {
           label: "Titik buta",
@@ -105,6 +107,66 @@ export const id: Dictionary = {
         },
       ],
       handoff: "Inspektur sedikit. Cekungan banyak. Ke mana mereka pergi lebih dulu?",
+    },
+    questions: {
+      title: "Satu pandangan radar menjawab enam pertanyaan yang berbeda.",
+      lead: "Satelit mengukur seberapa jauh tanah bergerak, sampai beberapa milimeter. Setiap tim air membaca ukuran yang sama itu untuk keputusan yang berbeda.",
+      items: [
+        {
+          team: "Dinas SDA dan Badan Geologi",
+          question: "Di mana air masih dipompa tanpa izin?",
+          body: "Dinas air Jakarta (Dinas SDA) dan lembaga izin nasional (Badan Geologi) mendapat daftar berurutan tempat yang turun paling cepat, sehingga petugas tahu ke mana harus pergi lebih dulu.",
+          steps: ["Pindai radar", "Tempat berperingkat", "Kunjungan"],
+          note: "Tempat berperingkat tinggi adalah alasan berkunjung, bukan bukti ada pompa.",
+          figure:
+            "Tiga tumpukan bulat berdiri di atas sepetak tanah. Yang tertinggi menyala dan membawa bendera, karena tanah di sana turun paling cepat.",
+        },
+        {
+          team: "KemenLH dan Dinas SDA",
+          question: "Di mana mengembalikan air paling membantu?",
+          body: "Orbitalis mendaftar area yang cepat turun dan tanahnya cocok untuk resapan (hujan yang meresap) atau injeksi (air yang dipompa ke akuifer, lapisan yang menyimpan air tanah).",
+          steps: ["Laju turun", "Cek tanah", "Survei lapangan"],
+          note: "Hanya penyaringan. Survei lapangan yang menyetujui setiap lokasi.",
+          figure:
+            "Potongan tiga lapisan tanah. Hujan jatuh ke lubang-lubang kecil di tanah atas, dan pipa sumur mencapai lapisan air tanah yang menyala di bawahnya.",
+        },
+        {
+          team: "PAM Jaya",
+          question: "Ke mana pipa air berikutnya dipasang?",
+          body: "Orbitalis menghitung orang di tiap area yang belum punya pipa dan memompa air sendiri, sehingga perusahaan air kota memasang pipa di tempat yang menggantikan air tanah paling banyak.",
+          steps: ["Warga tanpa pipa", "Kesenjangan air", "Rencana pipa"],
+          note: "PAM Jaya menargetkan semua rumah terlayani pada 2029.",
+          figure:
+            "Pipa utama air yang menyala melewati empat rumah. Tiga rumah punya pipa dari pipa utama. Rumah keempat tidak punya dan memakai pompa tangan.",
+        },
+        {
+          team: "KemenLH dan dinas lingkungan hidup daerah",
+          question: "Apakah orang mengembalikan air ke tanah?",
+          body: "Rancangan aturan water farming meminta pengguna air tanah mengembalikan air dengan tangki, biopori (lubang kecil agar hujan meresap), atau kolam. Citra satelit memeriksa tiap lokasi.",
+          steps: ["Daftar lokasi", "Cek satelit", "Penurunan melambat"],
+          note: "Berhasil berarti penurunan melambat, bukan tanah naik.",
+          figure:
+            "Sebuah lokasi kecil dengan rumah, tangki air hujan, deretan lubang resapan, kolam, dan pohon. Sebuah satelit di atasnya memandang ke kolam.",
+        },
+        {
+          team: "Pengembang",
+          question: "Seperti apa tanah di bawah lahan saya?",
+          body: "Gambar sebidang lahan lalu baca seberapa cepat lahan itu turun, seberapa dalam bisa turun pada 2050, dan aturan air tanah yang berlaku.",
+          steps: ["Gambar lahan", "Baca laporan", "Bagikan tautan"],
+          note: "Penyaringan awal, bukan survei tanah atau nasihat hukum.",
+          figure:
+            "Sebidang lahan yang ditandai empat patok dan tali, dengan model bangunan kecil di atasnya, alat ukur surveyor, dan tongkat ukur yang berdiri di air yang naik.",
+        },
+        {
+          team: "Siapa saja yang membeli atau menjual rumah",
+          question: "Seberapa cepat tanah turun dekat saya?",
+          body: "Ketik sebuah alamat lalu baca, dengan kata sederhana, seberapa cepat area itu turun.",
+          steps: ["Ketik alamat", "Sel area", "Kata sederhana"],
+          note: "Hasil mencakup sekitar 500 meter, tidak pernah satu bangunan.",
+          figure:
+            "Kotak-kotak tanah tersusun dalam kisi. Sebuah pin peta berdiri di kotak tertinggi yang menyala, tempat satu rumah kecil berada.",
+        },
+      ],
     },
     showcase: {
       title: "Ikuti satu cekungan dari radar sampai kunjungan.",
@@ -256,6 +318,16 @@ export const id: Dictionary = {
         {
           question: "Bagaimana saya mencoba meja?",
           answer: "Gunakan Coba sebagai tamu, atau masuk dengan akun regulator.",
+        },
+        {
+          question: "Apakah proyeksi sama dengan ramalan?",
+          answer:
+            "Tidak. Proyeksi menunjukkan apa yang terjadi jika tren hari ini berlanjut, sehingga setiap proyeksi menyebut bahwa ia berlaku pada asumsi saat ini.",
+        },
+        {
+          question: "Siapa yang dapat melihat data yang dibagikan lembaga?",
+          answer:
+            "Data izin, pipa, dan lokasi tetap berada pada lembaga pemiliknya, dan halaman publik hanya menampilkan area selebar sekitar 500 meter, tidak pernah satu bangunan.",
         },
       ],
     },

@@ -9,6 +9,7 @@ import { Hero } from "@/features/landing/hero";
 import { HeroDashboard } from "@/features/landing/hero-dashboard";
 import { HowToStart } from "@/features/landing/how-to-start";
 import { Problem } from "@/features/landing/problem";
+import { Questions } from "@/features/landing/questions";
 import { Showcase } from "@/features/landing/showcase";
 import { Team } from "@/features/landing/team";
 
@@ -23,6 +24,7 @@ export function LandingContent({ locale, dict }: { locale: Locale; dict: Diction
         <Hero locale={locale} t={t} common={common} />
         <HeroDashboard nav={dict.nav} />
         <Problem t={t} />
+        <Questions t={t} />
         <Showcase locale={locale} t={t} nav={dict.nav} />
         <Team t={t} />
         <HowToStart locale={locale} t={t} common={common} />

@@ -13,6 +13,7 @@ export function SiteFooter({
 }) {
   const links = [
     { href: `/${locale}/map`, label: t.nav.map },
+    { href: "#questions", label: t.nav.who },
     { href: "#services", label: t.nav.how },
     { href: "#faq", label: t.nav.faq },
     { href: `/${locale}/sign-in`, label: common.signIn },

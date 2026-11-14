@@ -12,6 +12,7 @@ import {
   slabOf,
   type Plan,
   type Point3,
+  type Tone,
 } from "@/components/iso/iso-kit";
 import * as G from "@/components/iso/lathe.mjs";
 import { Dots, IsoFigure, Line, Solid } from "@/components/iso/react/draw";
@@ -37,7 +38,7 @@ export function frameAt(x: number, y: number, z: number) {
   return G.frameOf([x, y, z], UP, [1, 0, 0], [0, 1, 0]);
 }
 
-export function slab(plan: Plan, z: number, height: number, tone: "lo" | "mid" = "mid") {
+export function slab(plan: Plan, z: number, height: number, tone: Tone = "mid") {
   return <Solid paths={slabOf(plan, z, height, P, 4, 0.4)} tone={tone} />;
 }
 

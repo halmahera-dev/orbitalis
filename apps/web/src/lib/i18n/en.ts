@@ -50,6 +50,7 @@ export const en = {
     brand: "ORBITALIS",
     nav: {
       map: "Map",
+      who: "Who uses it",
       how: "How it works",
       faq: "FAQ",
     },
@@ -58,14 +59,14 @@ export const en = {
       body: {
         before: "",
         nisar: "NISAR",
-        after: " radar ranks the bowls where North Jakarta sinks fastest.",
+        after: " radar shows how fast Jakarta sinks, so water teams can decide where to act first.",
       },
     },
     seeMap: "See the public map",
     attribution:
       "Radar data comes from NASA, JPL, and ISRO through the ASF DAAC. The basemap comes from OpenStreetMap contributors.",
     footer: {
-      blurb: "NISAR radar for groundwater regulators in North Jakarta.",
+      blurb: "NISAR radar for the teams that manage groundwater in Jakarta.",
       pages: "Pages",
       data: "Data",
       copyright: "© 2026 ORBITALIS",
@@ -93,7 +94,7 @@ export const en = {
         {
           label: "Gap",
           name: "The ban is hard to enforce",
-          body: "Pumping is banned in large zones (Pergub 93/2021). Piped water reaches only about 60% of the city.",
+          body: "Pumping is banned in large zones (Pergub 93/2021). Piped water reaches about 82% of the city, so some people still pump their own.",
         },
         {
           label: "Blind spot",
@@ -102,6 +103,66 @@ export const en = {
         },
       ],
       handoff: "Few inspectors. Many bowls. Where should they go first?",
+    },
+    questions: {
+      title: "One radar view answers six different questions.",
+      lead: "A satellite measures how far the ground moves, down to a few millimeters. Each water team reads that same measurement for a different decision.",
+      items: [
+        {
+          team: "Dinas SDA and Badan Geologi",
+          question: "Where is water still pumped without a permit?",
+          body: "Jakarta's water agency (Dinas SDA) and the national permit agency (Badan Geologi) get a ranked list of the fastest-sinking places, so inspectors know where to go first.",
+          steps: ["Radar scan", "Ranked places", "Site visit"],
+          note: "A ranked place is a reason to visit, not proof of a pump.",
+          figure:
+            "Three round stacks stand on a patch of ground. The tallest one glows and carries a flag, because the ground sinks fastest there.",
+        },
+        {
+          team: "KemenLH and Dinas SDA",
+          question: "Where would putting water back help most?",
+          body: "Orbitalis lists fast-sinking areas where the soil can take recharge (rain that soaks in) or injection (water pumped down into the aquifer, the layer that holds groundwater).",
+          steps: ["Sinking rate", "Soil check", "Field survey"],
+          note: "A screening only. A field survey approves each site.",
+          figure:
+            "A cut-away of three ground layers. Rain falls into small holes in the topsoil, and a well pipe reaches the glowing layer of groundwater below.",
+        },
+        {
+          team: "PAM Jaya",
+          question: "Where should the next water pipes go?",
+          body: "Orbitalis counts the people in each area who have no pipe and pump their own water, so the city water utility lays pipes where they replace the most groundwater.",
+          steps: ["People without pipes", "Water gap", "Pipe plan"],
+          note: "PAM Jaya aims to reach every home by 2029.",
+          figure:
+            "A glowing water main runs past four houses. Three houses have a pipe from the main. The fourth has none and uses a hand pump.",
+        },
+        {
+          team: "KemenLH and regional environment offices",
+          question: "Are people giving water back to the ground?",
+          body: "The draft water farming rule asks groundwater users to give water back with tanks, biopores (small holes that let rain soak in), or ponds. Satellite images check each site.",
+          steps: ["Register site", "Satellite check", "Sinking slows"],
+          note: "Success means the sinking slows, not that the ground rises.",
+          figure:
+            "A small site with a house, a rainwater tank, a row of soak holes, a pond, and trees. A satellite above looks down at the pond.",
+        },
+        {
+          team: "Developers",
+          question: "What is the ground like under my parcel?",
+          body: "Draw a parcel and read how fast it sinks, how deep it may sink by 2050, and which groundwater rules apply.",
+          steps: ["Draw parcel", "Read report", "Share link"],
+          note: "A first screening, not a soil survey or legal advice.",
+          figure:
+            "A building plot marked with four stakes and a string, with a small model building on it, a surveyor's instrument, and a measuring staff that stands in rising water.",
+        },
+        {
+          team: "Anyone who buys or sells a home",
+          question: "How fast does the ground sink near me?",
+          body: "Type an address and read, in plain words, how fast the area sinks.",
+          steps: ["Type address", "Area cell", "Plain words"],
+          note: "The result covers about 500 meters, never one building.",
+          figure:
+            "A grid of ground tiles. A map pin stands on the tallest, glowing tile, which holds one small house.",
+        },
+      ],
     },
     showcase: {
       title: "Follow one bowl from radar to visit.",
@@ -250,6 +311,16 @@ export const en = {
         {
           question: "How do I try the desk?",
           answer: "Use Try as guest, or sign in with a regulator account.",
+        },
+        {
+          question: "Is a projection a forecast?",
+          answer:
+            "No. A projection shows what happens if today's trend continues, so every projection says that it holds at current assumptions.",
+        },
+        {
+          question: "Who can see the data that agencies share?",
+          answer:
+            "Permit, pipe, and site data stays with the agency that owns it, and the public pages show only areas about 500 meters wide, never single buildings.",
         },
       ],
     },
