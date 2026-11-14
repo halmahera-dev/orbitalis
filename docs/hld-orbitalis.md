@@ -137,19 +137,23 @@ Aggregated values (per bowl, per kelurahan, per 100 m cell for the area check) s
 
 Next.js 16 App Router, React Server Components, deployed to Cloudflare Workers with OpenNext. It follows `.agents/skills/nextjs-app-architecture`. Features live in `src/features/<name>`.
 
-| Area                   | Route (under `/[locale]`)                   | Access              | Built on `main`                               |
-| ---------------------- | ------------------------------------------- | ------------------- | --------------------------------------------- |
-| Landing                | `/landing`                                  | Public              | Yes                                           |
-| Area check (N6)        | `/check`                                    | Public, coarse data | No                                            |
-| Map                    | `/map`                                      | Sign-in             | Yes (bowls, NISAR passes, 3D buildings)       |
-| Bowl twin              | `/bowls/[id]`                               | Sign-in             | Yes                                           |
-| Overview               | `/` desk home                               | Sign-in             | Yes                                           |
-| Pumping leads (N1)     | `/bowls` desk                               | Regulator           | Yes as inspection table. Lead score not built |
-| Recharge priority (N2) | `/recharge`                                 | Regulator, KemenLH  | No                                            |
-| Pipe priority (N3)     | `/pipes`                                    | PAM Jaya            | No                                            |
-| Water farming (N4)     | `/water-farming`, `/water-farming/[siteId]` | KemenLH, DLH        | No                                            |
-| Site report (N5)       | `/report`                                   | Developer account   | No                                            |
-| Team                   | `/team`                                     | Regulator           | Yes                                           |
+| Area                              | Route (under `/[locale]`)                   | Access              | Built on `main`                               |
+| --------------------------------- | ------------------------------------------- | ------------------- | --------------------------------------------- |
+| Landing                           | `/landing`                                  | Public              | Yes                                           |
+| Area check (N6)                   | `/check`                                    | Public, coarse data | No                                            |
+| Map                               | `/map`                                      | Sign-in             | Yes (bowls, NISAR passes, 3D buildings)       |
+| Bowl twin                         | `/bowls/[id]`                               | Sign-in             | Yes                                           |
+| Overview                          | `/` desk home                               | Sign-in             | Yes                                           |
+| Pumping leads (N1)                | `/bowls` desk                               | Regulator           | Yes as inspection table. Lead score not built |
+| Recharge priority (N2)            | `/recharge`                                 | Regulator, KemenLH  | No                                            |
+| Pipe priority (N3)                | `/pipes`                                    | PAM Jaya            | No                                            |
+| Water farming (N4)                | `/water-farming`, `/water-farming/[siteId]` | KemenLH, DLH        | No                                            |
+| Site report (N5)                  | `/report`                                   | Developer account   | No                                            |
+| Team                              | `/team`                                     | Regulator           | Yes                                           |
+| Case report (N1)                  | `/bowls/[id]/report`                        | Agency roles        | No                                            |
+| Water farming calculator (N4, N5) | `/water-farming/calculator`                 | Public              | No                                            |
+
+Pass digest (F20): after the publish step, one job reads what changed per role and sends one email per user through a transactional email service. It runs outside the Worker, next to the processing jobs. The digest reads the same change list as the Overview, so the two never disagree.
 
 Shared map and 3D parts:
 
@@ -161,16 +165,18 @@ Shared map and 3D parts:
 
 PostgreSQL on Neon through Drizzle. It holds only things people create or decide. Radar outputs stay in the layer store.
 
-| Table                                        | Exists | Purpose                                                                                                                                                |
-| -------------------------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `user`, `session`, `account`, `verification` | Yes    | Better Auth                                                                                                                                            |
-| `inspection`                                 | Yes    | Visit status and outcome per bowl                                                                                                                      |
-| `inspector`                                  | Yes    | Inspector roster                                                                                                                                       |
-| `organization`, `member`                     | No     | Agency and role: `dki_regulator`, `badan_geologi`, `pam_jaya`, `kemenlh`, `dlh`, `developer`. Better Auth organization plugin                          |
-| `well_permit`                                | No     | Permit number, holder type (no personal names in the repo), location, permitted volume m³/month, valid dates. Source: Badan Geologi and DKI registries |
-| `water_farming_site`                         | No     | Site polygon, extractor type (micro: housing or office, macro: industry or business), required measures, declared measures                             |
-| `water_farming_check`                        | No     | Check date, method (field visit, satellite, optical), result, note, user                                                                               |
-| `plan_item`                                  | No     | A recharge site or a pipe segment that a user adopts from a priority list: type, area id, status (proposed, approved, built), user                     |
+| Table                                        | Exists | Purpose                                                                                                                                                            |
+| -------------------------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `user`, `session`, `account`, `verification` | Yes    | Better Auth                                                                                                                                                        |
+| `inspection`                                 | Yes    | Visit status and outcome per bowl                                                                                                                                  |
+| `inspector`                                  | Yes    | Inspector roster                                                                                                                                                   |
+| `organization`, `member`                     | No     | Agency and role: `dki_regulator`, `badan_geologi`, `pam_jaya`, `kemenlh`, `dlh`, `developer`. Better Auth organization plugin                                      |
+| `well_permit`                                | No     | Permit number, holder type (no personal names in the repo), location, permitted volume m³/month, valid dates. Source: Badan Geologi and DKI registries             |
+| `water_farming_site`                         | No     | Site polygon, extractor type (micro: housing or office, macro: industry or business), required measures, declared measures                                         |
+| `water_farming_check`                        | No     | Check date, method (field visit, satellite, optical), result, note, user                                                                                           |
+| `plan_item`                                  | No     | A recharge site or a pipe segment that a user adopts from a priority list: type, area id, status (proposed, approved, built), user                                 |
+| `area_watch`                                 | No     | User, area id or cell, digest on or off. Feeds the pass digest and the area watch (F20)                                                                            |
+| `water_farming_factor`                       | No     | Calculator factors (rainfall, runoff share, infiltration per measure), each with a source and a valid date (F21). Data, not code, so a rule change needs no deploy |
 
 All new tables store the user and the time of each change, as `inspection` does today.
 
@@ -243,6 +249,8 @@ The monitor checks each registered site in three ways:
 3. **Ground check** with NISAR: the vertical rate in the site and a ring around it, before and after the declared start date. A site that recharges should slow its local sinking over time. This check is slow (months to years) and noisy, so it supports the other two and never decides alone.
 
 Status per site: registered, measures declared, verified, needs visit, non-compliant. A field visit uses the same visit flow as inspections (F9).
+
+The water farming calculator (F21) gives the required measures for a site from its area, roof area, sealed area, groundwater use, and scale. The monitor compares declared with required. A site below required goes to "needs visit". The same calculator runs in the developer site report (F16).
 
 ## 8. Deployment
 

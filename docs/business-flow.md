@@ -53,9 +53,10 @@ flowchart TB
     G --> H1[Regulator: new or rising leads]
     G --> H2[PAM Jaya: pipe priority changes]
     G --> H3[KemenLH: sites with a rate change]
+    G --> M[Pass digest email per role, and area watch messages]
 ```
 
-Exit of the cycle: the Overview lists rank up, rank down, new bowls, slowing bowls, and sites that changed. Each desk starts its own flow from there.
+Exit of the cycle: the Overview lists rank up, rank down, new bowls, slowing bowls, and sites that changed. The same list goes out as one digest email per role (F20), so users do not need to open the app to know they must act. Each desk starts its own flow from there.
 
 ## 4. Flow N1: from pumping hint to enforcement
 
@@ -76,10 +77,12 @@ sequenceDiagram
         O->>I: Visit in the inspector's list
         I->>O: Record outcome: pump found, no pump, natural compaction
         alt Pump found, no permit
-            R->>B: Report unlicensed well
+            O->>R: Case report with evidence
+            R->>B: Send case report: unlicensed well
             B-->>R: Seal or permit process
         else Pump found, permit exists
-            R->>B: Report possible over-use
+            O->>R: Case report with evidence
+            R->>B: Send case report: possible over-use
             B-->>R: Permit audit
         else No pump or natural compaction
             R->>O: Close case
@@ -140,10 +143,12 @@ sequenceDiagram
     participant O as Orbitalis
     actor I as Inspector
 
-    K->>O: Register site: polygon, scale (micro or macro), required measures
+    U->>O: Use the calculator: which measures does my site need?
+    K->>O: Register site: polygon, scale (micro or macro)
+    O->>O: Calculator gives required measures
     U->>K: Declare measures: tank volume, biopores, embung, vegetation area
     K->>O: Enter declared measures and start date
-    O->>O: Expected recharge volume per year
+    O->>O: Compare declared with required. Expected recharge volume per year
     loop Every month
         O->>O: Optical check: open water in embung, vegetation cover
     end
@@ -166,7 +171,7 @@ The rule is a draft in November 2026. The flow uses the press release terms. Upd
 flowchart LR
     A[Developer signs in] --> B[Draw a parcel or pick an address]
     B --> C[Report: sinking rate, projected depth to 2050, year below high tide, local groundwater balance]
-    C --> D[Rules that apply: groundwater permit above 100 m³ per month, water farming scale and measures]
+    C --> D[Rules that apply: groundwater permit above 100 m³ per month, water farming measures from the calculator]
     D --> E[Suggested measures: piped connection, recharge, foundation note]
     E --> F[Share or download the report]
 ```

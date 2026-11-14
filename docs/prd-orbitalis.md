@@ -87,14 +87,22 @@ On top of these, each user group has a desk: pumping leads with an inspection wo
 
 The team mapped six needs to the capabilities. N1–N4 are primary. N5 is secondary. N6 is tertiary.
 
-| #   | Need (original wording)                                                                                                                            | User                     | Maps | 3D  | Projection             | Feature     | State     |
-| --- | -------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------ | ---- | --- | ---------------------- | ----------- | --------- |
-| N1  | Find hints of illegal pumps (_deteksi petunjuk pompa ilegal_)                                                                                      | Dinas SDA, Badan Geologi | Yes  | Yes | Extraction ratio       | F3, F9, F12 | Partial   |
-| N2  | Areas that sink fast and need groundwater injection (_daerah yang laju penurunan tanahnya cepat dan perlu injeksi air tanah_)                      | KemenLH, Dinas SDA       | Yes  | Yes | Scenario with recharge | F13         | Not built |
-| N3  | Recommend water pipe extension, with the number of people in each area (_rekomendasi pembangunan pipa air, estimasi ada berapa orang di area itu_) | PAM Jaya                 | Yes  | No  | Demand gap             | F14         | Not built |
-| N4  | Monitor water farming (KemenLH)                                                                                                                    | KemenLH, DLH             | Yes  | Yes | Expected recharge      | F15         | Not built |
-| N5  | Building plans for real-estate developers (secondary)                                                                                              | Developers               | Yes  | Yes | Local balance          | F16         | Not built |
-| N6  | People who want to buy or sell a house (tertiary)                                                                                                  | Public                   | Yes  | No  | Simple text            | F17         | Not built |
+| #   | Need (original wording)                                                                                                                            | User                     | Maps | 3D  | Projection             | Feature          | State     |
+| --- | -------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------ | ---- | --- | ---------------------- | ---------------- | --------- |
+| N1  | Find hints of illegal pumps (_deteksi petunjuk pompa ilegal_)                                                                                      | Dinas SDA, Badan Geologi | Yes  | Yes | Extraction ratio       | F3, F9, F12, F19 | Partial   |
+| N2  | Areas that sink fast and need groundwater injection (_daerah yang laju penurunan tanahnya cepat dan perlu injeksi air tanah_)                      | KemenLH, Dinas SDA       | Yes  | Yes | Scenario with recharge | F13              | Not built |
+| N3  | Recommend water pipe extension, with the number of people in each area (_rekomendasi pembangunan pipa air, estimasi ada berapa orang di area itu_) | PAM Jaya                 | Yes  | No  | Demand gap             | F14              | Not built |
+| N4  | Monitor water farming (KemenLH)                                                                                                                    | KemenLH, DLH             | Yes  | Yes | Expected recharge      | F15, F21         | Not built |
+| N5  | Building plans for real-estate developers (secondary)                                                                                              | Developers               | Yes  | Yes | Local balance          | F16, F21         | Not built |
+| N6  | People who want to buy or sell a house (tertiary)                                                                                                  | Public                   | Yes  | No  | Simple text            | F17, F20         | Not built |
+
+The three capabilities alone leave gaps in the flows. F12–F18 fill the main gaps. F19–F21 fill three more that the [Business Flow](business-flow.md) shows:
+
+| Gap                                                                                                                                                                                     | Where it shows                 | New feature                    |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------ | ------------------------------ |
+| A regulator must hand evidence to Badan Geologi after "pump found", but no feature makes that document                                                                                  | Business Flow section 4        | F19 Case report                |
+| Agencies act every 12 days, but they must open the app to see what changed                                                                                                              | Business Flow section 3        | F20 Pass digest and area watch |
+| The water farming rule says measures must be "proportional", but no one can tell a user or a developer what that means for one site, and officers cannot compare declared with required | Business Flow sections 7 and 8 | F21 Water farming calculator   |
 
 | Capability                 | State on `main`                                                                                                      |
 | -------------------------- | -------------------------------------------------------------------------------------------------------------------- |
@@ -388,6 +396,43 @@ Gap: the clean-signal share comes from a roughness rule on the browse image (`RO
 - Each role opens its own desk by default. Permit and site data follow the role rules in HLD section 9.
 - Accounts are still created by an admin, except developer accounts.
 
+#### F19. Case report (N1) — Not built
+
+**Story:** As a regulator, I want a printable report for a lead with an inspection outcome so that I can send it to Badan Geologi for a permit action or audit.
+
+**Acceptance criteria:**
+
+- One page per case: area map, bowl rate and depth over time, change after the ban, extraction ratio (F12), permits in the bowl radius, visit date, inspector, outcome, and note.
+- Each number keeps its evidence record (F7).
+- Outcome "pump found, no permit" gives the request "seal or permit process". Outcome "permit exists, possible over-use" gives the request "permit audit".
+- The report names no person or company. The inspector's field notes hold the site facts.
+- The report opens as a link for signed-in agency users and prints to A4.
+
+#### F20. Pass digest and area watch (all needs) — Not built
+
+**Story:** As an agency user, I want a short message after each NISAR pass so that I know what changed without opening the app.
+
+**Acceptance criteria:**
+
+- After each pass that passes the quality gate, each role gets one email with its own changes: new or rising leads (regulator), pipe priority changes (PAM Jaya), site status changes (KemenLH, DLH), overdue visits (all).
+- A pass that fails the quality gate sends one line: "no update this pass" with the reason.
+- Each item links to the page in the app.
+- A user can turn the digest off.
+- Developers and the public can watch one area. They get a message only when its rate class changes. (Phase 4, with F16 and F17.)
+
+#### F21. Water farming calculator (N4, N5) — Not built
+
+**Story:** As a groundwater user or a developer, I want to know which water farming measures my site needs so that I can plan them. As an officer, I want to compare declared measures with required measures.
+
+**Acceptance criteria:**
+
+- Input: site area, roof area, sealed area, groundwater use in m³ per month, and scale (micro or macro).
+- Output: required measures, for example rainwater tank volume, number of biopores or recharge wells, embung area, or vegetation area, with the expected recharge volume per year.
+- Factors (rainfall, runoff share, infiltration rate per measure) are data with sources, not code. Each result shows the factors used.
+- Until KemenLH publishes the final numbers, the result says "estimate under the draft rule".
+- In F15, the site page shows declared vs required. A site below required goes to "needs visit".
+- In F16, the site report includes the calculator result for the parcel.
+
 #### G1. See the national view — Not built
 
 **Story:** As national staff or KemenLH, I want to see the rates in Jakarta, Semarang, and Pekalongan so that I can compare the cities.
@@ -522,13 +567,13 @@ flowchart LR
 
 Each phase ships a working product. The next phase starts only when the last one works.
 
-| Phase                              | Date                                              | Scope                                                                                                                                                                      | Exit criteria                                                     |
-| ---------------------------------- | ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
-| 0. Hackathon prototype             | Up to 15 Nov 2026                                 | F1, F2, F4, F8–F11 on synthetic values and real NISAR browse images. Bowl detector on one pair.                                                                            | Submission complete.                                              |
-| 1. Real radar data                 | Dec 2026 – Jan 2027                               | NISAR stack with MintPy, both tracks, vertical motion. Sentinel-1 rate. Bowl detector on the stack. Lead score (F3). GNSS check (F6). Evidence states (F7). Rasters to R2. | No seed values in rates (KPI 9). KPI 7 holds.                     |
-| 2. Projection and planning         | Feb – Apr 2027                                    | Roles (F18). Groundwater use projection (F12). Pipe priority (F14). Recharge priority (F13). Synthetic permit and network seeds, then real data where agreements exist.    | KPI 4 on test areas. Demo to PAM Jaya and Dinas SDA.              |
-| 3. Pilot and water farming         | May – Sep 2027, or when the KemenLH rule is final | Water farming monitor (F15) with optical checks. Pilot with one agency per desk.                                                                                           | KPIs 1, 2, 3, 5, 6.                                               |
-| 4. Outside government and national | Late 2027                                         | Site report (F16). Public area check (F17). National view (G1) with Semarang and Pekalongan. Split view (F5).                                                              | KPI 10. A partner agency keeps using the product after the pilot. |
+| Phase                              | Date                                              | Scope                                                                                                                                                                                                                      | Exit criteria                                                     |
+| ---------------------------------- | ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| 0. Hackathon prototype             | Up to 15 Nov 2026                                 | F1, F2, F4, F8–F11 on synthetic values and real NISAR browse images. Bowl detector on one pair.                                                                                                                            | Submission complete.                                              |
+| 1. Real radar data                 | Dec 2026 – Jan 2027                               | NISAR stack with MintPy, both tracks, vertical motion. Sentinel-1 rate. Bowl detector on the stack. Lead score (F3). GNSS check (F6). Evidence states (F7). Rasters to R2.                                                 | No seed values in rates (KPI 9). KPI 7 holds.                     |
+| 2. Projection and planning         | Feb – Apr 2027                                    | Roles (F18). Groundwater use projection (F12). Pipe priority (F14). Recharge priority (F13). Case report (F19). Pass digest for agencies (F20). Synthetic permit and network seeds, then real data where agreements exist. | KPI 4 on test areas. Demo to PAM Jaya and Dinas SDA.              |
+| 3. Pilot and water farming         | May – Sep 2027, or when the KemenLH rule is final | Water farming monitor (F15) with optical checks and the calculator (F21). Pilot with one agency per desk.                                                                                                                  | KPIs 1, 2, 3, 5, 6.                                               |
+| 4. Outside government and national | Late 2027                                         | Site report (F16). Public area check (F17). Area watch (F20). National view (G1) with Semarang and Pekalongan. Split view (F5).                                                                                            | KPI 10. A partner agency keeps using the product after the pilot. |
 
 **Future NISAR applications (for the challenge).** NISAR's 12-day repeat and free L-band data let a city check every pass whether enforcement, pipes, and recharge slow the ground. The same pipeline can watch other pumping cities (Semarang, Pekalongan, Mexico City, the Central Valley), dyke and sea-wall settlement, and fish-pond and wetland change from GCOV polarizations.
 
@@ -566,3 +611,5 @@ Each phase ships a working product. The next phase starts only when the last one
 10. Calibration area for `k`.
 11. Which hydrogeology map sets recharge suitability.
 12. Team size, test users, and device targets.
+13. Water farming calculator factors and their sources (F21), until KemenLH publishes final numbers.
+14. Email sender and delivery service for the pass digest (F20).
