@@ -10,6 +10,9 @@ export const env = createEnv({
     NODE_ENV: z.enum(["development", "production", "staging"]).default("development"),
   },
   runtimeEnv: process.env,
-  skipValidation: !!process.env.SKIP_ENV_VALIDATION,
+  skipValidation:
+    process.env.SKIP_ENV_VALIDATION === "1" ||
+    process.env.SKIP_ENV_VALIDATION === "true" ||
+    process.env.NEXT_PHASE === "phase-production-build",
   emptyStringAsUndefined: true,
 });

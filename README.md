@@ -119,14 +119,15 @@ The web app deploys with [OpenNext for Cloudflare](https://opennext.js.org/cloud
 cd apps/web && bunx wrangler login
 ```
 
-2. Set Worker secrets (same values as local `.env`, but `BETTER_AUTH_URL` must be the public Worker origin):
+2. Set runtime secrets in the Cloudflare dashboard (or via Wrangler). `BETTER_AUTH_URL` is already a `vars` entry in `wrangler.jsonc`.
 
 ```bash
 cd apps/web
 bunx wrangler secret put DATABASE_URL
 bunx wrangler secret put BETTER_AUTH_SECRET
-bunx wrangler secret put BETTER_AUTH_URL
 ```
+
+Worker secrets are not available during Builds. The web `build` script sets `SKIP_ENV_VALIDATION=1` so `next build` can finish. Runtime still needs the secrets above.
 
 Optional: `NODE_ENV=production`.
 
