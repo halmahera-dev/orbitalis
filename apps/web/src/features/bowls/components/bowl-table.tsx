@@ -33,7 +33,7 @@ import {
   InspectorAvatar,
   type InspectorAvatarLabels,
 } from "@/features/team/components/inspector-avatar";
-import { Sparkline } from "@/features/today/components/today-charts";
+import { Sparkline } from "@/features/today/components/sparkline";
 import { fill, formatDateShort, type Dictionary, type Locale } from "@/lib/i18n";
 
 const column = createColumnHelper<DataTableFeatures, Bowl>();

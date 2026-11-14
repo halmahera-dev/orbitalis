@@ -6,45 +6,7 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@repo/ui/components/chart";
-import { Area, AreaChart, CartesianGrid, ResponsiveContainer, XAxis, YAxis } from "recharts";
-
-export function Sparkline({
-  values,
-  color,
-  isStep = false,
-  className = "h-12",
-}: {
-  values: number[];
-  color: string;
-  isStep?: boolean;
-  className?: string;
-}) {
-  const stepValues = isStep && values.length > 0 ? [...values, values[values.length - 1]] : values;
-  const points = stepValues.map((value, index) => ({ index, value }));
-  const min = Math.min(...values);
-  const max = Math.max(...values);
-  const padding = (max - min) * 0.2 || 1;
-  return (
-    <div className={className} aria-hidden="true">
-      <ResponsiveContainer width="100%" height="100%" initialDimension={{ width: 240, height: 48 }}>
-        <AreaChart data={points} margin={{ top: 4, right: 0, bottom: 0, left: 0 }}>
-          <YAxis hide domain={[min - padding, max + padding / 2]} />
-          <Area
-            dataKey="value"
-            type={isStep ? "stepAfter" : "monotone"}
-            baseValue="dataMin"
-            stroke={color}
-            strokeWidth={1.5}
-            fill={color}
-            fillOpacity={0.12}
-            activeDot={false}
-            isAnimationActive={false}
-          />
-        </AreaChart>
-      </ResponsiveContainer>
-    </div>
-  );
-}
+import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
 type PassPoint = { label: string; mm: number };
 

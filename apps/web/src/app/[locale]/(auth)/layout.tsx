@@ -1,16 +1,18 @@
 import Link from "next/link";
+import { Suspense } from "react";
 
 import { AppLogo } from "@/components/app-logo";
 import { ModeToggle } from "@/components/mode-toggle";
-import { redirectIfAuthenticated } from "@/features/user/user-queries";
+import { RedirectIfSignedIn } from "@/features/user/components/redirect-if-signed-in";
 import { toLocale } from "@/lib/i18n";
 
 export default function AuthLayout({ children, params }: LayoutProps<"/[locale]">) {
-  return params.then(async ({ locale }) => {
-    await redirectIfAuthenticated(toLocale(locale));
-
+  return params.then(({ locale }) => {
     return (
       <div className="grid min-h-svh lg:grid-cols-12">
+        <Suspense fallback={null}>
+          <RedirectIfSignedIn locale={toLocale(locale)} />
+        </Suspense>
         <div className="col-span-7 flex flex-col gap-4 p-6 md:p-10">
           <div className="flex w-full justify-center">
             <header className="flex w-full max-w-sm justify-center gap-2">

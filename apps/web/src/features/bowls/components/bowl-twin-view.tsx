@@ -86,7 +86,6 @@ import {
   sinkingBetweenMeters,
   soilLayers,
 } from "@/features/bowls/bowl-shape";
-import { BowlChart } from "@/features/bowls/components/bowl-chart";
 import { BowlPlan } from "@/features/bowls/components/bowl-plan";
 import { dropMeters, fastRateMmYr, middleRateMmYr, slowRateMmYr } from "@/features/map/bowl-rates";
 import { BarTimeline, usePlayback } from "@/features/map/components/bar-timeline";
@@ -99,6 +98,11 @@ import { cn } from "@/lib/utils";
 const BowlScene = dynamic(
   () => import("@/features/bowls/components/bowl-scene").then((module) => module.BowlScene),
   { ssr: false, loading: () => <Skeleton className="size-full" /> },
+);
+
+const BowlChart = dynamic(
+  () => import("@/features/bowls/components/bowl-chart").then((module) => module.BowlChart),
+  { loading: () => <Skeleton className="h-44 w-full" /> },
 );
 
 const firstYear = 2015;

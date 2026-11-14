@@ -16,7 +16,8 @@ import Link from "next/link";
 
 import { getBowlSeries, getBowls, type Bowl } from "@/features/bowls/bowls-queries";
 import { interferogramCatalog } from "@/features/nisar/nisar-catalog";
-import { PassChart, Sparkline } from "@/features/today/components/today-charts";
+import { Sparkline } from "@/features/today/components/sparkline";
+import { PassChart } from "@/features/today/components/today-charts";
 import { TodayMiniMapLazy } from "@/features/today/components/today-mini-map-lazy";
 import {
   Card,
