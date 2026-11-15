@@ -14,6 +14,7 @@ export const en = {
     dark: "Dark",
     system: "System",
     switchLanguage: "Bahasa Indonesia",
+    insight: "Insight",
     language: "Language",
     indonesian: "Bahasa Indonesia",
     english: "English",
@@ -361,6 +362,9 @@ export const en = {
     plans: "Recharge and pipe plans",
     meanMovement: "Mean vertical movement measured by NISAR",
     passCount: "{count} passes",
+    insightLeads: "**{open}** of **{total}** bowls wait for a first visit.",
+    insightNoLeads: "No bowl waits for a first visit.",
+    insightFastest: "The fastest is **{name}** at **{rate} {unit}**.",
   },
   team: {
     title: "Team",
@@ -389,7 +393,7 @@ export const en = {
     kpiHeaviest: "Heaviest load",
     kpiHeaviestEmpty: "None",
     kpiHeaviestDetail: "{count} open",
-    insightHeaviest: "{name} has {count} open visits.",
+    insightHeaviest: "**{name}** has **{count}** open visits.",
     insightQuiet: "No open visits are assigned yet.",
     statuses: {
       active: "Active",
@@ -439,6 +443,8 @@ export const en = {
     empty: "No bowl matches these filters.",
     inspectionTitle: "Inspection",
     twin: {
+      insight: "At **{rate} {unit}**, the center of this bowl is **{cm} cm** deep in **{year}**.",
+      insightNoRate: "NISAR has no measured rate for this bowl yet.",
       viewLabel: "View",
       views: {
         overview: "Overview",
@@ -719,6 +725,9 @@ export const en = {
     deeperBy: "Deeper by {year}, at today's rate",
     withoutPipes: "People without pipes (estimate)",
     around: "Around this site",
+    insight: "At **{rate} {unit}**, this site is **{cm} cm** lower by **{year}**.",
+    insightStable: "This site does not sink in the latest NISAR run.",
+    insightLead: "The nearest pump lead, **{name}**, is **{km} km** away.",
     nearestLead: "Nearest pump lead: {name}",
     noLead: "No pump lead nearby",
     nearestSite: "Nearest water body: {name}",
