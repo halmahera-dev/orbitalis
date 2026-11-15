@@ -72,6 +72,7 @@ import {
   type ReactNode,
 } from "react";
 
+import { InsightCard } from "@/components/insight-card";
 import type { Bowl, NisarRunSummary } from "@/features/bowls/bowls-queries";
 import type { SceneLayers } from "@/features/bowls/components/bowl-scene";
 
@@ -451,6 +452,11 @@ export function BowlTwinView({
     }
     setTab("parts");
     setParam("part", nextPart === "center" ? null : nextPart);
+  }
+
+  function showEvidence() {
+    setTab("evidence");
+    tabsRef.current?.scrollIntoView({ block: "nearest" });
   }
 
   const softClaySqueeze = soilLayers.find((layer) => layer.id === "softClay")?.squeeze ?? 0;
@@ -885,6 +891,35 @@ export function BowlTwinView({
                 unit={t.unitPeople}
               />
             </div>
+
+            <InsightCard
+              title={labels.common.insight}
+              sentences={[
+                bowl.rateMmYr === null
+                  ? { template: twin.insightNoRate }
+                  : {
+                      template: twin.insight,
+                      values: {
+                        rate: rateText,
+                        unit: labels.common.mmPerYear,
+                        cm: projectedCm,
+                        year: shownYear,
+                      },
+                    },
+              ]}
+              action={
+                <IconTip label={t.evidenceTitle}>
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    aria-label={t.evidenceTitle}
+                    onClick={showEvidence}
+                  >
+                    <HugeiconsIcon icon={FileSearchIcon} strokeWidth={2} />
+                  </Button>
+                </IconTip>
+              }
+            />
 
             <Tile ref={tabsRef}>
               <Tabs value={tab} onValueChange={setTab}>
