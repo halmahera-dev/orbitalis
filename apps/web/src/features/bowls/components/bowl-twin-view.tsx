@@ -618,7 +618,7 @@ export function BowlTwinView({
       facts: [
         { label: labels.bowls.status, value: labels.bowls.statuses[bowl.status] },
         { label: labels.bowls.rateAfterExample, value: `${bowl.rateAfterBanMmYr} mm/yr` },
-        { label: t.rateChange, value: `−${rateChangePercent}%` },
+        { label: t.rateChangeExample, value: `−${rateChangePercent}%` },
       ],
     },
     radar: {

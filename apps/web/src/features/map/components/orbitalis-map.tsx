@@ -335,7 +335,7 @@ export function OrbitalisMap({
   function changeShow(value: string) {
     playback.pause();
     const nextLayer = parseMapLayer(value);
-    setParams({ show: nextLayer === "leads" ? null : nextLayer, area: null });
+    setParams({ show: nextLayer === "leads" ? null : nextLayer, area: null, lead: null });
   }
 
   function scrub(value: number) {
@@ -572,8 +572,12 @@ export function OrbitalisMap({
             items={listItems()}
             title={priorityLayer ? t.priority.areaListTitle : t.listTitle}
             summary={fill(t.priority.matchCount, {
-              count: priorityLayer ? matchingAreas.length : matchingLeads.length,
-              total: priorityLayer ? rankedAreas.length : rankedLeads.length,
+              count: priorityLayer
+                ? matchingAreas.length
+                : matchingLeads.length + rankedCandidates.filter((ranked) => ranked.matches).length,
+              total: priorityLayer
+                ? rankedAreas.length
+                : rankedLeads.length + rankedCandidates.length,
             })}
             emptyText={t.priority.noMatch}
             rankTemplate={t.rankLabel}

@@ -16,6 +16,7 @@ import Link from "next/link";
 
 import { getBowlSeries, getBowls, type Bowl } from "@/features/bowls/bowls-queries";
 import { interferogramCatalog } from "@/features/nisar/nisar-catalog";
+import { nisarRateForBowl } from "@/features/nisar/nisar-queries";
 import { Sparkline } from "@/features/today/components/sparkline";
 import { PassChart } from "@/features/today/components/today-charts";
 import { TodayMiniMapLazy } from "@/features/today/components/today-mini-map-lazy";
@@ -101,7 +102,18 @@ function RankChange({ bowl, kind, text }: { bowl: Bowl; kind: ChangeKind; text: 
   );
 }
 
+function measuredVerticalSeries(bowlId: string) {
+  const rate = nisarRateForBowl(bowlId);
+  if (!rate.measured || rate.series.length === 0) {
+    return null;
+  }
+  return rate.series.map((point) => ({ date: point.date, mm: -point.mm }));
+}
+
 function meanByIndex(seriesList: { mm: number }[][]) {
+  if (seriesList.length === 0) {
+    return [];
+  }
   const length = Math.min(...seriesList.map((series) => series.length));
   return Array.from({ length }, (_, index) => {
     const total = seriesList.reduce((sum, series) => sum + series[index].mm, 0);
@@ -150,15 +162,18 @@ export async function TodayOverview({ locale }: { locale: Locale }) {
     const series = getBowlSeries(bowl.id);
     return series ? [series] : [];
   });
-  const nisarDates = seriesList[0]?.nisar.map((point) => point.date) ?? [];
-  const meanNisar = meanByIndex(seriesList.map((series) => series.nisar));
-  const passPoints = meanNisar.map((mm, index) => ({
+  const measuredSeries = activeBowls.flatMap((bowl) => {
+    const series = measuredVerticalSeries(bowl.id);
+    return series ? [series] : [];
+  });
+  const nisarDates = measuredSeries[0]?.map((point) => point.date) ?? [];
+  const passPoints = meanByIndex(measuredSeries).map((mm, index) => ({
     label: formatDate(locale, nisarDates[index]),
     mm,
   }));
   const meanSentinel = meanByIndex(seriesList.map((series) => series.sentinel1));
   const fastestSeries = fastestBowl
-    ? (getBowlSeries(fastestBowl.id)?.nisar.map((point) => point.mm) ?? [])
+    ? (measuredVerticalSeries(fastestBowl.id)?.map((point) => point.mm) ?? [])
     : [];
   const knownByPass = pairs.map(
     (_, passIndex) => activeBowls.filter((bowl) => bowl.firstSeenPass <= passIndex).length,
