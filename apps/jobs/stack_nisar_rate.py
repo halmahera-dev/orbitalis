@@ -1,11 +1,12 @@
-"""Stack NISAR GUNW pairs from two tracks into a vertical local sinking rate per bowl.
+"""Stack NISAR GUNW pairs from two tracks into vertical local sinking bowls and a cell grid.
 
 Each pair is masked, corrected for the ionosphere, and smoothed. The regional ramp (atmosphere,
 orbit, and the slow sinking of the whole city) is removed, so every rate is relative to the
 ground within about 3 km, not absolute. Each track is stacked in range units, then the ascending
 track 10 and the descending track 18 are decomposed into vertical and east rates with the north
 rate set to zero. This is a stack, not a MintPy time series. The window covers mainland Jakarta.
-Candidates are named by OpenStreetMap reverse geocoding (Nominatim), cached in out/.
+Bowls are named by OpenStreetMap reverse geocoding (Nominatim), cached in out/. The output
+`out/nisar-run.json` is loaded into Postgres with `bun run --cwd packages/db import:nisar`.
 """
 
 import json
@@ -19,7 +20,6 @@ from pyproj import Transformer
 from scipy import ndimage
 
 from detect_bowls import (
-    DETECTION_SNR,
     LOCAL_SIGMA_PIXELS,
     PEAK_NEIGHBOURHOOD_PIXELS,
     REGIONAL_SIGMA_PIXELS,
@@ -39,9 +39,7 @@ GEOCODE_CACHE_PATH = JOBS_DIR / "out" / "geocode-cache.json"
 NOMINATIM_URL = "https://nominatim.openstreetmap.org/reverse"
 NOMINATIM_HEADERS = {"User-Agent": "orbitalis-jobs/0.1 (NISAR subsidence research)"}
 NOMINATIM_PAUSE_SECONDS = 1.1
-WEB_APP = JOBS_DIR.parent / "web"
-BOWLS_PATH = WEB_APP / "src" / "features" / "bowls" / "bowls-seed.json"
-RATES_PATH = WEB_APP / "src" / "features" / "nisar" / "nisar-rates.json"
+RUN_PATH = JOBS_DIR / "out" / "nisar-run.json"
 ASCENDING_TRACK = 10
 DESCENDING_TRACK = 18
 DIRECTIONS = {ASCENDING_TRACK: "ascending", DESCENDING_TRACK: "descending"}
@@ -49,7 +47,9 @@ DAYS_PER_YEAR = 365.0
 MIN_PAIRS_PER_PIXEL = 5
 MIN_BOWL_RADIUS_PIXELS = 1.5
 MIN_CANDIDATE_RADIUS_PIXELS = 2
-MIN_RATE_TO_UNCERTAINTY = 2
+DETECTION_SNR = 2.5
+MIN_RATE_TO_UNCERTAINTY = 1.5
+CELL_SIZE_M = 500
 
 
 @dataclass(frozen=True)
@@ -198,27 +198,47 @@ def bowl_series(bowl_inside, ascending, descending, los) -> list[dict]:
     ]
 
 
-def bowl_rate(bowl, vertical, ascending, descending, los) -> dict:
-    inside = bowl_mask(bowl, ascending.window)
-    sinking = -vertical["up"][inside]
-    is_measured = np.isfinite(sinking)
-    if not is_measured.any():
-        return {"id": bowl["id"], "measured": False}
-    with np.errstate(invalid="ignore"):
-        return {
-            "id": bowl["id"],
-            "measured": True,
-            "verticalRateMmYr": round(float(np.nanmean(sinking)), 1),
-            "verticalUncertaintyMmYr": round(float(np.nanmean(vertical["uncertainty"][inside])), 1),
-            "eastRateMmYr": round(float(np.nanmean(vertical["east"][inside])), 1),
-            "losRateMmYr": {
-                str(ascending.track): round(float(np.nanmean(ascending.rate[inside])), 1),
-                str(descending.track): round(float(np.nanmean(descending.rate[inside])), 1),
-            },
-            "pixels": int(is_measured.sum()),
-            "pairs": int(np.max(ascending.pair_count[inside]) + np.max(descending.pair_count[inside])),
-            "series": bowl_series(inside, ascending, descending, los),
-        }
+def with_measurements(candidate, sinking, ascending, descending, los) -> dict:
+    inside = bowl_mask(candidate, ascending.window)
+    return {
+        **candidate,
+        "pixels": int(np.isfinite(sinking[inside]).sum()),
+        "pairs": int(np.max(ascending.pair_count[inside]) + np.max(descending.pair_count[inside])),
+        "series": bowl_series(inside, ascending, descending, los),
+    }
+
+
+def cell_block_pixels(window) -> int:
+    pixel_meters = abs(float(window.xs[1] - window.xs[0]))
+    return max(round(CELL_SIZE_M / pixel_meters), 1)
+
+
+def grid_cells(sinking, uncertainty, window) -> list[dict]:
+    block = cell_block_pixels(window)
+    to_lonlat = Transformer.from_crs(window.epsg, 4326, always_xy=True)
+    rows, columns = sinking.shape
+    cells = []
+    for top in range(0, rows, block):
+        for left in range(0, columns, block):
+            rates = sinking[top : top + block, left : left + block]
+            spreads = uncertainty[top : top + block, left : left + block]
+            is_measured = np.isfinite(rates)
+            if not is_measured.any():
+                continue
+            center_x = float(np.mean(window.xs[left : left + block]))
+            center_y = float(np.mean(window.ys[top : top + block]))
+            longitude, latitude = to_lonlat.transform(center_x, center_y)
+            cells.append(
+                {
+                    "id": f"c{top // block:03d}-{left // block:03d}",
+                    "center": [round(longitude, 5), round(latitude, 5)],
+                    "sinkingMmYr": round(float(np.nanmean(rates)), 1),
+                    "uncertaintyMmYr": round(float(np.nanmean(spreads)), 1),
+                    "coveredShare": round(float(is_measured.mean()), 2),
+                    "people": None,
+                }
+            )
+    return cells
 
 
 def place_from_address(address: dict) -> dict:
@@ -307,7 +327,6 @@ def main() -> None:
     if not np.isfinite(noise):
         raise SystemExit(f"No pixel has {MIN_PAIRS_PER_PIXEL} usable pairs on both tracks.")
 
-    bowls = json.loads(BOWLS_PATH.read_text(encoding="utf-8"))["bowls"]
     window = ascending.window
     geocode_cache = (
         json.loads(GEOCODE_CACHE_PATH.read_text(encoding="utf-8")) if GEOCODE_CACHE_PATH.exists() else {}
@@ -320,28 +339,29 @@ def main() -> None:
     GEOCODE_CACHE_PATH.write_text(json.dumps(geocode_cache, indent=2), encoding="utf-8")
 
     document = {
-        "synthetic": False,
         "product": "NISAR L2 GUNW provisional, unwrapped phase (HDF5)",
+        "script": "apps/jobs/stack_nisar_rate.py",
         "tracks": [track_summary(ascending), track_summary(descending)],
         "gridM": round(abs(float(window.xs[1] - window.xs[0]))),
         "noiseFloorMmYr": round(noise, 1),
         "detectionSnr": DETECTION_SNR,
-        "script": "apps/jobs/stack_nisar_rate.py",
-        "bowls": [bowl_rate(bowl, vertical, ascending, descending, los) for bowl in bowls],
-        "candidates": candidates,
+        "minRateToUncertainty": MIN_RATE_TO_UNCERTAINTY,
+        "cellSizeM": cell_block_pixels(window) * round(abs(float(window.xs[1] - window.xs[0]))),
+        "bowls": [
+            with_measurements(candidate, sinking, ascending, descending, los) for candidate in candidates
+        ],
+        "cells": grid_cells(sinking, vertical["uncertainty"], window),
     }
-    RATES_PATH.write_text(json.dumps(document, indent=2, allow_nan=False) + "\n", encoding="utf-8")
+    RUN_PATH.write_text(json.dumps(document, indent=2, allow_nan=False) + "\n", encoding="utf-8")
     render_panel(sinking, "NISAR two-track stack, vertical local sinking mm/yr").save(PREVIEW_PATH)
 
     print(f"los ascending {np.round(ascending.los, 3)}, descending {np.round(descending.los, 3)}")
     print(f"vertical noise floor {noise:.1f} mm/yr, stacked pixels {np.isfinite(sinking).mean():.0%}")
+    print(f"bowls: {len(document['bowls'])}, cells: {len(document['cells'])}")
     for bowl in document["bowls"]:
         summary = {key: value for key, value in bowl.items() if key != "series"}
-        print(f"  {summary} series={len(bowl.get('series', []))}")
-    print(f"candidates: {len(candidates)}")
-    for candidate in candidates[:10]:
-        print(f"  {candidate}")
-    print(f"wrote {RATES_PATH} and {PREVIEW_PATH}")
+        print(f"  {summary} series={len(bowl['series'])}")
+    print(f"wrote {RUN_PATH} and {PREVIEW_PATH}")
 
 
 if __name__ == "__main__":
