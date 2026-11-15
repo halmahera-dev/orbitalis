@@ -205,7 +205,7 @@ export function BowlTable({
             const [lng, lat] = row.original.center;
             return (
               <BowlRowActions
-                bowl={{ id: row.original.id, name: row.original.name }}
+                bowl={row.original}
                 status={row.original.status}
                 mapHref={`/${locale}/map?at=${lng.toFixed(4)},${lat.toFixed(4)},13`}
                 labels={labels.actions}

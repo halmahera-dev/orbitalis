@@ -4,8 +4,10 @@ import Link from "next/link";
 
 import { getBowls, getLatestRun, type Bowl } from "@/features/bowls/bowls-queries";
 import { RateRange } from "@/features/bowls/components/rate-range";
-import { statusDotColors } from "@/features/bowls/visit";
+import { isFarmingSite, statusDotColors } from "@/features/bowls/visit";
 import { interferogramCatalog } from "@/features/nisar/nisar-catalog";
+import { planKinds, planStatuses } from "@/features/plans/plan-scores";
+import { getPlanEntries } from "@/features/plans/plans-queries";
 import { Sparkline } from "@/features/today/components/sparkline";
 import { PassChart } from "@/features/today/components/today-charts";
 import { TodayMiniMapLazy } from "@/features/today/components/today-mini-map-lazy";
@@ -33,7 +35,13 @@ export async function TodayOverview({ locale }: { locale: Locale }) {
   const dictionary = getDictionary(locale);
   const t = dictionary.today;
   const unit = dictionary.common.mmPerYear;
-  const [bowls, run] = await Promise.all([getBowls(), getLatestRun()]);
+  const [everyBowl, run, planEntries] = await Promise.all([
+    getBowls(),
+    getLatestRun(),
+    getPlanEntries(),
+  ]);
+  const bowls = everyBowl.filter((bowl) => !isFarmingSite(bowl));
+  const sites = everyBowl.filter(isFarmingSite);
   const activeBowls = bowls.filter((bowl) => bowl.status !== "dismissed");
   const openLeads = activeBowls.filter((bowl) => bowl.status === "lead");
   const fastest = activeBowls
@@ -195,6 +203,61 @@ export async function TodayOverview({ locale }: { locale: Locale }) {
         </Card>
         <Card id="by-kecamatan" title={t.byKecamatan}>
           <CountList rows={kecamatanRows} emptyMessage={dictionary.bowls.empty} />
+        </Card>
+        <Card
+          id="water-farming"
+          title={fill(t.farmingSites, { count: sites.length })}
+          action={
+            <Link
+              href={`${mapPath}?show=farming`}
+              className="text-xs text-brand-text transition-colors duration-160 ease-out hover:text-foreground"
+            >
+              {t.openMapCard}
+            </Link>
+          }
+        >
+          <SplitRows
+            rows={(["lead", "scheduled", "closed", "dismissed"] as const).map((status) => ({
+              label: dictionary.map.farming.statuses[status],
+              value: sites.filter((site) =>
+                status === "closed"
+                  ? site.status === "closed" || site.status === "inspected"
+                  : site.status === status,
+              ).length,
+              color: statusDotColors[status],
+              href: `${bowlsPath}?type=farming&status=${status}`,
+            }))}
+          />
+        </Card>
+        <Card id="plans" title={t.plans}>
+          {planKinds.map((kind) => {
+            const entries = planEntries.filter((entry) => entry.kind === kind);
+            return (
+              <div key={kind} className="flex flex-col gap-2">
+                <Link
+                  href={`${mapPath}?show=${kind === "pipe" ? "people" : "sinking"}`}
+                  className="flex items-baseline justify-between text-sm transition-colors duration-160 ease-out hover:text-brand-text"
+                >
+                  <span>{dictionary.map.plan.title[kind]}</span>
+                  <span className="tabular-nums">{entries.length}</span>
+                </Link>
+                <ol className="flex gap-1" aria-hidden="true">
+                  {planStatuses.map((status) => (
+                    <li
+                      key={status}
+                      title={dictionary.map.plan.statuses[status]}
+                      className={cn(
+                        "h-1.5 flex-1 rounded-full",
+                        entries.some((entry) => entry.status === status)
+                          ? "bg-brand"
+                          : "bg-muted-foreground/15",
+                      )}
+                    />
+                  ))}
+                </ol>
+              </div>
+            );
+          })}
         </Card>
       </div>
 

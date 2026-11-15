@@ -1,5 +1,6 @@
 import "server-only";
 import { db } from "@repo/db";
+import { farmingSite, type FarmingSite } from "@repo/db/schema/farming";
 import { inspection } from "@repo/db/schema/inspection";
 import {
   bowl as bowlTable,
@@ -51,7 +52,8 @@ export type InspectionFields = {
 
 export type Bowl = InspectionFields & {
   id: string;
-  source: "nisar" | "manual";
+  source: "nisar" | "manual" | "farming";
+  site: Pick<FarmingSite, "kind" | "areaM2"> | null;
   name: string;
   kecamatan: string;
   center: [number, number];
@@ -104,7 +106,7 @@ function metersBetween([lon1, lat1]: [number, number], [lon2, lat2]: [number, nu
   return { east, north };
 }
 
-function cellAt(point: [number, number], cells: Cell[], cellSizeM: number) {
+export function cellAt(point: [number, number], cells: Cell[], cellSizeM: number) {
   const half = cellSizeM / 2;
   return (
     cells.find((cell) => {
@@ -129,6 +131,14 @@ function triageOrder(a: Bowl, b: Bowl) {
   return (b.snr ?? -Infinity) - (a.snr ?? -Infinity) || (b.rateMmYr ?? 0) - (a.rateMmYr ?? 0);
 }
 
+function withRanks(bowls: Bowl[]) {
+  return bowls.toSorted(triageOrder).map((bowl, index) => ({ ...bowl, rank: index + 1 }));
+}
+
+function siteRadiusM(areaM2: number) {
+  return Math.round(Math.sqrt(areaM2 / Math.PI));
+}
+
 async function loadBowls(): Promise<Bowl[]> {
   const run = await getLatestRun();
   if (!run) {
@@ -136,21 +146,23 @@ async function loadBowls(): Promise<Bowl[]> {
   }
   const [rows, cells] = await Promise.all([
     db
-      .select({ bowl: bowlTable, measurement: bowlMeasurement, inspection })
+      .select({ bowl: bowlTable, measurement: bowlMeasurement, inspection, site: farmingSite })
       .from(bowlTable)
       .leftJoin(
         bowlMeasurement,
         and(eq(bowlMeasurement.bowlId, bowlTable.id), eq(bowlMeasurement.runId, run.id)),
       )
-      .leftJoin(inspection, eq(inspection.bowlId, bowlTable.id)),
+      .leftJoin(inspection, eq(inspection.bowlId, bowlTable.id))
+      .leftJoin(farmingSite, eq(farmingSite.bowlId, bowlTable.id)),
     getCells(),
   ]);
   const areaKm2 = cellAreaKm2(run.cellSizeM);
 
   const bowls = rows
-    .filter((row) => row.measurement !== null || row.bowl.source === "manual")
+    .filter((row) => row.measurement !== null || row.bowl.source !== "nisar")
     .map((row): Bowl => {
       const measurement = row.measurement;
+      const site = row.site ? { kind: row.site.kind, areaM2: row.site.areaM2 } : null;
       const center: [number, number] = measurement
         ? [measurement.lon, measurement.lat]
         : [row.bowl.lon, row.bowl.lat];
@@ -159,10 +171,11 @@ async function loadBowls(): Promise<Bowl[]> {
         ...inspectionFields(row.inspection),
         id: row.bowl.id,
         source: row.bowl.source,
+        site,
         name: row.bowl.name ?? cell?.id ?? row.bowl.id,
         kecamatan: row.bowl.kecamatan ?? "",
         center,
-        radiusM: measurement?.radiusM ?? run.cellSizeM / 2,
+        radiusM: measurement?.radiusM ?? (site ? siteRadiusM(site.areaM2) : run.cellSizeM / 2),
         rateMmYr: measurement?.rateMmYr ?? cell?.sinkingMmYr ?? null,
         uncertaintyMmYr: measurement?.uncertaintyMmYr ?? cell?.uncertaintyMmYr ?? null,
         snr: measurement?.snr ?? null,
@@ -174,7 +187,9 @@ async function loadBowls(): Promise<Bowl[]> {
         rank: 0,
       };
     });
-  return bowls.toSorted(triageOrder).map((bowl, index) => ({ ...bowl, rank: index + 1 }));
+  const leads = bowls.filter((bowl) => bowl.source !== "farming");
+  const sites = bowls.filter((bowl) => bowl.source === "farming");
+  return [...withRanks(leads), ...withRanks(sites)];
 }
 
 export const getBowls = cache(loadBowls);

@@ -1,11 +1,12 @@
 "use client";
 
 import {
-  DashboardSpeed01Icon,
+  DropletsIcon,
   Flag01Icon,
+  PipelineIcon,
   Radar01Icon,
   Target01Icon,
-  UserGroupIcon,
+  WaterfallDown01Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Button } from "@repo/ui/components/button";
@@ -18,14 +19,19 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 import type { Bowl, Cell } from "@/features/bowls/bowls-queries";
+import type { PlanEntry } from "@/features/plans/plan-scores";
 
 import { AppLogo } from "@/components/app-logo";
 import { Map, useMap } from "@/components/ui/map";
 import { BowlActions, type BowlActionLabels } from "@/features/bowls/components/bowl-actions";
+import { isFarmingSite } from "@/features/bowls/visit";
+import { slowRateMmYr } from "@/features/map/bowl-rates";
 import { BarTimeline, usePlayback } from "@/features/map/components/bar-timeline";
 import { BowlLayer } from "@/features/map/components/bowl-layer";
 import { CellLayer, type CellScale } from "@/features/map/components/cell-layer";
+import { CellRankPanel } from "@/features/map/components/cell-rank-panel";
 import { BowlPanel, CellPanel } from "@/features/map/components/map-panels";
+import { SiteLayer } from "@/features/map/components/site-layer";
 import {
   TriagePanel,
   triageStatuses,
@@ -51,10 +57,13 @@ const metersPerDegree = 111_320;
 
 const layerIcons: Record<MapLayer, typeof Target01Icon> = {
   leads: Target01Icon,
-  sinking: DashboardSpeed01Icon,
-  people: UserGroupIcon,
+  sinking: WaterfallDown01Icon,
+  people: PipelineIcon,
+  farming: DropletsIcon,
   radar: Radar01Icon,
 };
+
+const siteSorts = ["rate", "people"] as const;
 
 const cellScales: Record<"sinking" | "people", CellScale> = {
   sinking: { kind: "sinking", stops: [0, 30, 60] },
@@ -202,7 +211,7 @@ function MapLegend({
   const t = labels.map;
   return (
     <div className="absolute top-4 left-4 flex w-56 flex-col gap-2 rounded-3xl border border-transparent glass p-3 text-xs text-muted-foreground shadow-md max-md:hidden">
-      {layer === "leads" || layer === "sinking" ? (
+      {layer === "leads" || layer === "sinking" || layer === "farming" ? (
         <GradientLegend
           className="bg-linear-to-r from-rate-slow via-rate-middle to-rate-fast"
           low={layer === "leads" ? "20" : "0"}
@@ -233,6 +242,18 @@ function MapLegend({
           </li>
         </ul>
       ) : null}
+      {layer === "farming" ? (
+        <ul className="flex flex-col gap-1">
+          <li className="flex items-center gap-2">
+            <span className="size-3 rounded-full bg-chart-5" />
+            {t.farming.legendSite}
+          </li>
+          <li className="flex items-center gap-2">
+            <span className="size-3 rounded-full bg-rate-fast" />
+            {t.farming.legendNeedsVisit}
+          </li>
+        </ul>
+      ) : null}
       {layer === "sinking" ? <p>{t.relativeNote}</p> : null}
     </div>
   );
@@ -243,6 +264,7 @@ export function OrbitalisMap({
   bowls,
   cells,
   cellSizeM,
+  planEntries,
   inspectors,
   labels,
 }: {
@@ -250,6 +272,7 @@ export function OrbitalisMap({
   bowls: Bowl[];
   cells: Cell[];
   cellSizeM: number;
+  planEntries: PlanEntry[];
   inspectors: string[];
   labels: {
     map: Dictionary["map"];
@@ -266,6 +289,7 @@ export function OrbitalisMap({
 
   const layer = parseMapLayer(searchParams.get("show"));
   const isLeads = layer === "leads";
+  const isFarming = layer === "farming";
   const isRadar = layer === "radar";
   const cellLayer = layer === "sinking" || layer === "people" ? layer : null;
   const is2d = searchParams.get("view") === "2d";
@@ -277,18 +301,32 @@ export function OrbitalisMap({
   );
   const pair = pairs[passIndex];
 
-  const selectedBowl = isLeads
-    ? (bowls.find((bowl) => bowl.id === searchParams.get("lead")) ?? null)
-    : null;
+  const leads = bowls.filter((bowl) => !isFarmingSite(bowl));
+  const sites = bowls.filter(isFarmingSite);
+  const layerBowls = isLeads ? leads : isFarming ? sites : [];
+  const selectedBowl = layerBowls.find((bowl) => bowl.id === searchParams.get("lead")) ?? null;
   const selectedCell = cellLayer
     ? (cells.find((cell) => cell.id === searchParams.get("cell")) ?? null)
     : null;
+  const planKind = layer === "people" ? "pipe" : "recharge";
+  const selectedPlan = selectedCell
+    ? (planEntries.find((entry) => entry.cellId === selectedCell.id && entry.kind === planKind) ??
+      null)
+    : null;
   const nearestLead = selectedCell
-    ? (bowls
+    ? (leads
         .map((bowl) => ({ bowl, distanceKm: distanceKm(bowl.center, selectedCell.center) }))
         .toSorted((a, b) => a.distanceKm - b.distanceKm)[0] ?? null)
     : null;
-  const visibleBowls = bowls.filter((bowl) => bowl.status !== "dismissed");
+  const visibleLeads = leads.filter((bowl) => bowl.status !== "dismissed");
+  const mapSites = sites
+    .filter((site) => site.status !== "dismissed")
+    .map((site) => ({
+      ...site,
+      needsVisit:
+        site.outcome === "measures_failing" ||
+        (site.status === "lead" && (site.rateMmYr ?? 0) >= slowRateMmYr),
+    }));
   const hasPanel = selectedBowl !== null || selectedCell !== null;
 
   function setParams(updates: Record<string, string | null>) {
@@ -411,7 +449,7 @@ export function OrbitalisMap({
           <BuildingsLayer />
           {isLeads && (
             <BowlLayer
-              bowls={visibleBowls}
+              bowls={visibleLeads}
               selectedBowlId={selectedBowl?.id ?? null}
               onSelect={(bowlId) => setParam("lead", bowlId)}
               onDeselect={() => setParam("lead", null)}
@@ -424,6 +462,13 @@ export function OrbitalisMap({
               scale={cellScales[cellLayer]}
               selectedCellId={selectedCell?.id ?? null}
               onSelect={(cellId) => setParam("cell", cellId)}
+            />
+          )}
+          {isFarming && (
+            <SiteLayer
+              sites={mapSites}
+              selectedId={selectedBowl?.id ?? null}
+              onSelect={(siteId) => setParam("lead", siteId)}
             />
           )}
           {isRadar && <InterferogramLayer pair={pair} />}
@@ -439,13 +484,37 @@ export function OrbitalisMap({
         {isLeads && !hasPanel && (
           <TriagePanel
             locale={locale}
-            bowls={bowls}
+            bowls={leads}
             status={triageStatus}
             sort={triageSort}
             selectedId={null}
             onStatusChange={(status) => setParam("status", status === "lead" ? null : status)}
             onSortChange={(sort) => setParam("sort", sort === "signal" ? null : sort)}
             onSelect={(bowlId) => setParam("lead", bowlId)}
+            labels={labels}
+          />
+        )}
+        {isFarming && !hasPanel && (
+          <TriagePanel
+            locale={locale}
+            bowls={sites}
+            status={triageStatus}
+            sort={triageSort}
+            sorts={siteSorts}
+            selectedId={null}
+            onStatusChange={(status) => setParam("status", status === "lead" ? null : status)}
+            onSortChange={(sort) => setParam("sort", sort)}
+            onSelect={(siteId) => setParam("lead", siteId)}
+            labels={{ map: t, statuses: t.farming.statuses }}
+          />
+        )}
+        {cellLayer && !hasPanel && (
+          <CellRankPanel
+            locale={locale}
+            kind={planKind}
+            cells={cells}
+            entries={planEntries}
+            onSelect={(cellId) => setParam("cell", cellId)}
             labels={labels}
           />
         )}
@@ -458,7 +527,7 @@ export function OrbitalisMap({
             onClose={() => setParam("lead", null)}
             actions={
               <BowlActions
-                bowl={{ id: selectedBowl.id, name: selectedBowl.name }}
+                bowl={selectedBowl}
                 status={selectedBowl.status}
                 labels={labels.actions}
                 inspectors={inspectors}
@@ -476,6 +545,8 @@ export function OrbitalisMap({
             labels={labels}
             onClose={() => setParam("cell", null)}
             onSelectBowl={selectBowl}
+            planKind={planKind}
+            planStatus={selectedPlan?.status ?? null}
           />
         )}
         {isRadar && (

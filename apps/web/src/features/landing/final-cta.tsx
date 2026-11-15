@@ -46,6 +46,14 @@ export function FinalCta({
               {t.openMapAsGuest}
             </Button>
           </form>
+          <Button
+            size="lg"
+            variant="link"
+            nativeButton={false}
+            render={<Link href={`/${locale}/check`} />}
+          >
+            {t.checkArea}
+          </Button>
         </Reveal>
       </div>
     </section>

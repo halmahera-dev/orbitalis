@@ -1,5 +1,6 @@
 import { getBowls, getCells, getLatestRun } from "@/features/bowls/bowls-queries";
 import { OrbitalisMap } from "@/features/map/components/orbitalis-map";
+import { getPlanEntries } from "@/features/plans/plans-queries";
 import { getActiveInspectorNames } from "@/features/team/team-queries";
 import { requireSession } from "@/features/user/user-queries";
 import { getDictionary, type Locale } from "@/lib/i18n";
@@ -7,10 +8,11 @@ import { getDictionary, type Locale } from "@/lib/i18n";
 export async function MapExperience({ locale }: { locale: Locale }) {
   await requireSession(locale);
   const t = getDictionary(locale);
-  const [bowls, cells, run, inspectors] = await Promise.all([
+  const [bowls, cells, run, planEntries, inspectors] = await Promise.all([
     getBowls(),
     getCells(),
     getLatestRun(),
+    getPlanEntries(),
     getActiveInspectorNames(),
   ]);
   return (
@@ -19,6 +21,7 @@ export async function MapExperience({ locale }: { locale: Locale }) {
       bowls={bowls}
       cells={cells}
       cellSizeM={run?.cellSizeM ?? 480}
+      planEntries={planEntries}
       inspectors={inspectors}
       labels={{
         map: t.map,

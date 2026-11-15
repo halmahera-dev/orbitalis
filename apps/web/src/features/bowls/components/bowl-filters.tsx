@@ -1,10 +1,10 @@
 "use client";
 
+import { Search01Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { Button } from "@repo/ui/components/button";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@repo/ui/components/input-group";
 import { Spinner } from "@repo/ui/components/spinner";
-import { Search01Icon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
 import { usePathname, useRouter } from "next/navigation";
 import { useRef, useState, useTransition } from "react";
 
@@ -13,11 +13,19 @@ import { FilterSelect } from "@/components/filter-select";
 export const anyValue = "all";
 export const overdueValue = "1";
 
-type Filters = { q: string; kecamatan: string; status: string; assignee: string; overdue: string };
+type Filters = {
+  type: string;
+  q: string;
+  kecamatan: string;
+  status: string;
+  assignee: string;
+  overdue: string;
+};
 
 type Option = { value: string; label: string };
 
 const noFilters: Filters = {
+  type: anyValue,
   q: "",
   kecamatan: anyValue,
   status: anyValue,
@@ -38,6 +46,8 @@ function toQuery(filters: Filters) {
 
 // Filters apply as they change and live in the URL, so a filtered list is a link someone can share.
 export function BowlFilters({
+  type,
+  typeOptions,
   search,
   kecamatan,
   status,
@@ -49,6 +59,8 @@ export function BowlFilters({
   overdueOptions,
   labels,
 }: {
+  type: string | null;
+  typeOptions: Option[];
   search: string;
   kecamatan: string | null;
   status: string | null;
@@ -59,6 +71,7 @@ export function BowlFilters({
   assigneeOptions: Option[];
   overdueOptions: Option[];
   labels: {
+    type: string;
     search: string;
     searchPlaceholder: string;
     kecamatan: string;
@@ -73,6 +86,7 @@ export function BowlFilters({
   const pathname = usePathname();
   const [isPending, startTransition] = useTransition();
   const [filters, setFilters] = useState<Filters>({
+    type: type ?? anyValue,
     q: search,
     kecamatan: kecamatan ?? anyValue,
     status: status ?? anyValue,
@@ -106,6 +120,13 @@ export function BowlFilters({
 
   return (
     <search className="flex flex-wrap items-center gap-3">
+      <FilterSelect
+        id="bowl-type"
+        label={labels.type}
+        options={typeOptions}
+        value={filters.type}
+        onChange={(value) => apply({ ...filters, type: value, kecamatan: anyValue })}
+      />
       <InputGroup className="w-full sm:w-72">
         <InputGroupAddon>
           <HugeiconsIcon icon={Search01Icon} />

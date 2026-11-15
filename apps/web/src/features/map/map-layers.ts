@@ -1,4 +1,4 @@
-export const mapLayers = ["leads", "sinking", "people", "radar"] as const;
+export const mapLayers = ["leads", "sinking", "people", "farming", "radar"] as const;
 
 export type MapLayer = (typeof mapLayers)[number];
 

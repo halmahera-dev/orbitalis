@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 
 import { defaultLocale, hasLocale } from "@/lib/i18n/locales";
 
-const publicPages = ["landing", "sign-in", "sign-up", "design-system"];
+const publicPages = ["landing", "check", "sign-in", "sign-up", "design-system"];
 
 function preferredLocale(request: NextRequest) {
   const firstLanguage = request.headers.get("accept-language")?.split(",")[0] ?? "";

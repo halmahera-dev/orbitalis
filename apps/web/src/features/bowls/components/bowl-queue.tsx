@@ -4,11 +4,14 @@ import { KpiCards } from "@/components/kpi-cards";
 import { getBowls, type Bowl } from "@/features/bowls/bowls-queries";
 import { anyValue, BowlFilters, overdueValue } from "@/features/bowls/components/bowl-filters";
 import { BowlTable } from "@/features/bowls/components/bowl-table";
-import { calendarDate, isVisitOverdue } from "@/features/bowls/visit";
+import { calendarDate, isFarmingSite, isVisitOverdue } from "@/features/bowls/visit";
 import { getTeamMembers } from "@/features/team/team-queries";
-import { getDictionary, type Locale } from "@/lib/i18n";
+import { fill, getDictionary, type Locale } from "@/lib/i18n";
+
+export const farmingType = "farming";
 
 export type BowlQueueFilters = {
+  type: string | null;
   search: string;
   kecamatan: string | null;
   status: string | null;
@@ -25,8 +28,10 @@ export async function BowlQueue({
 }) {
   const dictionary = getDictionary(locale);
   const t = dictionary.bowls;
-  const { search, kecamatan, status, assignee, overdue } = filters;
-  const [allBowls, members] = await Promise.all([getBowls(), getTeamMembers()]);
+  const { type, search, kecamatan, status, assignee, overdue } = filters;
+  const showsSites = type === farmingType;
+  const [everyBowl, members] = await Promise.all([getBowls(), getTeamMembers()]);
+  const allBowls = everyBowl.filter((bowl) => isFarmingSite(bowl) === showsSites);
   const inspectors = members.filter((member) => member.active).map((member) => member.name);
   const membersByName = Object.fromEntries(members.map((member) => [member.name, member]));
   const searchText = search.toLowerCase();
@@ -90,6 +95,19 @@ export async function BowlQueue({
       />
       <div className="flex flex-wrap items-center justify-between gap-3 border-b px-4 py-3 sm:px-6">
         <BowlFilters
+          type={type}
+          typeOptions={[
+            {
+              value: anyValue,
+              label: fill(t.typeLeads, {
+                count: everyBowl.filter((bowl) => !isFarmingSite(bowl)).length,
+              }),
+            },
+            {
+              value: farmingType,
+              label: fill(t.typeFarming, { count: everyBowl.filter(isFarmingSite).length }),
+            },
+          ]}
           search={search}
           kecamatan={kecamatan}
           status={status}
@@ -112,6 +130,7 @@ export async function BowlQueue({
             { value: overdueValue, label: t.overdue },
           ]}
           labels={{
+            type: t.type,
             search: dictionary.common.search,
             searchPlaceholder: t.searchPlaceholder,
             kecamatan: t.kecamatan,

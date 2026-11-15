@@ -33,7 +33,7 @@ export async function BowlTwin({ locale, bowlId }: { locale: Locale; bowlId: str
       labels={{ map: dictionary.map, bowls: t, common: dictionary.common }}
       actions={
         <BowlActions
-          bowl={{ id: bowl.id, name: bowl.name }}
+          bowl={bowl}
           status={bowl.status}
           inspectors={inspectors}
           labels={{

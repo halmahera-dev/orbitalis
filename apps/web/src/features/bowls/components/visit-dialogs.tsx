@@ -20,8 +20,10 @@ import { toast } from "sonner";
 import type { InspectionOutcome } from "@/features/bowls/bowls-queries";
 
 import { recordOutcome, scheduleVisit } from "@/features/bowls/bowls-actions";
-import { calendarDate } from "@/features/bowls/visit";
+import { calendarDate, outcomesFor } from "@/features/bowls/visit";
 import { fill, type Dictionary } from "@/lib/i18n";
+
+export type VisitTarget = { id: string; name: string; source: string };
 
 export type VisitDialogLabels = {
   dialogs: Dictionary["bowls"]["dialogs"];
@@ -31,7 +33,7 @@ export type VisitDialogLabels = {
 };
 
 type VisitDialogProps = {
-  bowl: { id: string; name: string } | null;
+  bowl: VisitTarget | null;
   labels: VisitDialogLabels;
   onOpenChange: (open: boolean) => void;
 };
@@ -144,7 +146,10 @@ export function ScheduleVisitDialog({
 
 export function OutcomeDialog({ bowl, labels, onOpenChange }: VisitDialogProps) {
   const { isSaving, save } = useSave(onOpenChange, labels.dialogs.saved);
-  const outcomes = Object.entries(labels.outcomes) as [InspectionOutcome, string][];
+  const outcomes = (bowl ? outcomesFor(bowl) : []).map((outcome): [InspectionOutcome, string] => [
+    outcome,
+    labels.outcomes[outcome],
+  ]);
 
   function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();

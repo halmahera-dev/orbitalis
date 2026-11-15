@@ -1,5 +1,7 @@
 "use client";
 
+import { MoreHorizontalCircle01Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { Button } from "@repo/ui/components/button";
 import {
   DropdownMenu,
@@ -7,8 +9,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@repo/ui/components/dropdown-menu";
-import { MoreHorizontalCircle01Icon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
 import Link from "next/link";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
@@ -20,6 +20,7 @@ import {
   OutcomeDialog,
   ScheduleVisitDialog,
   type VisitDialogLabels,
+  type VisitTarget,
 } from "@/features/bowls/components/visit-dialogs";
 import { visitActionsForStatus, type BowlVisitAction } from "@/features/bowls/visit";
 
@@ -45,11 +46,7 @@ function actionLabel(action: BowlVisitAction, labels: BowlActionLabels) {
   }
 }
 
-function useBowlVisit(
-  bowl: { id: string; name: string },
-  labels: BowlActionLabels,
-  inspectors: string[],
-) {
+function useBowlVisit(bowl: VisitTarget, labels: BowlActionLabels, inspectors: string[]) {
   const [openDialog, setOpenDialog] = useState<"schedule" | "outcome" | null>(null);
   const [isMoving, startMoving] = useTransition();
 
@@ -105,7 +102,7 @@ export function BowlActions({
   labels,
   inspectors,
 }: {
-  bowl: { id: string; name: string };
+  bowl: VisitTarget;
   status: BowlStatus;
   labels: BowlActionLabels;
   inspectors: string[];
@@ -137,7 +134,7 @@ export function BowlRowActions({
   labels,
   inspectors,
 }: {
-  bowl: { id: string; name: string };
+  bowl: VisitTarget;
   status: BowlStatus;
   mapHref: string;
   labels: BowlActionLabels;

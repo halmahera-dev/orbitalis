@@ -69,6 +69,7 @@ export function TriagePanel({
   onStatusChange,
   onSortChange,
   onSelect,
+  sorts = triageSorts,
   labels,
 }: {
   locale: Locale;
@@ -79,13 +80,15 @@ export function TriagePanel({
   onStatusChange: (status: TriageStatus) => void;
   onSortChange: (sort: TriageSort) => void;
   onSelect: (bowlId: string) => void;
+  sorts?: readonly TriageSort[];
   labels: { map: Dictionary["map"]; statuses: Dictionary["bowls"]["statuses"] };
 }) {
   const t = labels.map;
   const listRef = useRef<HTMLOListElement>(null);
+  const activeSort = sorts.includes(sort) ? sort : sorts[0];
   const shown = bowls
     .filter((bowl) => inTriageStatus(bowl.status, status))
-    .toSorted((a, b) => sortValue(b, sort) - sortValue(a, sort));
+    .toSorted((a, b) => sortValue(b, activeSort) - sortValue(a, activeSort));
   const maxRate = Math.max(
     1,
     ...shown.map((bowl) => (bowl.rateMmYr ?? 0) + (bowl.uncertaintyMmYr ?? 0)),
@@ -140,10 +143,10 @@ export function TriagePanel({
           aria-label={t.triage.sort}
           size="sm"
           spacing={1}
-          value={[sort]}
+          value={[activeSort]}
           onValueChange={(next) => next[0] && onSortChange(next[0] as TriageSort)}
         >
-          {triageSorts.map((option) => (
+          {sorts.map((option) => (
             <Tooltip key={option}>
               <TooltipTrigger
                 render={<ToggleGroupItem value={option} aria-label={t.triage.sortBy[option]} />}
@@ -203,7 +206,7 @@ export function TriagePanel({
                   <span className="flex-1" />
                 )}
                 <span className="w-12 shrink-0 text-right text-muted-foreground tabular-nums">
-                  {sortLabel(bowl, sort, locale)}
+                  {sortLabel(bowl, activeSort, locale)}
                 </span>
               </button>
             </li>

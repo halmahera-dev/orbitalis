@@ -1,6 +1,6 @@
-import { Button } from "@repo/ui/components/button";
 import { MapsGlobal02Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
+import { Button } from "@repo/ui/components/button";
 import Link from "next/link";
 import { Suspense } from "react";
 
@@ -17,6 +17,7 @@ export default function BowlsPage({ params, searchParams }: PageProps<"/[locale]
     const locale = toLocale(rawLocale);
     const t = getDictionary(locale);
     const filters = {
+      type: firstValue(query.type),
       search: (firstValue(query.q) ?? "").trim().slice(0, 100),
       kecamatan: firstValue(query.kecamatan),
       status: firstValue(query.status),

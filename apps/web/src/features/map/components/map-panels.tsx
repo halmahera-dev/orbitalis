@@ -4,7 +4,9 @@ import {
   Alert02Icon,
   ArrowUpRight01Icon,
   Cancel01Icon,
+  DropletsIcon,
   Flag01Icon,
+  PipelineIcon,
   Satellite01Icon,
   SignalFull02Icon,
   Target01Icon,
@@ -21,7 +23,15 @@ import type { Bowl, Cell } from "@/features/bowls/bowls-queries";
 
 import { flagCell } from "@/features/bowls/bowls-actions";
 import { RateRange } from "@/features/bowls/components/rate-range";
-import { statusDotColors } from "@/features/bowls/visit";
+import { isFarmingSite, statusDotColors } from "@/features/bowls/visit";
+import {
+  cityPipedShare,
+  planStatuses,
+  unservedPeople,
+  type PlanKind,
+  type PlanStatus,
+} from "@/features/plans/plan-scores";
+import { setPlanStatus } from "@/features/plans/plans-actions";
 import { Sparkline } from "@/features/today/components/sparkline";
 import { fill, formatNumber, type Dictionary, type Locale } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
@@ -169,22 +179,24 @@ export function BowlPanel({
       closeLabel={labels.common.close}
       onClose={onClose}
       headerAction={
-        <Tooltip>
-          <TooltipTrigger
-            render={
-              <Button
-                size="icon-sm"
-                variant="ghost"
-                aria-label={t.openBowl}
-                nativeButton={false}
-                render={<Link href={`/${locale}/bowls/${bowl.id}`} />}
-              />
-            }
-          >
-            <HugeiconsIcon icon={ArrowUpRight01Icon} strokeWidth={2} />
-          </TooltipTrigger>
-          <TooltipContent>{t.openBowl}</TooltipContent>
-        </Tooltip>
+        isFarmingSite(bowl) ? null : (
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <Button
+                  size="icon-sm"
+                  variant="ghost"
+                  aria-label={t.openBowl}
+                  nativeButton={false}
+                  render={<Link href={`/${locale}/bowls/${bowl.id}`} />}
+                />
+              }
+            >
+              <HugeiconsIcon icon={ArrowUpRight01Icon} strokeWidth={2} />
+            </TooltipTrigger>
+            <TooltipContent>{t.openBowl}</TooltipContent>
+          </Tooltip>
+        )
       }
     >
       <div className="flex flex-wrap gap-1.5">
@@ -192,13 +204,13 @@ export function BowlPanel({
           <span className={cn("size-2 rounded-full", statusDotColors[bowl.status])} />
           {labels.statuses[bowl.status]}
         </Chip>
-        {bowl.source === "manual" ? (
-          <Chip icon={Flag01Icon}>{t.legend.manual}</Chip>
-        ) : (
+        {bowl.site ? <Chip icon={DropletsIcon}>{t.farming.kinds[bowl.site.kind]}</Chip> : null}
+        {bowl.source === "manual" ? <Chip icon={Flag01Icon}>{t.legend.manual}</Chip> : null}
+        {bowl.source === "nisar" ? (
           <Chip icon={Satellite01Icon}>
             {bowl.isOneTrack ? t.legend.oneTrack : t.legend.twoTracks}
           </Chip>
-        )}
+        ) : null}
       </div>
 
       <RateHeadline
@@ -212,11 +224,19 @@ export function BowlPanel({
       ) : null}
 
       <div className="grid grid-cols-3 gap-2">
-        <Stat
-          icon={SignalFull02Icon}
-          label={t.stats.signal}
-          value={bowl.snr === null ? "—" : `×${bowl.snr}`}
-        />
+        {bowl.site ? (
+          <Stat
+            icon={DropletsIcon}
+            label={t.farming.area}
+            value={`${formatNumber(locale, Math.round(bowl.site.areaM2 / 1000) / 10)} ha`}
+          />
+        ) : (
+          <Stat
+            icon={SignalFull02Icon}
+            label={t.stats.signal}
+            value={bowl.snr === null ? "—" : `×${bowl.snr}`}
+          />
+        )}
         <Stat icon={Target01Icon} label={t.stats.radius} value={`${bowl.radiusM} m`} />
         <Stat
           icon={UserGroupIcon}
@@ -229,7 +249,7 @@ export function BowlPanel({
 
       <p className="flex items-start gap-2 text-xs text-muted-foreground">
         <HugeiconsIcon icon={Alert02Icon} strokeWidth={2} className="size-4 shrink-0" />
-        {t.leadShort}
+        {isFarmingSite(bowl) ? t.farming.trendNote : t.leadShort}
       </p>
     </Panel>
   );
@@ -243,6 +263,8 @@ export function CellPanel({
   labels,
   onClose,
   onSelectBowl,
+  planKind,
+  planStatus,
 }: {
   locale: Locale;
   cell: Cell;
@@ -251,10 +273,23 @@ export function CellPanel({
   labels: PanelLabels;
   onClose: () => void;
   onSelectBowl: (bowlId: string) => void;
+  planKind: PlanKind;
+  planStatus: PlanStatus | null;
 }) {
   const t = labels.map;
   const [isFlagging, startFlagging] = useTransition();
+  const [isPlanning, startPlanning] = useTransition();
   const areaKm2 = (cellSizeM / 1000) ** 2;
+  const unserved = unservedPeople(cell);
+
+  function changePlan(status: PlanStatus | null) {
+    startPlanning(async () => {
+      const result = await setPlanStatus({ cellId: cell.id, kind: planKind, status });
+      if (!result.ok) {
+        toast.error(result.error);
+      }
+    });
+  }
 
   function flag() {
     startFlagging(async () => {
@@ -281,7 +316,7 @@ export function CellPanel({
         labels={labels}
       />
 
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-3 gap-2">
         <Stat
           icon={Satellite01Icon}
           label={t.cell.coverage}
@@ -294,7 +329,65 @@ export function CellPanel({
             cell.people === null ? "—" : formatNumber(locale, Math.round(cell.people / areaKm2))
           }
         />
+        <Stat
+          icon={PipelineIcon}
+          label={fill(t.plan.withoutPipesNote, { share: Math.round(cityPipedShare * 100) })}
+          value={unserved === null ? "—" : `≈${formatNumber(locale, unserved)}`}
+        />
       </div>
+
+      <section aria-label={t.plan.title[planKind]} className="flex flex-col gap-2">
+        <h3 className="text-xs text-muted-foreground">{t.plan.title[planKind]}</h3>
+        {planStatus === null ? (
+          <Button size="sm" disabled={isPlanning} onClick={() => changePlan("proposed")}>
+            {t.plan.add[planKind]}
+          </Button>
+        ) : (
+          <div className="flex items-center gap-1">
+            <ol className="flex flex-1 gap-1">
+              {planStatuses.map((status, index) => {
+                const isReached = planStatuses.indexOf(planStatus) >= index;
+                return (
+                  <li key={status} className="flex-1">
+                    <button
+                      type="button"
+                      aria-pressed={status === planStatus}
+                      disabled={isPlanning}
+                      onClick={() => changePlan(status)}
+                      className="flex w-full pressable flex-col items-center gap-1 rounded-xl py-1 text-xs text-muted-foreground transition-colors duration-160 ease-out outline-none hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/40"
+                    >
+                      <span
+                        className={cn(
+                          "h-1.5 w-full rounded-full",
+                          isReached ? "bg-brand" : "bg-muted-foreground/20",
+                        )}
+                      />
+                      {t.plan.statuses[status]}
+                    </button>
+                  </li>
+                );
+              })}
+            </ol>
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <Button
+                    size="icon-sm"
+                    variant="ghost"
+                    aria-label={t.plan.remove}
+                    disabled={isPlanning}
+                    onClick={() => changePlan(null)}
+                  />
+                }
+              >
+                <HugeiconsIcon icon={Cancel01Icon} strokeWidth={2} />
+              </TooltipTrigger>
+              <TooltipContent>{t.plan.remove}</TooltipContent>
+            </Tooltip>
+          </div>
+        )}
+        <p className="text-xs text-muted-foreground">{t.plan.note[planKind]}</p>
+      </section>
 
       {nearestLead ? (
         <button
@@ -314,9 +407,23 @@ export function CellPanel({
         </button>
       ) : null}
 
-      <Button size="sm" variant="outline" disabled={isFlagging} onClick={flag}>
-        {t.cell.flag}
-      </Button>
+      <div className="flex flex-wrap gap-2">
+        <Button size="sm" variant="outline" disabled={isFlagging} onClick={flag}>
+          {t.cell.flag}
+        </Button>
+        <Button
+          size="sm"
+          variant="outline"
+          nativeButton={false}
+          render={
+            <Link
+              href={`/${locale}/report?at=${cell.center[0].toFixed(5)},${cell.center[1].toFixed(5)}`}
+            />
+          }
+        >
+          {t.cell.report}
+        </Button>
+      </div>
     </Panel>
   );
 }
