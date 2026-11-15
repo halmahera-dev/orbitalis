@@ -19,4 +19,8 @@ Python batch jobs that turn satellite data into the files `apps/web` reads. Read
 4. `fetch_worldpop.py` adds WorldPop 2026 people to each cell of `out/nisar-run.json`. It downloads the 170 MB Indonesia file once into `out/worldpop/`.
 5. Import the run into Postgres (see Rules). A new detection within its radius (at least 250 m) of a known bowl keeps that bowl's id.
 
+## Water farming sites
+
+`fetch_water_bodies.py` reads the public water bodies of Jakarta from OpenStreetMap (Overpass) into `out/water-sites.json`. Load them with `bun run --cwd packages/db import:sites ../../apps/jobs/out/water-sites.json`. Private fishing ponds and estate lakes are left out by name.
+
 Every rate is relative to the ground within about 3 km. A bowl with `"basis": "track10"` is seen on one track only. Say both wherever they are shown.

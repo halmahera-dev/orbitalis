@@ -89,12 +89,12 @@ The team mapped six needs to the capabilities. N1–N4 are primary. N5 is second
 
 | #   | Need (original wording)                                                                                                                            | User                     | Maps | 3D  | Projection             | Feature          | State     |
 | --- | -------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------ | ---- | --- | ---------------------- | ---------------- | --------- |
-| N1  | Find hints of illegal pumps (_deteksi petunjuk pompa ilegal_)                                                                                      | Dinas SDA, Badan Geologi | Yes  | Yes | Extraction ratio       | F3, F9, F12, F19 | Partial   |
-| N2  | Areas that sink fast and need groundwater injection (_daerah yang laju penurunan tanahnya cepat dan perlu injeksi air tanah_)                      | KemenLH, Dinas SDA       | Yes  | Yes | Scenario with recharge | F13              | Not built |
-| N3  | Recommend water pipe extension, with the number of people in each area (_rekomendasi pembangunan pipa air, estimasi ada berapa orang di area itu_) | PAM Jaya                 | Yes  | No  | Demand gap             | F14              | Not built |
-| N4  | Monitor water farming (KemenLH)                                                                                                                    | KemenLH, DLH             | Yes  | Yes | Expected recharge      | F15, F21         | Not built |
-| N5  | Building plans for real-estate developers (secondary)                                                                                              | Developers               | Yes  | Yes | Local balance          | F16, F21         | Not built |
-| N6  | People who want to buy or sell a house (tertiary)                                                                                                  | Public                   | Yes  | No  | Simple text            | F17, F20         | Not built |
+| N1  | Find hints of illegal pumps (_deteksi petunjuk pompa ilegal_)                                                                                      | Dinas SDA, Badan Geologi | Yes  | Yes | Extraction ratio       | F3, F9, F12, F19 | Built (core) |
+| N2  | Areas that sink fast and need groundwater injection (_daerah yang laju penurunan tanahnya cepat dan perlu injeksi air tanah_)                      | KemenLH, Dinas SDA       | Yes  | Yes | Scenario with recharge | F13              | Partial   |
+| N3  | Recommend water pipe extension, with the number of people in each area (_rekomendasi pembangunan pipa air, estimasi ada berapa orang di area itu_) | PAM Jaya                 | Yes  | No  | Demand gap             | F14              | Partial   |
+| N4  | Monitor water farming (KemenLH)                                                                                                                    | KemenLH, DLH             | Yes  | Yes | Expected recharge      | F15, F21         | Partial   |
+| N5  | Building plans for real-estate developers (secondary)                                                                                              | Developers               | Yes  | Yes | Local balance          | F16, F21         | Partial   |
+| N6  | People who want to buy or sell a house (tertiary)                                                                                                  | Public                   | Yes  | No  | Simple text            | F17, F20         | Partial   |
 
 The three capabilities alone leave gaps in the flows. F12–F18 fill the main gaps. F19–F21 fill three more that the [Business Flow](business-flow.md) shows:
 
@@ -326,9 +326,11 @@ Gap: the clean-signal share comes from a roughness rule on the browse image (`RO
 - The panel appears on the bowl page, the area page, the site report, and (simplified) the area check.
 - A projection is labeled "at current assumptions". It is not a forecast.
 
-#### F13. Recharge priority (N2) — Not built
+#### F13. Recharge priority (N2) — Partial
 
 **Story:** As a KemenLH or Dinas SDA officer, I want a ranked list of fast-sinking areas that are suitable for recharge or injection so that I know where to survey first.
+
+**Built today:** the Recharge layer ranks 480 m cells by measured sinking × WorldPop people. The cell panel adds a cell to the recharge plan and moves it through proposed, surveyed, approved, built. The plan exports as CSV. Missing: recharge suitability (no hydrogeology data), the suggested method, and the rate before and after a build.
 
 **Acceptance criteria:**
 
@@ -339,9 +341,11 @@ Gap: the clean-signal share comes from a roughness rule on the browse image (`RO
 - The officer can add an area to a plan (proposed, surveyed, approved, built) and see the rate before and after the build.
 - Label: "screening, needs a field survey".
 
-#### F14. Pipe priority (N3) — Not built
+#### F14. Pipe priority (N3) — Partial
 
 **Story:** As a PAM Jaya planner, I want areas ranked by the people a pipe would serve and the groundwater it would replace so that I can plan extension to 100% coverage.
+
+**Built today:** the Pipes layer ranks cells by people without pipes, with a boost for sinking. People come from WorldPop 2026. Coverage per area is not public, so "without pipes" uses the city-wide 83.59% (PAM Jaya, September 2026) and says so. The cell panel adds a cell to the pipe plan, and the plan exports as CSV. Missing: real per-area coverage, BPS scaling, the demand gap, and the distance to the main.
 
 **Acceptance criteria:**
 
@@ -351,9 +355,11 @@ Gap: the clean-signal share comes from a roughness rule on the browse image (`RO
 - The planner can add areas to the pipe plan and export the plan as CSV.
 - After a build, if the local rate does not slow within a set number of passes, the area returns to the pumping lead list (F3) with a note.
 
-#### F15. Water farming monitor (N4) — Not built
+#### F15. Water farming monitor (N4) — Partial
 
 **Story:** As a KemenLH or DLH officer, I want to see which registered groundwater users do their water farming measures so that I can visit the right sites.
+
+**Built today:** 58 public water bodies (waduk, embung, situ, retention ponds) from OpenStreetMap (`fetch_water_bodies.py`, `import:sites`) are seeded as macro-scale sites. The Water farming layer colors a site red when it needs a visit: still unchecked and its cell sinks 20 mm/yr or more, or its last visit found the measures failing. The site list uses the triage panel and the Bowls desk type filter. Visits use the F9 flow with two outcomes: measures working, measures failing. Missing: site registration by drawing, declared measures, optical checks, the area impact vs control areas (needs a second NISAR run), and role-based visibility.
 
 **Acceptance criteria:**
 
@@ -370,9 +376,11 @@ Gap: the clean-signal share comes from a roughness rule on the browse image (`RO
 - Site data is visible only to KemenLH and the DLH of that region.
 - The terms follow the press release of 2 June 2026. Update them when the final regulation is published.
 
-#### F16. Site report (N5) — Not built
+#### F16. Site report (N5) — Partial
 
 **Story:** As a developer, I want a report on a parcel so that I can judge ground risk and the groundwater rules before I buy land or design.
+
+**Built today:** "Site report" in the cell panel opens `/report?at=lon,lat`, a printable page (sign-in): rate ± uncertainty and class, depth added by 2035 and 2050 at the measured rate, people per km², people without pipes, the nearest pump lead and water body, plan status, radar coverage, the three rules (permit above 100 m³ per month, water farming draft, groundwater-free zones), and the screening disclaimer. It is its own page so it can print and be shared as a link. Missing: parcel drawing, the parcel twin, the groundwater balance (F12), and the calculator (F21).
 
 **Acceptance criteria:**
 
@@ -382,9 +390,11 @@ Gap: the clean-signal share comes from a roughness rule on the browse image (`RO
 - The report can be shared as a link (map URL with the parcel) and printed with the print stylesheet.
 - The report states it is a screening document, not a geotechnical survey or a legal opinion.
 
-#### F17. Public area check (N6) — Not built
+#### F17. Public area check (N6) — Partial
 
 **Story:** As a person who wants to buy or sell a house, I want to check how fast an area sinks so that I understand the area.
+
+**Built today:** public `/check`, linked from the landing page. A 2D map of 480 m cells. Tap a cell or use "my location". The result shows the class (slow, medium, fast) as a color and a three-step bar, the rate in centimeters a year, the drop by 2035, and what the result means and does not mean. The page sends rounded rates only, with no people counts. It links to PAM Jaya. Missing: address search and the trend since 2023 (needs Sentinel-1).
 
 **Acceptance criteria:**
 
