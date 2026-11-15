@@ -11,7 +11,8 @@ function csvRow(values: (string | number | null)[]) {
 }
 
 export async function GET(request: NextRequest) {
-  const session = await auth.api.getSession({ headers: await headers() });
+  const requestHeaders = await headers();
+  const session = await auth.api.getSession({ headers: requestHeaders });
   if (!session) {
     return new NextResponse("Sign in first.", { status: 401 });
   }
