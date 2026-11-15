@@ -16,7 +16,7 @@ import { ToggleGroup, ToggleGroupItem } from "@repo/ui/components/toggle-group";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@repo/ui/components/tooltip";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 
 import type { Bowl, Cell } from "@/features/bowls/bowls-queries";
 import type { PlanEntry } from "@/features/plans/plan-scores";
@@ -37,12 +37,14 @@ import {
   triageStatuses,
   type TriageStatus,
 } from "@/features/map/components/triage-panel";
+import { WaterEffectChart } from "@/features/map/components/water-effect-chart";
 import {
   mapLayers,
   parseMapLayer,
   parseTriageSort,
   type MapLayer,
 } from "@/features/map/map-layers";
+import { waterEffect } from "@/features/map/water-effect";
 import { BuildingsLayer, InterferogramLayer } from "@/features/nisar/components/nisar-layers";
 import { interferogramCatalog } from "@/features/nisar/nisar-catalog";
 import { LanguageSwitch } from "@/features/shell/components/language-switch";
@@ -203,15 +205,17 @@ function MapLegend({
   layer,
   locale,
   labels,
+  children,
 }: {
   layer: MapLayer;
   locale: Locale;
   labels: { map: Dictionary["map"]; common: Dictionary["common"] };
+  children?: ReactNode;
 }) {
   const t = labels.map;
   return (
     <div className="absolute top-4 left-4 flex w-56 flex-col gap-2 rounded-3xl border border-transparent glass p-3 text-xs text-muted-foreground shadow-md max-md:hidden">
-      {layer === "leads" || layer === "sinking" || layer === "farming" ? (
+      {layer === "leads" || layer === "sinking" ? (
         <GradientLegend
           className="bg-linear-to-r from-rate-slow via-rate-middle to-rate-fast"
           low={layer === "leads" ? "20" : "0"}
@@ -255,6 +259,7 @@ function MapLegend({
         </ul>
       ) : null}
       {layer === "sinking" ? <p>{t.relativeNote}</p> : null}
+      {children}
     </div>
   );
 }
@@ -328,6 +333,7 @@ export function OrbitalisMap({
         site.outcome === "measures_failing" ||
         (site.status === "lead" && (site.rateMmYr ?? 0) >= slowRateMmYr),
     }));
+  const effect = useMemo(() => waterEffect(cells, bowls.filter(isFarmingSite)), [cells, bowls]);
   const selectedSite = isFarming ? selectedBowl : null;
   const hasPanel = selectedSite !== null || selectedCell !== null;
 
@@ -481,7 +487,16 @@ export function OrbitalisMap({
           />
         </Map>
 
-        <MapLegend layer={layer} locale={locale} labels={labels} />
+        <MapLegend layer={layer} locale={locale} labels={labels}>
+          {isFarming && effect ? (
+            <WaterEffectChart
+              effect={effect}
+              locale={locale}
+              labels={t.farming.effect}
+              unit={labels.common.mmPerYear}
+            />
+          ) : null}
+        </MapLegend>
 
         {isLeads && !hasPanel && (
           <TriagePanel

@@ -1,6 +1,14 @@
 "use client";
 
 import {
+  CompassIcon,
+  DashboardSquare01Icon,
+  ListViewIcon,
+  MapsGlobal02Icon,
+  UserMultipleIcon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
+import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
@@ -12,13 +20,6 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@repo/ui/components/sidebar";
-import {
-  DashboardSquare01Icon,
-  ListViewIcon,
-  MapsGlobal02Icon,
-  UserMultipleIcon,
-} from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -40,6 +41,7 @@ export function AppSidebar({
   const home = `/${locale}`;
   const items = [
     { title: labels.today, href: home, icon: DashboardSquare01Icon },
+    { title: labels.start, href: `${home}/start`, icon: CompassIcon },
     { title: labels.bowls, href: `${home}/bowls`, icon: ListViewIcon },
     { title: labels.team, href: `${home}/team`, icon: UserMultipleIcon },
     { title: labels.map, href: `${home}/map`, icon: MapsGlobal02Icon },

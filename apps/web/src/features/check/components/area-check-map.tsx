@@ -6,16 +6,20 @@ import {
   CheckmarkCircle02Icon,
   Location01Icon,
   Navigation03Icon,
+  Share08Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Button } from "@repo/ui/components/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@repo/ui/components/tooltip";
-import { useEffect, useState } from "react";
+import { usePathname, useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { toast } from "sonner";
 
 import type { Cell } from "@/features/bowls/bowls-queries";
 
 import { Map, useMap } from "@/components/ui/map";
+import { findAddress } from "@/features/check/check-actions";
+import { GroundDropFigure } from "@/features/check/components/ground-drop-figure";
 import { rateClass } from "@/features/map/bowl-rates";
 import { CellLayer, type CellScale } from "@/features/map/components/cell-layer";
 import { fill, type Dictionary } from "@/lib/i18n";
@@ -72,26 +76,68 @@ export function AreaCheckMap({
   labels: { check: Dictionary["check"]; common: Dictionary["common"] };
 }) {
   const t = labels.check;
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const [selectedId, setSelectedId] = useState<string | null>(() => searchParams.get("cell"));
   const [focus, setFocus] = useState<[number, number] | null>(null);
+  const [isSearching, startSearching] = useTransition();
   const selected = cells.find((cell) => cell.id === selectedId) ?? null;
   const rate = selected?.sinkingMmYr ?? null;
   const tone = rate === null ? null : rateClass(rate);
+  const sortedRates = useMemo(
+    () => cells.flatMap((cell) => cell.sinkingMmYr ?? []).toSorted((a, b) => a - b),
+    [cells],
+  );
+  const slowerShare =
+    rate === null
+      ? 0
+      : Math.round(
+          (sortedRates.filter((other) => other < rate).length / Math.max(sortedRates.length, 1)) *
+            100,
+        );
+  const dropCm =
+    rate === null ? 0 : Math.max(Math.round((rate * (checkYear - currentYear)) / 10), 0);
+
+  function select(cellId: string | null) {
+    setSelectedId(cellId);
+    window.history.replaceState(null, "", cellId ? `${pathname}?cell=${cellId}` : pathname);
+  }
+
+  function showPoint(point: [number, number]) {
+    const cell = cellNear(point, cells, cellSizeM);
+    if (!cell) {
+      toast.error(t.outside);
+      return;
+    }
+    setFocus(point);
+    select(cell.id);
+  }
 
   function locate() {
     navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const point: [number, number] = [position.coords.longitude, position.coords.latitude];
-        const cell = cellNear(point, cells, cellSizeM);
-        if (!cell) {
-          toast.error(t.outside);
-          return;
-        }
-        setFocus(point);
-        setSelectedId(cell.id);
-      },
+      (position) => showPoint([position.coords.longitude, position.coords.latitude]),
       () => toast.error(t.locationDenied),
     );
+  }
+
+  function search(formData: FormData) {
+    startSearching(async () => {
+      const result = await findAddress(String(formData.get("address") ?? ""));
+      if (!result.ok) {
+        toast.error(t.addressNotFound);
+        return;
+      }
+      showPoint(result.point);
+    });
+  }
+
+  function share() {
+    const url = window.location.href;
+    if (navigator.share) {
+      void navigator.share({ title: t.title, url });
+      return;
+    }
+    void navigator.clipboard.writeText(url).then(() => toast.success(t.linkCopied));
   }
 
   return (
@@ -102,25 +148,42 @@ export function AreaCheckMap({
           cellSizeM={cellSizeM}
           scale={scale}
           selectedCellId={selectedId}
-          onSelect={setSelectedId}
+          onSelect={select}
         />
         <FlyTo point={focus} />
       </Map>
 
-      <div className="absolute top-3 left-3 flex items-center gap-2 rounded-full border border-transparent glass p-1 pl-3 text-sm shadow-md">
-        <HugeiconsIcon icon={Location01Icon} strokeWidth={2} className="size-4" />
-        {t.tapHint}
+      <form
+        action={search}
+        className="absolute top-3 right-3 left-3 flex items-center gap-2 rounded-full border border-transparent glass p-1 pl-3 text-sm shadow-md md:right-auto md:w-96"
+      >
+        <HugeiconsIcon icon={Location01Icon} strokeWidth={2} className="size-4 shrink-0" />
+        <input
+          name="address"
+          type="search"
+          maxLength={120}
+          aria-label={t.addressLabel}
+          placeholder={t.addressPlaceholder}
+          disabled={isSearching}
+          className="min-w-0 flex-1 bg-transparent outline-none placeholder:text-muted-foreground"
+        />
         <Tooltip>
           <TooltipTrigger
             render={
-              <Button size="icon-sm" variant="ghost" aria-label={t.useLocation} onClick={locate} />
+              <Button
+                type="button"
+                size="icon-sm"
+                variant="ghost"
+                aria-label={t.useLocation}
+                onClick={locate}
+              />
             }
           >
             <HugeiconsIcon icon={Navigation03Icon} strokeWidth={2} />
           </TooltipTrigger>
           <TooltipContent>{t.useLocation}</TooltipContent>
         </Tooltip>
-      </div>
+      </form>
 
       {selected ? (
         <section
@@ -129,11 +192,21 @@ export function AreaCheckMap({
         >
           <div className="flex items-start gap-2">
             <h2 className="flex-1 type-title">{fill(t.areaTitle, { size: cellSizeM })}</h2>
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <Button size="icon-sm" variant="ghost" aria-label={t.share} onClick={share} />
+                }
+              >
+                <HugeiconsIcon icon={Share08Icon} strokeWidth={2} />
+              </TooltipTrigger>
+              <TooltipContent>{t.share}</TooltipContent>
+            </Tooltip>
             <Button
               size="icon-sm"
               variant="ghost"
               aria-label={labels.common.close}
-              onClick={() => setSelectedId(null)}
+              onClick={() => select(null)}
             >
               <HugeiconsIcon icon={Cancel01Icon} strokeWidth={2} />
             </Button>
@@ -157,11 +230,18 @@ export function AreaCheckMap({
                   />
                 ))}
               </ol>
+              <p className="type-title text-balance">
+                {fill(t.percentile, { share: slowerShare })}
+              </p>
+              <GroundDropFigure
+                dropCm={dropCm}
+                label={fill(t.figure, { cm: dropCm, year: checkYear })}
+              />
               <p>
                 {fill(t.plainRate, {
                   cm: Math.max(Math.round(rate / 10), 0),
                   year: checkYear,
-                  total: Math.max(Math.round((rate * (checkYear - currentYear)) / 10), 0),
+                  total: dropCm,
                 })}
               </p>
             </>

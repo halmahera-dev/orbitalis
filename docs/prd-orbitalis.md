@@ -191,7 +191,7 @@ Each feature has a state: Built, Partial, or Not built.
 - A 2D view is available with the same numbers.
 - **New:** the layer picker has four icon toggles: leads, sinking (NISAR vertical rate in 480 m cells), people (WorldPop 2026 per km²), and radar passes. One layer shows at a time. **Built on real data.** Recharge priority, pipe priority, and water farming return as layers when their inputs exist (F13–F15).
 - **New:** a triage queue on the leads layer, with tabs for lead, scheduled, outcome, and dismissed, and a sort by signal (SNR), sinking rate, or people. Each row shows the rate and its uncertainty as a bar. J and K move through the rows. The tab and the sort are in the URL. **Built.**
-- **New:** a click on a lead opens a bowl panel with the rate, signal, radius, people, the NISAR series, and the visit actions. A click on a cell opens a cell panel with the rate, coverage, people, and the nearest lead. "Flag for review" turns the cell into a manual lead. **Built.**
+- **New:** a click on a lead, on the map or in the triage list, opens its 3D bowl page (F4), which holds the visit actions. A `/start` page shows the six needs as cards that open the right layer. A click on a cell opens a cell panel with the rate, coverage, people, and the nearest lead. "Flag for review" turns the cell into a manual lead. **Built.**
 - **New:** each role opens the map on its own layer. No new desk pages for recharge, pipes, or water farming. **Not built.**
 
 #### F2. Watch NISAR passes over time — Built
@@ -359,7 +359,7 @@ Gap: the clean-signal share comes from a roughness rule on the browse image (`RO
 
 **Story:** As a KemenLH or DLH officer, I want to see which registered groundwater users do their water farming measures so that I can visit the right sites.
 
-**Built today:** 58 public water bodies (waduk, embung, situ, retention ponds) from OpenStreetMap (`fetch_water_bodies.py`, `import:sites`) are seeded as macro-scale sites. The Water farming layer colors a site red when it needs a visit: still unchecked and its cell sinks 20 mm/yr or more, or its last visit found the measures failing. The site list uses the triage panel and the Bowls desk type filter. Visits use the F9 flow with two outcomes: measures working, measures failing. Missing: site registration by drawing, declared measures, optical checks, the area impact vs control areas (needs a second NISAR run), and role-based visibility.
+**Built today:** 58 public water bodies (waduk, embung, situ, retention ponds) from OpenStreetMap (`fetch_water_bodies.py`, `import:sites`) are seeded as macro-scale sites. The Water farming layer colors a site red when it needs a visit: still unchecked and its cell sinks 20 mm/yr or more, or its last visit found the measures failing. The site list uses the triage panel and the Bowls desk type filter. Visits use the F9 flow with two outcomes: measures working, measures failing. The layer legend has a "Does water help?" chart: the mean sinking of cells within 500 m of a water body against cells farther away, with errors and a plain verdict. On run 1, cells near water sink slightly faster (2.8 ± 0.9 against −1.1 ± 0.3 mm/yr). The chart says this is a link, not a cause. Missing: site registration by drawing, declared measures, optical checks, the area impact vs control areas (needs a second NISAR run), and role-based visibility.
 
 **Acceptance criteria:**
 
@@ -394,7 +394,7 @@ Gap: the clean-signal share comes from a roughness rule on the browse image (`RO
 
 **Story:** As a person who wants to buy or sell a house, I want to check how fast an area sinks so that I understand the area.
 
-**Built today:** public `/check`, linked from the landing page. A 2D map of 480 m cells. Tap a cell or use "my location". The result shows the class (slow, medium, fast) as a color and a three-step bar, the rate in centimeters a year, the drop by 2035, and what the result means and does not mean. The page sends rounded rates only, with no people counts. It links to PAM Jaya. Missing: address search and the trend since 2023 (needs Sentinel-1).
+**Built today:** public `/check`, linked from the landing page. A 2D map of 480 m cells. Tap a cell or use "my location". The result shows the class (slow, medium, fast) as a color and a three-step bar, the rate in centimeters a year, the drop by 2035, and what the result means and does not mean. The page sends rounded rates only, with no people counts. It links to PAM Jaya. An address search (OpenStreetMap Nominatim, through a server action, limited to Jakarta) moves the map to the address. The result leads with a percentile ("sinks faster than 82% of the mapped area") and a drawing of a person in the ground drop by 2035. The selected cell is in the URL, and a share button sends the link. Missing: the trend since 2023 (needs Sentinel-1).
 
 **Acceptance criteria:**
 

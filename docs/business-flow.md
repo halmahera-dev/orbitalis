@@ -17,6 +17,8 @@ Each need has one path through the app. Sections 4 to 9 show the full target flo
 | N5 Developer planning | Developers | Map, any cell, **Site report** | Printable report: rate, depth by 2035 and 2050, people, nearest lead and water body, rules |
 | N6 Buy or sell a house | Public | Landing, **Check an area** (`/check`, no sign-in), tap the map or use my location | Plain class (slow, medium, fast), cm per year, what it means and does not mean |
 
+The **Start** page (`/start`, in the sidebar) shows these six needs as cards. A card opens the map on the right layer, or the area check. On the map, a click on a pump lead opens its 3D bowl page.
+
 The Overview shows the open pump leads, the triage list, water farming site status, and the progress of both plans.
 
 ## 1. Actors
