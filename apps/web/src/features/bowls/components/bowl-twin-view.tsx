@@ -76,6 +76,7 @@ import {
 } from "react";
 
 import type { Bowl, BowlSeries } from "@/features/bowls/bowls-queries";
+import type { NisarSeriesPoint } from "@/features/nisar/nisar-queries";
 import type { SceneLayers } from "@/features/bowls/components/bowl-scene";
 
 import {
@@ -103,6 +104,14 @@ const BowlScene = dynamic(
 const BowlChart = dynamic(
   () => import("@/features/bowls/components/bowl-chart").then((module) => module.BowlChart),
   { loading: () => <Skeleton className="h-44 w-full" /> },
+);
+
+const NisarSeriesChart = dynamic(
+  () =>
+    import("@/features/bowls/components/nisar-series-chart").then(
+      (module) => module.NisarSeriesChart,
+    ),
+  { loading: () => <Skeleton className="h-36 w-full" /> },
 );
 
 const firstYear = 2015;
@@ -293,11 +302,15 @@ export function BowlTwinView({
   bowlOptions,
   labels,
   measured,
+  nisarSeries,
+  nisarRate,
   actions,
   inspection,
 }: {
   highTideM: number;
   measured: { summary: string; body: string };
+  nisarSeries: NisarSeriesPoint[] | null;
+  nisarRate: { rate: number; uncertainty: number } | null;
   bowlOptions: { id: string; name: string; rank: number }[];
   locale: Locale;
   bowl: Bowl;
@@ -604,7 +617,7 @@ export function BowlTwinView({
       body: twin.parts.well.body,
       facts: [
         { label: labels.bowls.status, value: labels.bowls.statuses[bowl.status] },
-        { label: labels.bowls.nisar, value: `${bowl.rateAfterBanMmYr} mm/yr` },
+        { label: labels.bowls.rateAfterExample, value: `${bowl.rateAfterBanMmYr} mm/yr` },
         { label: t.rateChange, value: `−${rateChangePercent}%` },
       ],
     },
@@ -1197,17 +1210,29 @@ export function BowlTwinView({
                 banDate={banDate}
                 labels={{
                   sentinel: labels.bowls.sentinel,
-                  nisar: labels.bowls.nisar,
                   banLine: labels.bowls.banLine,
+                  caption: labels.bowls.chartExampleCaption,
+                }}
+              />
+              <NisarSeriesChart
+                points={nisarSeries}
+                labels={{
+                  title: labels.bowls.nisarSeriesTitle,
+                  note: labels.bowls.nisarSeriesNote,
+                  empty: labels.bowls.nisarSeriesEmpty,
                 }}
               />
               <dl className="flex flex-col divide-y">
                 <Row label={labels.bowls.sentinel} value={`${bowl.rateBeforeBanMmYr} mm/yr`} />
                 <Row
-                  label={labels.bowls.nisar}
-                  value={`${bowl.rateAfterBanMmYr} ± ${bowl.uncertaintyMmYr} mm/yr`}
+                  label={labels.bowls.nisarVertical}
+                  value={
+                    nisarRate
+                      ? `${nisarRate.rate} ± ${nisarRate.uncertainty} mm/yr`
+                      : "—"
+                  }
+                  isStrong
                 />
-                <Row label={t.rateChange} value={`−${rateChangePercent}%`} isStrong />
               </dl>
             </Tile>
           </div>

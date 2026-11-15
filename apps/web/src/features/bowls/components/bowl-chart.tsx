@@ -16,11 +16,10 @@ export function BowlChart({
 }: {
   series: BowlSeries;
   banDate: string;
-  labels: { sentinel: string; nisar: string; banLine: string };
+  labels: { sentinel: string; banLine: string; caption: string };
 }) {
   const config = {
     sentinel: { label: labels.sentinel, color: "var(--chart-2)" },
-    nisar: { label: labels.nisar, color: "var(--brand)" },
   } satisfies ChartConfig;
   const yearFormat = new Intl.DateTimeFormat("en", { year: "numeric", timeZone: "UTC" });
 
@@ -59,27 +58,9 @@ export function BowlChart({
             dot={false}
             isAnimationActive={false}
           />
-          <Line
-            data={toPoints(series.nisar)}
-            dataKey="mm"
-            name={labels.nisar}
-            stroke="var(--color-nisar)"
-            strokeWidth={2}
-            dot={false}
-            isAnimationActive={false}
-          />
         </LineChart>
       </ChartContainer>
-      <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
-        <span className="flex items-center gap-1.5">
-          <span className="h-0.5 w-4 rounded-full bg-chart-2" />
-          {labels.sentinel}
-        </span>
-        <span className="flex items-center gap-1.5">
-          <span className="h-0.5 w-4 rounded-full bg-brand" />
-          {labels.nisar}
-        </span>
-      </div>
+      <p className="text-xs text-muted-foreground">{labels.caption}</p>
     </div>
   );
 }

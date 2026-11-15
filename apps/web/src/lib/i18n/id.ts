@@ -587,9 +587,16 @@ export const id: Dictionary = {
       },
     },
     chartTitle: "Gerak tanah di pusat cekungan",
-    sentinel: "Sentinel-1 (sebelum larangan)",
-    nisar: "NISAR (2026)",
+    sentinel: "Sentinel-1 sebelum larangan (contoh)",
+    rateAfterExample: "Laju sesudah larangan (contoh)",
     banLine: "Larangan",
+    chartExampleCaption: "Sentinel-1 sebelum larangan, nilai contoh.",
+    nisarSeriesTitle: "Terukur NISAR, 2026",
+    nisarSeriesNote:
+      "Gerak vertikal cekungan dibanding tanah dalam jarak sekitar 3 km. Turun bernilai negatif. Pita menunjukkan derau.",
+    nisarSeriesEmpty:
+      "Belum ada seri NISAR lengkap untuk cekungan ini: sebagian pasangan tidak punya piksel yang bisa dipakai di sini.",
+    nisarVertical: "NISAR vertikal, relatif terhadap sekitarnya",
     joinNote: "Kedua garis tidak disambung, karena sensornya memakai titik acuan yang berbeda.",
     scheduleVisit: "Jadwalkan kunjungan",
     dismiss: "Abaikan",

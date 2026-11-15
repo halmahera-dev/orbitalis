@@ -38,6 +38,18 @@ function measuredEvidence(bowlId: string, locale: Locale, t: Dictionary["map"]) 
   };
 }
 
+function nisarSeriesFor(bowlId: string) {
+  const rate = nisarRateForBowl(bowlId);
+  return rate.measured && rate.series.length > 0 ? rate.series : null;
+}
+
+function nisarVerticalRate(bowlId: string) {
+  const rate = nisarRateForBowl(bowlId);
+  return rate.measured
+    ? { rate: rate.verticalRateMmYr, uncertainty: rate.verticalUncertaintyMmYr }
+    : null;
+}
+
 export async function BowlTwin({ locale, bowlId }: { locale: Locale; bowlId: string }) {
   await requireSession(locale);
   const dictionary = getDictionary(locale);
@@ -64,6 +76,8 @@ export async function BowlTwin({ locale, bowlId }: { locale: Locale; bowlId: str
         .sort((a, b) => a.rank - b.rank)}
       labels={{ map: dictionary.map, bowls: t, common: dictionary.common }}
       measured={measuredEvidence(bowlId, locale, dictionary.map)}
+      nisarSeries={nisarSeriesFor(bowlId)}
+      nisarRate={nisarVerticalRate(bowlId)}
       actions={
         <BowlActions
           bowl={{ id: bowl.id, name: bowl.name }}
