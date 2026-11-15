@@ -31,10 +31,10 @@ BETTER_AUTH_SECRET=at-least-32-characters-long-secret
 BETTER_AUTH_URL=http://localhost:3000
 ```
 
-3. Push the schema and seed demo accounts (the seed script prints emails and the shared password):
+3. Apply the migrations and seed demo accounts (the seed script prints emails and the shared password):
 
 ```bash
-bun run db:push
+bun run db:migrate
 bun run db:seed
 ```
 
@@ -97,7 +97,6 @@ npx shadcn@latest add accordion dialog popover sheet table -c packages/ui
 | `bun run deploy:web`   | Build with OpenNext and deploy to Cloudflare |
 | `bun run check-types`  | Typecheck the workspace                      |
 | `bun run check`        | Oxlint and Oxfmt                             |
-| `bun run db:push`      | Push Drizzle schema to the database          |
 | `bun run db:generate`  | Generate migrations                          |
 | `bun run db:migrate`   | Run migrations                               |
 | `bun run db:seed`      | Create or reset synthetic demo accounts      |
