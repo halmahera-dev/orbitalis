@@ -87,7 +87,7 @@ flowchart TB
 
     subgraph Web[apps/web, Next.js 16 on Cloudflare Workers]
         PUBLIC[Public pages: landing, area check]
-        MAP[Map: 4 priority layers, radar passes, priority filter, area panel, site report]
+        MAP[Map: leads triage, sinking and people cells, radar passes, later priority layers and site report]
         TWIN[Bowl page: 3D twin, projection, case report print]
         DESK[Desks: Overview, Bowls with leads and sites, Team]
     end
@@ -130,7 +130,7 @@ OPERA DISP-S1 covers North America only. It is not available for Jakarta. The de
 
 | Phase                        | Store                                                                                     | Why                                                                                                                                                     |
 | ---------------------------- | ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Now                          | Static files in `apps/web` (`bowls-seed.json`, `nisar-pairs.json`, `public/nisar/*.webp`) | Small. Deploys with the app.                                                                                                                            |
+| Now                          | PostgreSQL for NISAR runs, bowls, measurements, and 480 m cells (`import:nisar`). Static `nisar-pairs.json` and `public/nisar/*.webp` for the pass images | Small. One run is 3 bowls and 4,173 cells.                                                                                                              |
 | When a raster layer is added | Cloudflare R2 bucket with PMTiles (raster and vector) and one JSON index                  | Velocity grids are too large for Worker static assets (25 MiB per file limit). MapLibre reads PMTiles with range requests, so no tile server is needed. |
 
 Aggregated values (per bowl, per kelurahan, per 100 m cell for the area check) stay as JSON. Only full-resolution rasters go to R2.
@@ -144,7 +144,7 @@ New features go into the pages that exist. Only one new route is needed: the pub
 | Page            | Route (under `/[locale]`) | Access       | Built on `main`                                                        | What it gains                                                                                         |
 | --------------- | ------------------------- | ------------ | ---------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
 | Landing         | `/landing`                | Public       | Yes                                                                    | Link to the area check                                                                                |
-| Map             | `/map`                    | Sign-in      | Yes: bowls, NISAR passes, 3D buildings, ranked list, legend, 2D switch | Four priority layers, the priority filter, an area panel, parcel drawing for the site report (N1–N5)  |
+| Map             | `/map`                    | Sign-in      | Yes: bowls, triage queue, sinking and people cells, cell panel, NISAR passes, 3D buildings, 2D switch | Recharge, pipe, and water farming layers when their data exists, parcel drawing for the site report (N2–N5) |
 | Bowl page       | `/bowls/[id]`             | Sign-in      | Yes: 3D twin, year timeline, chart                                     | Projection panel (F12). "Print case report" with a print stylesheet (F19), no new route               |
 | Overview        | `/` desk home             | Sign-in      | Yes                                                                    | Changes per role, the same list as the pass digest (F20)                                              |
 | Bowls desk      | `/bowls`                  | Agency roles | Yes: inspection table                                                  | A type filter: pumping lead or water farming site. Site visits use the same inspection flow (F9, F15) |
@@ -153,7 +153,9 @@ New features go into the pages that exist. Only one new route is needed: the pub
 
 ### 3.3.1 Map layers and priority filter
 
-The map header has a "Show" picker today with two options (bowls, radar passes). It grows to five options. One layer shows at a time, so the legend, the ranked list, and the colors always belong to one question.
+**Built today:** four icon toggles in the map header: leads (bowl stacks and the triage queue), sinking (NISAR vertical rate per 480 m cell), people (WorldPop 2026 per km²), and radar passes. A cell click opens a cell panel that can flag the cell as a manual lead. The priority filter and the three priority layers below were built once on synthetic areas and then removed. They return when their real inputs exist.
+
+The target design below keeps one layer at a time, so the legend, the list, and the colors always belong to one question.
 
 | Layer             | Answers                                                | Shape on the map                                       | Click opens                                                       | Need |
 | ----------------- | ------------------------------------------------------ | ------------------------------------------------------ | ----------------------------------------------------------------- | ---- |

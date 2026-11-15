@@ -44,7 +44,7 @@ flowchart LR
 | Data writes | Server actions for inspections and inspectors (exist), water farming sites, plan items, area watches             | All    |
 | Access      | Sign-in (exists), roles per agency (new, F18)                                                                    | All    |
 
-**Reads.** Static JSON in the app (`bowls-seed.json`, `nisar-pairs.json`, later the job outputs), raster tiles from R2 in the browser, and the database.
+**Reads.** The database (NISAR runs, bowls, measurements, 480 m cells, inspections), static `nisar-pairs.json` for the pass images, and later raster tiles from R2 in the browser.
 
 **Never does.** Download satellite files, run processing, or send bulk email during a request. The Worker has size limits (commit `6f78a99`), so large data stays in R2.
 
@@ -68,10 +68,10 @@ flowchart LR
 | Script                    | Step              | Input                                                                                                                   | Output                                                                                                                                                        | Phase | State  |
 | ------------------------- | ----------------- | ----------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- | ------ |
 | `fetch_nisar_browse.py`   | Pass images       | ASF search API                                                                                                          | `public/nisar/*.webp`, `nisar-pairs.json`                                                                                                                     | 0     | Exists |
-| `seed_areas.py`           | Synthetic areas   | `bowls-seed.json`                                                                                                       | `areas-seed.json`: 500 m cells with sinking rate, population, piped share, and economic activity, all `synthetic`. Replaced by the Phase 2 scripts            | 0     | Exists |
 | `detect_bowls.py`         | Bowl detector     | One GUNW HDF5 pair now. Later a vertical velocity grid: the NISAR stack, or Sentinel-1 PS points after `grid_points.py` | Bowls with center, radius, peak rate, noise floor                                                                                                             | 0, 1  | Exists |
 | `fetch_nisar_gunw.py`     | Ingest            | ASF search, Earthdata Login token in `NASA_API_KEY`                                                                     | The mainland Jakarta window and LOS vector of each GUNW pair on track 10 or track 18 frame 92 (`--track`), read with HTTP range requests, in `out/gunw-jakarta/<track>/` | 0     | Exists |
-| `stack_nisar_rate.py`     | Stack rate        | `out/gunw-jakarta/10/`, `out/gunw-jakarta/18/`, `bowls-seed.json`, Nominatim reverse geocoding                          | `nisar-rates.json`: vertical and east rates and a vertical series per bowl relative to the ground within about 3 km, and lead candidates named by kelurahan. A stack, not MintPy | 0     | Exists |
+| `stack_nisar_rate.py`     | Stack rate        | `out/gunw-jakarta/10/`, `out/gunw-jakarta/18/`, Nominatim reverse geocoding                                             | `out/nisar-run.json`: bowls (rate, uncertainty, SNR, radius, vertical series) named by kelurahan, and 480 m cells with the vertical rate, relative to the ground within about 3 km. A stack, not MintPy | 0     | Exists |
+| `fetch_worldpop.py`       | Population        | `out/nisar-run.json`, WorldPop 2026 constrained 100 m (Indonesia)                                                       | People per cell, written back into `out/nisar-run.json`                                                                                                       | 0     | Exists |
 | `nisar_timeseries.py`     | Time series       | GUNW stack                                                                                                              | Displacement series, velocity, temporal coherence (MintPy)                                                                                                    | 1     | New    |
 | `sentinel1_rate.py`       | Long-term rate    | Path A: Sentinel-1 SLC stack, ascending and descending, aligned with ISCE2 `topsStack`. Path B: LiCSAR interferograms   | Path A: PS points with velocity, time series, amplitude stability, temporal coherence (MiaplPy with MintPy). Path B: velocity grid (LiCSBAS). 2015–2023       | 1     | New    |
 | `grid_points.py`          | Points to grid    | PS points from `sentinel1_rate.py` (Path A only)                                                                        | Velocity grid on the radar grid (EPSG:32748): median of the points per cell, point count, spread. Cells with too few points stay empty                        | 1     | New    |
@@ -108,7 +108,7 @@ Three differences from the paper, and how the jobs handle them:
 
 **Secrets.** Earthdata login in `~/.netrc` or runner secrets. R2 keys in runner secrets. Never in the repo.
 
-**Contract with `apps/web`.** Each JSON file has a `synthetic` flag and an `evidence` block. `apps/web` checks the shape when it reads a file and fails the build if a field is missing.
+**Contract with `apps/web`.** The jobs write `out/nisar-run.json`. `packages/db` imports it into Postgres (`import:nisar`), checks the shape with zod, and keeps bowl ids stable across runs. `apps/web` reads only the database.
 
 **Gap.** The units in `packages/` have no `AGENTS.md` and `CLAUDE.md`. `CLAUDE.md` at the root asks for both in every unit. Add them with the next change to each unit.
 
