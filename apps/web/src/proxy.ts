@@ -28,8 +28,13 @@ export function proxy(request: NextRequest) {
 
   // A fast cookie check only. requireSession does the real session check.
   if (!publicPages.includes(page) && !getSessionCookie(request)) {
-    url.pathname = page === "" ? `/${locale}/landing` : `/${locale}/sign-in`;
-    return NextResponse.redirect(url);
+    if (page === "") {
+      url.pathname = `/${locale}/landing`;
+      return NextResponse.redirect(url);
+    }
+    const guestUrl = new URL("/api/guest", request.url);
+    guestUrl.searchParams.set("next", `${pathname}${request.nextUrl.search}`);
+    return NextResponse.redirect(guestUrl);
   }
 
   return NextResponse.next();

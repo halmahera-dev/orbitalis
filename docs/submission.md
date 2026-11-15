@@ -10,7 +10,7 @@ Open items are marked **TODO**.
 
 - [ ] Every team member is registered and listed on the team page. Members cannot be added after the deadline.
 - [ ] The repo `halmahera-dev/orbitalis` is public. It is private now. Scan the git history for secrets before you open it.
-- [ ] The app on `orbitalis.halmahera.site` runs the latest commit, and "Try as guest" works in a private window.
+- [ ] The app on `orbitalis.halmahera.site` runs the latest commit. In a private window, `orbitalis.halmahera.site/en/map` opens the map with no sign-in form (a guest session starts by itself).
 - [ ] The demo link (7 slides or 30 seconds of video) opens in a private window with no sign-in.
 - [ ] Every image made with AI carries a visible watermark. **TODO:** confirm which landing images, if any, are AI-generated.
 - [ ] The AI-use dropdown on the project page is filled in.
@@ -42,7 +42,7 @@ Orbitalis turns NISAR radar into inspection leads for the people who manage grou
 ## Link to final project
 
 - Code: https://github.com/halmahera-dev/orbitalis (**TODO:** make public)
-- App: https://orbitalis.halmahera.site (sign in with "Try as guest")
+- App: https://orbitalis.halmahera.site/en/map (no sign-in: a guest session starts by itself). Public pages: `/en/landing` and `/en/check`
 
 ## Project details
 
