@@ -17,6 +17,7 @@ local.db-*
 .env
 .env*.local
 .env.*
+!.env.example
 
 # IDEs and editors
 .vscode/*

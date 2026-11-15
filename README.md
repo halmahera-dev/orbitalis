@@ -8,8 +8,8 @@ This monorepo holds the Next.js web app, shared packages under the `@repo` scope
 
 ## Screenshots
 
-| Digital twin of a bowl | Recharge priority |
-| --- | --- |
+| Digital twin of a bowl                                                            | Recharge priority                                                        |
+| --------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
 | ![Digital twin of the Kalideres bowl on the 3D map](docs/images/digital-twin.png) | ![Recharge priority map over Jakarta](docs/images/recharge-priority.png) |
 
 ## How it works
@@ -78,16 +78,16 @@ orbitalis/
 │   ├── web/          # Next.js app (landing, desk, map, bowl twin)
 │   └── jobs/         # Python NISAR jobs
 ├── packages/
-│   ├── auth/         # @repo/auth — Better Auth setup and demo seed
-│   ├── config/       # @repo/config — shared TypeScript config
-│   ├── db/           # @repo/db — Drizzle schema and client
-│   ├── env/          # @repo/env — validated environment variables
-│   └── ui/           # @repo/ui — shared components and design tokens
+│   ├── auth/         # @repo/auth: Better Auth setup and demo seed
+│   ├── config/       # @repo/config: shared TypeScript config
+│   ├── db/           # @repo/db: Drizzle schema and client
+│   ├── env/          # @repo/env: validated environment variables
+│   └── ui/           # @repo/ui: shared components and design tokens
 ├── docs/             # Product docs, start at docs/README.md
 └── plans/            # Implementation plans
 ```
 
-Import shared UI like this:
+Each app and package has its own `README.md` with run steps. Import shared UI like this:
 
 ```tsx
 import { Button } from "@repo/ui/components/button";
@@ -201,6 +201,8 @@ The home page is in `/sitemap.xml`. Pages use `noindex`. `/robots.txt` blocks on
 ## Docs
 
 - Product PRD: `docs/prd-orbitalis.md`
+- High-level design: `docs/hld-orbitalis.md`
+- Jobs and services per app: `docs/services.md`
 - Design rules: `design.md`
 - Agent guidance: `AGENTS.md`
 - Space Apps 2026 submission draft: `docs/submission.md`
