@@ -10,13 +10,9 @@ function firstValue(value: string | string[] | undefined) {
 }
 
 export default function TeamPage({ params, searchParams }: PageProps<"/[locale]/team">) {
-  return Promise.all([params, searchParams]).then(([{ locale: rawLocale }, query]) => {
+  return params.then(({ locale: rawLocale }) => {
     const locale = toLocale(rawLocale);
     const t = getDictionary(locale);
-    const filters = {
-      search: (firstValue(query.q) ?? "").trim().slice(0, 100),
-      status: firstValue(query.status),
-    };
 
     return (
       <>
@@ -36,7 +32,15 @@ export default function TeamPage({ params, searchParams }: PageProps<"/[locale]/
         />
         <main className="flex w-full flex-1 flex-col">
           <Suspense fallback={<TeamBoardSkeleton />}>
-            <TeamBoard locale={locale} filters={filters} />
+            {searchParams.then((query) => (
+              <TeamBoard
+                locale={locale}
+                filters={{
+                  search: (firstValue(query.q) ?? "").trim().slice(0, 100),
+                  status: firstValue(query.status),
+                }}
+              />
+            ))}
           </Suspense>
         </main>
       </>

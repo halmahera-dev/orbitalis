@@ -13,17 +13,9 @@ function firstValue(value: string | string[] | undefined) {
 }
 
 export default function BowlsPage({ params, searchParams }: PageProps<"/[locale]/bowls">) {
-  return Promise.all([params, searchParams]).then(([{ locale: rawLocale }, query]) => {
+  return params.then(({ locale: rawLocale }) => {
     const locale = toLocale(rawLocale);
     const t = getDictionary(locale);
-    const filters = {
-      type: firstValue(query.type),
-      search: (firstValue(query.q) ?? "").trim().slice(0, 100),
-      kecamatan: firstValue(query.kecamatan),
-      status: firstValue(query.status),
-      assignee: firstValue(query.assignee),
-      overdue: firstValue(query.overdue) === "1",
-    };
 
     return (
       <>
@@ -39,7 +31,19 @@ export default function BowlsPage({ params, searchParams }: PageProps<"/[locale]
         />
         <main className="flex w-full flex-1 flex-col">
           <Suspense fallback={<BowlQueueSkeleton />}>
-            <BowlQueue locale={locale} filters={filters} />
+            {searchParams.then((query) => (
+              <BowlQueue
+                locale={locale}
+                filters={{
+                  type: firstValue(query.type),
+                  search: (firstValue(query.q) ?? "").trim().slice(0, 100),
+                  kecamatan: firstValue(query.kecamatan),
+                  status: firstValue(query.status),
+                  assignee: firstValue(query.assignee),
+                  overdue: firstValue(query.overdue) === "1",
+                }}
+              />
+            ))}
           </Suspense>
         </main>
       </>
