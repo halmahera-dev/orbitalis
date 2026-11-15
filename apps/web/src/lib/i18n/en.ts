@@ -657,7 +657,22 @@ export const en = {
     rateLegend:
       "Sinking rate in mm/yr. A taller stack means a deeper drop by {year}. Select a bowl to open it.",
     candidateLegend:
-      "Dashed ring: {count} bowl candidate found in real NISAR data. The strongest sinks {rate} ± {uncertainty} mm/yr faster than the ground around it. A lead for inspection, not proof.",
+      "Dashed ring: {count} bowl candidate found in real NISAR data. The strongest sinks {rate} ± {uncertainty} mm/yr faster than the ground around it. Select it to open it. A lead for inspection, not proof.",
+    foundInNisar: "Found in NISAR data",
+    exampleBowls: "Example bowls",
+    oneTrackOnly: "One track only, not confirmed by the second track",
+    nearBowl: "Near {name}",
+    candidateTitle: "Area {id}",
+    candidateRate: "Vertical sinking",
+    candidateRateOneTrack: "Line-of-sight sinking",
+    rateValue: "{rate} ± {uncertainty} mm/yr",
+    candidateSize: "Radius",
+    candidateSizeValue: "{radius} m",
+    candidatePairs: "NISAR pairs",
+    candidatePairsValue: "{count} on 2 tracks",
+    candidateStatus: "Status",
+    candidateEvidence:
+      "Found by stacking {count} NISAR L2 GUNW pairs over North Jakarta. The rate is the extra sinking compared with the ground within about 3 km. Noise floor: {noise} mm/yr. Detection: a local peak at least 2 pixels wide, at least {snr} times the noise floor, and at least twice its own uncertainty.",
     depthTitle: "How deep the bowl is",
     depthToday: "Now: {cm} cm",
     depthProjected: "By {year}: {cm} cm",
@@ -670,16 +685,17 @@ export const en = {
       "Product: bowl detector on the vertical rate map. Method: the drop at the bowl center compared with the ring around it. Scale: the bowl radius is {radius} m.",
     evidenceRate: "Rate: {before} mm/yr before the ban, {after} mm/yr after",
     evidenceRateBody:
-      "Before the ban: Sentinel-1, from a published LiCSBAS product, 2015 to 2023. After the ban: NISAR L2 GUNW, track 10 ascending, 26 June to 13 October 2026, 80 m grid. Uncertainty: ±{uncertainty} mm/yr. Each rate is relative to a stable reference area.",
+      "Example values, shaped like a Sentinel-1 rate before the ban and a NISAR rate after it. Uncertainty: ±{uncertainty} mm/yr. The real NISAR measurement is the next item.",
     evidenceProjection: "Drop by {year}: {meters} m",
     evidenceProjectionBody:
       "Method: the rate times the years since 2026. It assumes a constant rate, with no sea wall, no pumping change, and no sea-level rise. This is a projection and not a forecast.",
     evidenceMixed:
       "Depth, rates, and projections in this prototype are example values. The NISAR measured item is a real measurement.",
-    evidenceMeasured: "NISAR measured: {rate} ± {uncertainty} mm/yr faster than the ground around it",
+    evidenceMeasured:
+      "NISAR measured: {rate} ± {uncertainty} mm/yr more vertical sinking than the ground around it",
     evidenceMeasuredNone: "NISAR measured: no usable pixels here",
     evidenceMeasuredBody:
-      "This is a real measurement. Product: NISAR L2 GUNW, {count} pairs on track 10 ascending, {start} to {end}, {grid} m grid. Method: each pair is masked for water and low coherence and corrected for the ionosphere. The ramp over the whole city is removed, so the number is the extra sinking compared with the ground within about 3 km, not the absolute rate. The pairs are stacked to lower the water vapor noise. Line-of-sight motion is shown as vertical. Noise floor: {noise} mm/yr.",
+      "This is a real measurement. Product: NISAR L2 GUNW, {count} pairs on two tracks: track 10 ascending, {ascendingStart} to {ascendingEnd}, and track 18 descending, {descendingStart} to {descendingEnd}, {grid} m grid. Method: each pair is masked for water and low coherence and corrected for the ionosphere. The ramp over the whole city is removed, so the number is the extra sinking compared with the ground within about 3 km, not the absolute rate. Each track is stacked, and the two lines of sight are solved for vertical and east motion, with north motion set to zero. The descending pass flies one day after the ascending one. Noise floor: {noise} mm/yr.",
     evidenceMeasuredNoneBody:
       "The NISAR pairs have no usable pixels inside this bowl after the water and coherence mask. The rate above is an example value.",
     priority: {

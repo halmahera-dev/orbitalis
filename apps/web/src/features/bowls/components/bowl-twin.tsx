@@ -20,15 +20,18 @@ function measuredEvidence(bowlId: string, locale: Locale, t: Dictionary["map"]) 
   if (!rate.measured) {
     return { summary: t.evidenceMeasuredNone, body: t.evidenceMeasuredNoneBody };
   }
+  const [ascending, descending] = nisarStack.tracks;
   return {
     summary: fill(t.evidenceMeasured, {
-      rate: rate.relativeRateMmYr,
-      uncertainty: rate.uncertaintyMmYr,
+      rate: rate.verticalRateMmYr,
+      uncertainty: rate.verticalUncertaintyMmYr,
     }),
     body: fill(t.evidenceMeasuredBody, {
       count: rate.pairs,
-      start: formatDate(locale, nisarStack.period.start),
-      end: formatDate(locale, nisarStack.period.end),
+      ascendingStart: formatDate(locale, ascending.period.start),
+      ascendingEnd: formatDate(locale, ascending.period.end),
+      descendingStart: formatDate(locale, descending.period.start),
+      descendingEnd: formatDate(locale, descending.period.end),
       grid: nisarStack.gridM,
       noise: nisarStack.noiseFloorMmYr,
     }),

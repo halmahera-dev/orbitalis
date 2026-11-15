@@ -665,7 +665,22 @@ export const id: Dictionary = {
     rateLegend:
       "Laju penurunan dalam mm/thn. Tumpukan lebih tinggi berarti penurunan pada {year} lebih dalam. Pilih cekungan untuk membukanya.",
     candidateLegend:
-      "Lingkaran putus-putus: {count} kandidat cekungan dari data NISAR asli. Yang terkuat turun {rate} ± {uncertainty} mm/thn lebih cepat dari tanah di sekitarnya. Petunjuk untuk inspeksi, bukan bukti.",
+      "Lingkaran putus-putus: {count} kandidat cekungan dari data NISAR asli. Yang terkuat turun {rate} ± {uncertainty} mm/thn lebih cepat dari tanah di sekitarnya. Pilih untuk membukanya. Petunjuk untuk inspeksi, bukan bukti.",
+    foundInNisar: "Ditemukan di data NISAR",
+    exampleBowls: "Cekungan contoh",
+    oneTrackOnly: "Hanya satu lintasan, belum dikonfirmasi lintasan kedua",
+    nearBowl: "Dekat {name}",
+    candidateTitle: "Area {id}",
+    candidateRate: "Penurunan vertikal",
+    candidateRateOneTrack: "Penurunan searah pandang",
+    rateValue: "{rate} ± {uncertainty} mm/thn",
+    candidateSize: "Jari-jari",
+    candidateSizeValue: "{radius} m",
+    candidatePairs: "Pasangan NISAR",
+    candidatePairsValue: "{count} pada 2 lintasan",
+    candidateStatus: "Status",
+    candidateEvidence:
+      "Ditemukan dengan menumpuk {count} pasangan NISAR L2 GUNW di atas Jakarta Utara. Laju ini adalah penurunan tambahan dibanding tanah dalam jarak sekitar 3 km. Batas derau: {noise} mm/thn. Deteksi: puncak lokal selebar minimal 2 piksel, minimal {snr} kali batas derau, dan minimal dua kali ketidakpastiannya sendiri.",
     depthTitle: "Seberapa dalam cekungan",
     depthToday: "Sekarang: {cm} cm",
     depthProjected: "Pada {year}: {cm} cm",
@@ -678,16 +693,17 @@ export const id: Dictionary = {
       "Produk: pendeteksi cekungan pada peta laju vertikal. Metode: penurunan di pusat cekungan dibandingkan dengan cincin di sekitarnya. Skala: jari-jari cekungan {radius} m.",
     evidenceRate: "Laju: {before} mm/thn sebelum larangan, {after} mm/thn sesudahnya",
     evidenceRateBody:
-      "Sebelum larangan: Sentinel-1, dari produk LiCSBAS yang dipublikasikan, 2015 sampai 2023. Sesudah larangan: NISAR L2 GUNW, lintasan 10 naik, 26 Juni sampai 13 Oktober 2026, grid 80 m. Ketidakpastian: ±{uncertainty} mm/thn. Setiap laju relatif terhadap area acuan yang stabil.",
+      "Nilai contoh, dibentuk seperti laju Sentinel-1 sebelum larangan dan laju NISAR sesudahnya. Ketidakpastian: ±{uncertainty} mm/thn. Hasil ukur NISAR yang asli ada di item berikutnya.",
     evidenceProjection: "Penurunan pada {year}: {meters} m",
     evidenceProjectionBody:
       "Metode: laju dikali jumlah tahun sejak 2026. Laju dianggap tetap, tanpa tanggul laut, tanpa perubahan pemompaan, dan tanpa kenaikan muka laut. Ini proyeksi, bukan ramalan.",
     evidenceMixed:
       "Kedalaman, laju, dan proyeksi di prototipe ini adalah nilai contoh. Item terukur NISAR adalah hasil ukur asli.",
-    evidenceMeasured: "Terukur NISAR: {rate} ± {uncertainty} mm/thn lebih cepat dari tanah di sekitarnya",
+    evidenceMeasured:
+      "Terukur NISAR: penurunan vertikal {rate} ± {uncertainty} mm/thn lebih cepat dari tanah di sekitarnya",
     evidenceMeasuredNone: "Terukur NISAR: tidak ada piksel yang bisa dipakai di sini",
     evidenceMeasuredBody:
-      "Ini hasil ukur asli. Produk: NISAR L2 GUNW, {count} pasangan pada lintasan 10 naik, {start} sampai {end}, grid {grid} m. Metode: setiap pasangan disaring dari air dan koherensi rendah, lalu dikoreksi untuk ionosfer. Kemiringan di seluruh kota dibuang, jadi angka ini adalah penurunan tambahan dibanding tanah dalam jarak sekitar 3 km, bukan laju mutlak. Pasangan-pasangan ditumpuk untuk menekan derau uap air. Gerak searah pandang satelit ditampilkan sebagai gerak vertikal. Batas derau: {noise} mm/thn.",
+      "Ini hasil ukur asli. Produk: NISAR L2 GUNW, {count} pasangan pada dua lintasan: lintasan 10 naik, {ascendingStart} sampai {ascendingEnd}, dan lintasan 18 turun, {descendingStart} sampai {descendingEnd}, grid {grid} m. Metode: setiap pasangan disaring dari air dan koherensi rendah, lalu dikoreksi untuk ionosfer. Kemiringan di seluruh kota dibuang, jadi angka ini adalah penurunan tambahan dibanding tanah dalam jarak sekitar 3 km, bukan laju mutlak. Setiap lintasan ditumpuk, lalu dua arah pandang diurai menjadi gerak vertikal dan timur, dengan gerak utara dianggap nol. Lintasan turun terbang satu hari setelah lintasan naik. Batas derau: {noise} mm/thn.",
     evidenceMeasuredNoneBody:
       "Pasangan NISAR tidak punya piksel yang bisa dipakai di dalam cekungan ini setelah saringan air dan koherensi. Laju di atas adalah nilai contoh.",
     priority: {

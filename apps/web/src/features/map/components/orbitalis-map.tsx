@@ -197,7 +197,7 @@ export function OrbitalisMap({
   locale: Locale;
   bowls: PublicBowl[];
   areaSet: PriorityAreaSet;
-  nisarCandidates: (CandidateRing & { relativeRateMmYr: number; uncertaintyMmYr: number })[];
+  nisarCandidates: (CandidateRing & { rateMmYr: number; uncertaintyMmYr: number })[];
   labels: { map: Dictionary["map"]; common: Dictionary["common"] };
 }) {
   const t = labels.map;
@@ -491,7 +491,7 @@ export function OrbitalisMap({
                 <p>
                   {fill(t.candidateLegend, {
                     count: nisarCandidates.length,
-                    rate: Math.round(nisarCandidates[0].relativeRateMmYr),
+                    rate: Math.round(nisarCandidates[0].rateMmYr),
                     uncertainty: Math.round(nisarCandidates[0].uncertaintyMmYr),
                   })}
                 </p>
