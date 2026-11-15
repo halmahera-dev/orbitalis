@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 
 import { defaultLocale, hasLocale } from "@/lib/i18n/locales";
 
-const publicPages = ["landing", "sign-in", "sign-up", "design-system"];
+const publicPages = ["landing", "check", "sign-in", "sign-up", "design-system"];
 
 function preferredLocale(request: NextRequest) {
   const firstLanguage = request.headers.get("accept-language")?.split(",")[0] ?? "";
@@ -28,8 +28,13 @@ export function proxy(request: NextRequest) {
 
   // A fast cookie check only. requireSession does the real session check.
   if (!publicPages.includes(page) && !getSessionCookie(request)) {
-    url.pathname = page === "" ? `/${locale}/landing` : `/${locale}/sign-in`;
-    return NextResponse.redirect(url);
+    if (page === "") {
+      url.pathname = `/${locale}/landing`;
+      return NextResponse.redirect(url);
+    }
+    const guestUrl = new URL("/api/guest", request.url);
+    guestUrl.searchParams.set("next", `${pathname}${request.nextUrl.search}`);
+    return NextResponse.redirect(guestUrl);
   }
 
   return NextResponse.next();

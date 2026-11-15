@@ -1,5 +1,7 @@
 "use client";
 
+import { ListViewIcon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { Badge } from "@repo/ui/components/badge";
 import {
   Empty,
@@ -8,9 +10,6 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@repo/ui/components/empty";
-import { cn } from "@repo/ui/lib/utils";
-import { ArrowRight02Icon, ListViewIcon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
 import { createColumnHelper, useTable } from "@tanstack/react-table";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -34,7 +33,7 @@ import {
   type InspectorAvatarLabels,
 } from "@/features/team/components/inspector-avatar";
 import { Sparkline } from "@/features/today/components/sparkline";
-import { fill, formatDateShort, type Dictionary, type Locale } from "@/lib/i18n";
+import { fill, formatDateShort, formatNumber, type Dictionary, type Locale } from "@/lib/i18n";
 
 const column = createColumnHelper<DataTableFeatures, Bowl>();
 
@@ -44,36 +43,23 @@ const columnLayout: Record<string, ColumnLayout> = {
   assignee: { hideBelow: "sm" },
   visitDate: { hideBelow: "sm" },
   trend: { hideBelow: "lg" },
-  depth: { hideBelow: "lg", alignEnd: true },
-  change: { hideBelow: "lg", alignEnd: true },
+  signal: { hideBelow: "lg", alignEnd: true },
+  people: { hideBelow: "lg", alignEnd: true },
   rate: { alignEnd: true },
 };
 
 const statusOrder: Bowl["status"][] = ["lead", "scheduled", "inspected", "closed", "dismissed"];
 
-function changeAfterBan(bowl: Bowl) {
-  return Math.round((bowl.rateAfterBanMmYr / bowl.rateBeforeBanMmYr - 1) * 100);
-}
-
-function RankCell({ bowl }: { bowl: Bowl }) {
-  const previous = bowl.previousRank;
-  const movedUp = previous !== null && previous > bowl.rank;
-  const movedDown = previous !== null && previous < bowl.rank;
-
+function RateCell({ bowl }: { bowl: Bowl }) {
+  if (bowl.rateMmYr === null) {
+    return <span className="text-muted-foreground">—</span>;
+  }
   return (
-    <span className="inline-flex items-center gap-1.5 tabular-nums">
-      {movedUp || movedDown ? (
-        <>
-          <span className="text-muted-foreground">{previous}</span>
-          <HugeiconsIcon
-            icon={ArrowRight02Icon}
-            strokeWidth={2}
-            className="size-3 text-muted-foreground"
-            aria-hidden="true"
-          />
-        </>
+    <span className="tabular-nums">
+      {Math.round(bowl.rateMmYr)}
+      {bowl.uncertaintyMmYr !== null ? (
+        <span className="text-muted-foreground"> ±{Math.round(bowl.uncertaintyMmYr)}</span>
       ) : null}
-      <span className={cn("font-medium", movedUp && "text-brand-text")}>{bowl.rank}</span>
     </span>
   );
 }
@@ -88,7 +74,6 @@ export function BowlTable({
   bowls,
   locale,
   isFiltered,
-  nisarByBowlId,
   inspectors,
   membersByName,
   labels,
@@ -96,7 +81,6 @@ export function BowlTable({
   bowls: Bowl[];
   locale: Locale;
   isFiltered: boolean;
-  nisarByBowlId: Record<string, number[]>;
   inspectors: string[];
   membersByName: Record<string, TeamMember>;
   labels: BowlTableLabels;
@@ -111,7 +95,7 @@ export function BowlTable({
         column.accessor("rank", {
           header: t.rank,
           sortFn: "basic",
-          cell: ({ row }) => <RankCell bowl={row.original} />,
+          cell: ({ row }) => <span className="font-medium tabular-nums">{row.original.rank}</span>,
         }),
         column.accessor("name", {
           id: "bowl",
@@ -178,12 +162,17 @@ export function BowlTable({
             );
           },
         }),
-        column.accessor("rateAfterBanMmYr", { id: "rate", header: t.rate, sortFn: "basic" }),
+        column.accessor((bowl) => bowl.rateMmYr ?? -Infinity, {
+          id: "rate",
+          header: t.rate,
+          sortFn: "basic",
+          cell: ({ row }) => <RateCell bowl={row.original} />,
+        }),
         column.display({
           id: "trend",
           header: t.trend,
           cell: ({ row }) => {
-            const values = nisarByBowlId[row.original.id] ?? [];
+            const values = row.original.series.map((point) => -point.mm);
             if (values.length < 2) {
               return null;
             }
@@ -194,17 +183,20 @@ export function BowlTable({
             );
           },
         }),
-        column.accessor("depthCm", {
-          id: "depth",
-          header: t.depth,
+        column.accessor((bowl) => bowl.snr ?? -Infinity, {
+          id: "signal",
+          header: t.signal,
           sortFn: "basic",
-          cell: ({ row }) => `${row.original.depthCm} cm`,
+          cell: ({ row }) => (row.original.snr === null ? "—" : `×${row.original.snr}`),
         }),
-        column.accessor(changeAfterBan, {
-          id: "change",
-          header: t.afterBan,
+        column.accessor((bowl) => bowl.peoplePerKm2 ?? -Infinity, {
+          id: "people",
+          header: t.people,
           sortFn: "basic",
-          cell: ({ row }) => `${changeAfterBan(row.original)}%`,
+          cell: ({ row }) =>
+            row.original.peoplePerKm2 === null
+              ? "—"
+              : formatNumber(locale, row.original.peoplePerKm2),
         }),
         column.display({
           id: "actions",
@@ -213,7 +205,7 @@ export function BowlTable({
             const [lng, lat] = row.original.center;
             return (
               <BowlRowActions
-                bowl={{ id: row.original.id, name: row.original.name }}
+                bowl={row.original}
                 status={row.original.status}
                 mapHref={`/${locale}/map?at=${lng.toFixed(4)},${lat.toFixed(4)},13`}
                 labels={labels.actions}
@@ -223,7 +215,7 @@ export function BowlTable({
           },
         }),
       ]),
-    [t, locale, nisarByBowlId, labels.actions, labels.inspector, inspectors, membersByName, today],
+    [t, locale, labels.actions, labels.inspector, inspectors, membersByName, today],
   );
 
   const table = useTable({

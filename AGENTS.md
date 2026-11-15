@@ -57,4 +57,4 @@
 
 - For every change in `apps/web`, read `.agents/skills/nextjs-app-architecture/SKILL.md` and follow its architecture workflow and verification checklist. Read the relevant skill references for the work at hand.
 - Use `apps/web/AGENTS.md` and the installed Next.js docs at `apps/web/node_modules/next/dist/docs` for version-specific framework behavior and APIs.
-- The interface is English (default) and Indonesian. Never hard-code user-facing text. Add every string to both `src/lib/i18n/en.ts` and `src/lib/i18n/id.ts`. `id.ts` is typed as `Dictionary` from `en.ts`, so a missing key fails `bun run check-types`.
+- The interface is Indonesian (default) and English. Never hard-code user-facing text. Add every string to both `src/lib/i18n/en.ts` and `src/lib/i18n/id.ts`. `id.ts` is typed as `Dictionary` from `en.ts`, so a missing key fails `bun run check-types`.

@@ -1,8 +1,8 @@
 # Orbitalis
 
-Orbitalis helps groundwater regulators in North Jakarta turn NISAR radar motion into inspection leads. A public landing page explains coastal subsidence. After sign-in, the desk shows a 3D map of subsidence bowls, a digital twin per bowl, and a visit workflow for the team.
+Orbitalis helps groundwater regulators in Jakarta turn NISAR radar motion into inspection leads. A public landing page explains coastal subsidence. After sign-in, the desk shows a 3D map of subsidence bowls, a digital twin per bowl, and a visit workflow for the team.
 
-This monorepo holds the Next.js web app, shared packages under the `@repo` scope, and Python jobs that fetch NISAR browse images.
+This monorepo holds the Next.js web app, shared packages under the `@repo` scope, and Python jobs that fetch NISAR browse images and stack NISAR GUNW pairs into a measured local sinking rate per bowl.
 
 ## Stack
 
@@ -13,7 +13,7 @@ This monorepo holds the Next.js web app, shared packages under the `@repo` scope
 - **Better Auth** (`@repo/auth`)
 - **Cloudflare Workers** via OpenNext (`@opennextjs/cloudflare`)
 - **Oxlint** and **Oxfmt**
-- **Python** jobs in `apps/jobs` (NISAR browse fetch)
+- **Python** jobs in `apps/jobs` (NISAR browse fetch, GUNW window read, rate stack)
 
 ## Quick start
 
@@ -31,10 +31,10 @@ BETTER_AUTH_SECRET=at-least-32-characters-long-secret
 BETTER_AUTH_URL=http://localhost:3000
 ```
 
-3. Push the schema and seed demo accounts (the seed script prints emails and the shared password):
+3. Apply the migrations and seed demo accounts (the seed script prints emails and the shared password):
 
 ```bash
-bun run db:push
+bun run db:migrate
 bun run db:seed
 ```
 
@@ -58,7 +58,7 @@ bun run dev:web
 orbitalis/
 ├── apps/
 │   ├── web/          # Next.js app (landing, desk, map, bowl twin)
-│   └── jobs/         # Python NISAR browse jobs
+│   └── jobs/         # Python NISAR jobs
 ├── packages/
 │   ├── auth/         # @repo/auth — Better Auth setup and demo seed
 │   ├── config/       # @repo/config — shared TypeScript config
@@ -97,7 +97,6 @@ npx shadcn@latest add accordion dialog popover sheet table -c packages/ui
 | `bun run deploy:web`   | Build with OpenNext and deploy to Cloudflare |
 | `bun run check-types`  | Typecheck the workspace                      |
 | `bun run check`        | Oxlint and Oxfmt                             |
-| `bun run db:push`      | Push Drizzle schema to the database          |
 | `bun run db:generate`  | Generate migrations                          |
 | `bun run db:migrate`   | Run migrations                               |
 | `bun run db:seed`      | Create or reset synthetic demo accounts      |
@@ -164,3 +163,9 @@ The home page is in `/sitemap.xml`. Pages use `noindex`. `/robots.txt` blocks on
 - Product PRD: `docs/prd-orbitalis.md`
 - Design rules: `design.md`
 - Agent guidance: `AGENTS.md`
+- Space Apps 2026 submission draft: `docs/submission.md`
+
+## Data and AI use
+
+- **Real data only:** NISAR L2 GUNW products and browse images (NASA, JPL, ISRO, through the ASF DAAC), WorldPop 2026 population, and OpenStreetMap data through CARTO tiles. The jobs write `apps/jobs/out/nisar-run.json`, and `bun run --cwd packages/db import:nisar ../../apps/jobs/out/nisar-run.json` loads the bowls and cells into Postgres. The app shows no synthetic values. The demo accounts from `db:seed` are synthetic.
+- **AI use:** parts of the code, the documents, and the submission text were written with the help of Claude Code (Anthropic) and reviewed by the team. No AI model runs inside the product.

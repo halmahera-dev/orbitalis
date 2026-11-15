@@ -3,17 +3,18 @@
 import { auth } from "@repo/auth";
 import { db } from "@repo/db";
 import { bowlStatuses, inspection, inspectionOutcomes } from "@repo/db/schema/inspection";
+import { bowl } from "@repo/db/schema/nisar";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import * as z from "zod";
 
+import { getBowl, getCells } from "@/features/bowls/bowls-queries";
 import { getActiveInspectorNames } from "@/features/team/team-queries";
 
-import seed from "./bowls-seed.json";
-
 type ActionResult = { ok: true } | { ok: false; error: string };
+type FlagResult = { ok: true; bowlId: string } | { ok: false; error: string };
 
-const bowlId = z.enum(seed.bowls.map((bowl) => bowl.id) as [string, ...string[]]);
+const bowlId = z.string().min(1).max(100);
 
 const moveInput = z.object({
   bowlId,
@@ -34,18 +35,43 @@ const outcomeInput = z.object({
 
 type InspectionValues = Omit<typeof inspection.$inferInsert, "bowlId" | "updatedBy" | "updatedAt">;
 
-async function saveInspection(bowl: string, values: InspectionValues): Promise<ActionResult> {
-  const session = await auth.api.getSession({ headers: await headers() });
+async function getSession() {
+  return auth.api.getSession({ headers: await headers() });
+}
+
+async function saveInspection(targetId: string, values: InspectionValues): Promise<ActionResult> {
+  const session = await getSession();
   if (!session) {
     return { ok: false, error: "Sign in to change a bowl." };
+  }
+  if (!(await getBowl(targetId))) {
+    return { ok: false, error: "This bowl does not exist." };
   }
   const changes = { ...values, updatedBy: session.user.id, updatedAt: new Date() };
   await db
     .insert(inspection)
-    .values({ bowlId: bowl, ...changes })
+    .values({ bowlId: targetId, ...changes })
     .onConflictDoUpdate({ target: inspection.bowlId, set: changes });
   revalidatePath("/[locale]", "layout");
   return { ok: true };
+}
+
+export async function flagCell(cellId: string): Promise<FlagResult> {
+  const session = await getSession();
+  if (!session) {
+    return { ok: false, error: "Sign in to flag a cell." };
+  }
+  const cell = (await getCells()).find((candidate) => candidate.id === cellId);
+  if (!cell) {
+    return { ok: false, error: "This cell is not in the latest NISAR run." };
+  }
+  const manualId = `cell-${cell.id}`;
+  await db
+    .insert(bowl)
+    .values({ id: manualId, source: "manual", lon: cell.center[0], lat: cell.center[1] })
+    .onConflictDoNothing();
+  revalidatePath("/[locale]", "layout");
+  return { ok: true, bowlId: manualId };
 }
 
 // Moving back to lead or to dismissed clears the visit, so old data does not linger.

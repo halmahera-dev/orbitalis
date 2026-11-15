@@ -22,21 +22,21 @@ Optional considerations: other polarizations or other frequencies from other sen
 
 ### How Orbitalis answers each item
 
-| Challenge item             | Orbitalis answer                                                                                               | State on `main`                                                                      |
-| -------------------------- | -------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
-| Interactive application    | Next.js web app: map, bowl page with a 3D digital twin, desk pages                                             | Built                                                                                |
-| NISAR data                 | NISAR L2 GUNW browse images, track 10 ascending, 8 pairs from 26 June 2026. A bowl detector reads GUNW HDF5    | Browse images built. `apps/jobs/detect_bowls.py` reads one HDF5 pair (not committed) |
-| Surface change type        | Coastal land subsidence in North Jakarta                                                                       | Built with synthetic bowl values                                                     |
-| Change over time           | Year timeline 2015–2050, NISAR pass timeline, Sentinel-1 and NISAR chart                                       | Built with synthetic series                                                          |
-| Other frequency            | Sentinel-1 (C-band) for the rate before the 2023 ban. SAOCOM (L-band, CONAE) is a possible second L-band check | Synthetic Sentinel-1 series. SAOCOM not started                                      |
-| Ancillary data             | OpenStreetMap buildings, kecamatan names. Population and piped-water coverage planned (F12, F14)               | Buildings and names built                                                            |
-| Human driver               | Deep groundwater pumping, the 2023 groundwater ban, permits, and piped-water gaps                              | Built as the main story                                                              |
-| Physical driver hypothesis | Section 4, "Physical driver hypothesis"                                                                        | Written. Shown in the twin                                                           |
-| Actionable insight         | Pumping leads, recharge priority, pipe priority, water farming status                                          | Pumping leads and the visit workflow built                                           |
-| Open source                | Public repo                                                                                                    | Repo is ready to open                                                                |
-| Hometown context           | Team members live in Indonesia                                                                                 | Partial                                                                              |
-| Story and presentation     | Landing page, demo video, slides                                                                               | Landing page built                                                                   |
-| Future NISAR applications  | Section 5, roadmap                                                                                             | Written                                                                              |
+| Challenge item             | Orbitalis answer                                                                                               | State on `main`                                                                                                                                                                       |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Interactive application    | Next.js web app: map, bowl page with a 3D digital twin, desk pages                                             | Built                                                                                                                                                                                 |
+| NISAR data                 | NISAR L2 GUNW browse images, track 10 ascending, 8 pairs from 26 June 2026. A bowl detector reads GUNW HDF5    | Browse images built. `fetch_nisar_gunw.py` and `stack_nisar_rate.py` stack 16 HDF5 pairs from tracks 10 and 18 into a vertical local rate, three bowls with series, and a 480 m cell grid, stored in PostgreSQL |
+| Surface change type        | Coastal land subsidence in Jakarta                                                                             | NISAR bowls and cells built over all of mainland Jakarta. No synthetic bowls or areas                                                                                                  |
+| Change over time           | NISAR pass timeline, NISAR series per bowl, depth timeline 2026–2050 at the measured rate                      | Built on real NISAR data. Sentinel-1 not started                                                                                                                                       |
+| Other frequency            | Sentinel-1 (C-band) for the rate before the 2023 ban. SAOCOM (L-band, CONAE) is a possible second L-band check | Synthetic Sentinel-1 series. SAOCOM not started                                                                                                                                       |
+| Ancillary data             | OpenStreetMap buildings, kecamatan names. Population and piped-water coverage planned (F12, F14)               | Buildings and names built                                                                                                                                                             |
+| Human driver               | Deep groundwater pumping, the 2023 groundwater ban, permits, and piped-water gaps                              | Built as the main story                                                                                                                                                               |
+| Physical driver hypothesis | Section 4, "Physical driver hypothesis"                                                                        | Written. Shown in the twin                                                                                                                                                            |
+| Actionable insight         | Pumping leads, recharge priority, pipe priority, water farming status                                          | Pumping leads and the visit workflow built                                                                                                                                            |
+| Open source                | Public repo                                                                                                    | Repo is ready to open                                                                                                                                                                 |
+| Hometown context           | Team members live in Indonesia                                                                                 | Partial                                                                                                                                                                               |
+| Story and presentation     | Landing page, demo video, slides                                                                               | Landing page built                                                                                                                                                                    |
+| Future NISAR applications  | Section 5, roadmap                                                                                             | Written                                                                                                                                                                               |
 
 ### Challenge resources (published 13 November 2026)
 
@@ -81,7 +81,7 @@ One platform that turns NISAR and Sentinel-1 radar motion into groundwater decis
 2. **3D visualization**: a digital twin of the ground under a bowl, a site, or a parcel, with soil layers, buildings, high tide, and a year timeline.
 3. **Groundwater use projection**: two independent estimates of groundwater extraction per area (from people and from ground motion), their ratio, and scenarios to 2050.
 
-New features go into the pages that exist. The map gets four priority layers (pumping leads, recharge priority, pipe priority, water farming) and one priority filter (sinking rate, population, economic activity). Each role opens the map on its own layer. The bowl page and the Bowls desk keep the inspection workflow (built) and add the case report and water farming site visits. The developer site report opens from the map. Only the public area check is a new page.
+New features go into the pages that exist. The map has four layers today (leads with a triage queue, measured sinking cells, people cells, radar passes). Recharge priority, pipe priority, and water farming come back as layers only when their real input data exists. Each role opens the map on its own layer. The bowl page and the Bowls desk keep the inspection workflow (built) and add the case report and water farming site visits. The developer site report opens from the map. Only the public area check is a new page.
 
 ### Needs and features
 
@@ -89,12 +89,12 @@ The team mapped six needs to the capabilities. N1–N4 are primary. N5 is second
 
 | #   | Need (original wording)                                                                                                                            | User                     | Maps | 3D  | Projection             | Feature          | State     |
 | --- | -------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------ | ---- | --- | ---------------------- | ---------------- | --------- |
-| N1  | Find hints of illegal pumps (_deteksi petunjuk pompa ilegal_)                                                                                      | Dinas SDA, Badan Geologi | Yes  | Yes | Extraction ratio       | F3, F9, F12, F19 | Partial   |
-| N2  | Areas that sink fast and need groundwater injection (_daerah yang laju penurunan tanahnya cepat dan perlu injeksi air tanah_)                      | KemenLH, Dinas SDA       | Yes  | Yes | Scenario with recharge | F13              | Not built |
-| N3  | Recommend water pipe extension, with the number of people in each area (_rekomendasi pembangunan pipa air, estimasi ada berapa orang di area itu_) | PAM Jaya                 | Yes  | No  | Demand gap             | F14              | Not built |
-| N4  | Monitor water farming (KemenLH)                                                                                                                    | KemenLH, DLH             | Yes  | Yes | Expected recharge      | F15, F21         | Not built |
-| N5  | Building plans for real-estate developers (secondary)                                                                                              | Developers               | Yes  | Yes | Local balance          | F16, F21         | Not built |
-| N6  | People who want to buy or sell a house (tertiary)                                                                                                  | Public                   | Yes  | No  | Simple text            | F17, F20         | Not built |
+| N1  | Find hints of illegal pumps (_deteksi petunjuk pompa ilegal_)                                                                                      | Dinas SDA, Badan Geologi | Yes  | Yes | Extraction ratio       | F3, F9, F12, F19 | Built (core) |
+| N2  | Areas that sink fast and need groundwater injection (_daerah yang laju penurunan tanahnya cepat dan perlu injeksi air tanah_)                      | KemenLH, Dinas SDA       | Yes  | Yes | Scenario with recharge | F13              | Partial   |
+| N3  | Recommend water pipe extension, with the number of people in each area (_rekomendasi pembangunan pipa air, estimasi ada berapa orang di area itu_) | PAM Jaya                 | Yes  | No  | Demand gap             | F14              | Partial   |
+| N4  | Monitor water farming (KemenLH)                                                                                                                    | KemenLH, DLH             | Yes  | Yes | Expected recharge      | F15, F21         | Partial   |
+| N5  | Building plans for real-estate developers (secondary)                                                                                              | Developers               | Yes  | Yes | Local balance          | F16, F21         | Partial   |
+| N6  | People who want to buy or sell a house (tertiary)                                                                                                  | Public                   | Yes  | No  | Simple text            | F17, F20         | Partial   |
 
 The three capabilities alone leave gaps in the flows. F12–F18 fill the main gaps. F19–F21 fill three more that the [Business Flow](business-flow.md) shows:
 
@@ -106,9 +106,9 @@ The three capabilities alone leave gaps in the flows. F12–F18 fill the main ga
 
 | Capability                 | State on `main`                                                                                                      |
 | -------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| Maps                       | Built: globe flight, bowl stacks, NISAR passes, 3D buildings. Missing: velocity raster, priority layers, site layers |
+| Maps                       | Built: globe flight, bowl stacks, triage queue, NISAR sinking cells, WorldPop people cells, NISAR passes, 3D buildings. Missing: priority layers, site layers |
 | 3D visualization           | Built for bowls. Missing: site and parcel twins                                                                      |
-| Groundwater use projection | Not built. Today the app projects ground depth and the "below high tide" year only (F4)                              |
+| Groundwater use projection | Not built. Today the app projects bowl depth at the measured rate only (F4)                                          |
 
 ### Confirmed scope
 
@@ -118,9 +118,9 @@ The three capabilities alone leave gaps in the flows. F12–F18 fill the main ga
 | Secondary user      | Real-estate developers (N5).                                                                                                                                                                 |
 | Tertiary user       | The public (N6).                                                                                                                                                                             |
 | Other user          | National monitoring staff (BIG, Badan Geologi): national view (G1).                                                                                                                          |
-| Launch area         | North Jakarta first (10 bowls in Penjaringan, Cilincing, Pademangan, Tanjung Priok). All of Jakarta next. Semarang and Pekalongan with the national view.                                    |
-| Radar data          | NISAR L2 GUNW for 2026 onward. Sentinel-1 for 2015–2023. On `main`, bowl values and series are synthetic (`bowls-seed.json`, `"synthetic": true`). NISAR pass images are real browse images. |
-| Other data          | WorldPop and BPS population, PAM Jaya service area, groundwater permits, Sentinel-2 optical, DEMNAS, hydrogeology map, CORS GNSS. Agency data is synthetic until a data agreement exists.    |
+| Launch area         | All of mainland Jakarta for NISAR bowls and cells. Semarang and Pekalongan with the national view. |
+| Radar data          | NISAR L2 GUNW for 2026 onward. Sentinel-1 for 2015–2023 (not started). Bowls, rates, and cells come from the NISAR stack, through `out/nisar-run.json` and `import:nisar` into PostgreSQL. No synthetic values in the app. |
+| Other data          | WorldPop 2026 population per cell (built). BPS totals, PAM Jaya service area, groundwater permits, Sentinel-2 optical, DEMNAS, hydrogeology map, CORS GNSS (not used). Features that need agency data wait for a data agreement. |
 | Processing          | Batch Python jobs in `apps/jobs`. MintPy small-baseline time series on the GUNW stack. Outputs to static files, then Cloudflare R2 for rasters (HLD 3.2).                                    |
 | Projection          | Both estimates, cross-checked (section 3, F12).                                                                                                                                              |
 | Scores              | Fixed formulas with visible weights. No machine learning.                                                                                                                                    |
@@ -181,17 +181,17 @@ Each feature has a state: Built, Partial, or Not built.
 
 #### F1. See the sinking city — Built
 
-**Story:** As a regulator, I want to see North Jakarta sink in 3D so that I can understand the size of the problem in one view.
+**Story:** As a regulator, I want to see Jakarta sink in 3D so that I can understand the size of the problem in one view.
 
 **Acceptance criteria:**
 
-- The map opens on a globe and flies to North Jakarta. With reduced motion, it goes to North Jakarta with no flight.
+- The map opens on a globe and flies to Jakarta. With reduced motion, it goes to Jakarta with no flight.
 - Each bowl is a stack of three round tiers. Height and width grow with the rate. Color follows the rate. Buildings show in 3D.
 - The legend states the rate in mm/yr.
 - A 2D view is available with the same numbers.
-- **New:** the "Show" picker has five layers: pumping leads (the bowls today), recharge priority, pipe priority, water farming, and radar passes. One layer shows at a time. **Not built.**
-- **New:** a priority filter in the legend panel with three factors: sinking rate (mm/yr), population (people per km² and people without pipes), and economic activity (low, medium, high). Each factor has a minimum. "Rank by" sets the order of the list and the colors: combined, sinking rate, population, or economic activity. The filter is in the URL. **Not built.**
-- **New:** the ranked list follows the active layer and the filter. A click on a pumping lead opens the bowl page. A click on any other layer opens an area panel on the map with its numbers and actions. **Not built.**
+- **New:** the layer picker has four icon toggles: leads, sinking (NISAR vertical rate in 480 m cells), people (WorldPop 2026 per km²), and radar passes. One layer shows at a time. **Built on real data.** Recharge priority, pipe priority, and water farming return as layers when their inputs exist (F13–F15).
+- **New:** a triage queue on the leads layer, with tabs for lead, scheduled, outcome, and dismissed, and a sort by signal (SNR), sinking rate, or people. Each row shows the rate and its uncertainty as a bar. J and K move through the rows. The tab and the sort are in the URL. **Built.**
+- **New:** a click on a lead, on the map or in the triage list, opens its 3D bowl page (F4), which holds the visit actions. A `/start` page shows the six needs as cards that open the right layer. A click on a cell opens a cell panel with the rate, coverage, people, and the nearest lead. "Flag for review" turns the cell into a manual lead. **Built.**
 - **New:** each role opens the map on its own layer. No new desk pages for recharge, pipes, or water farming. **Not built.**
 
 #### F2. Watch NISAR passes over time — Built
@@ -213,8 +213,8 @@ Gap: the clean-signal share comes from a roughness rule on the browse image (`RO
 
 **Acceptance criteria:**
 
-- The bowl detector finds areas that sink faster than their surroundings and have a bowl shape, on the vertical velocity from a stack of pairs. **Started:** `detect_bowls.py` works on one pair.
-- Each bowl has a center, a radius, a peak rate, a depth, a rank, and a previous rank. **Built (seed values).**
+- The bowl detector finds areas that sink faster than their surroundings and have a bowl shape, on the vertical velocity from a stack of pairs. **Built:** `stack_nisar_rate.py` on the 16-pair stack, at 2.5 times the noise floor and 1.5 times the bowl's own uncertainty. Three bowls on run 1.
+- Each bowl has a center, a radius, a rate with uncertainty, an SNR, a series, and a rank by signal. A rerun keeps a bowl's id when it finds it again. **Built (real values, PostgreSQL).** Depth and previous rank need more runs.
 - The lead score uses: peak rate and depth, change in rate after the 2023 ban, the extraction ratio from F12, whether a permitted well is inside the bowl radius, and whether permitted volume is exceeded. The weights are visible. **Not built.**
 - Each lead uses the label "lead for inspection, not proof of a pump". The suspected well in the twin is labeled "Illustration, not measured". **Built.**
 - The tool shows no owner names and makes no claim about a building or a person.
@@ -227,11 +227,11 @@ Gap: the clean-signal share comes from a roughness rule on the browse image (`RO
 **Acceptance criteria:**
 
 - The bowl page has a 3D digital twin with four views: overview, cut-away, street, and plan.
-- Layer toggles: buildings, scenery, contours, ban grid, rate color, high tide, and labels.
-- A year bar timeline runs from 2015 to 2050. Each bar shows the depth with and without the ban. NISAR years are marked.
+- Layer toggles: buildings, scenery, contours, rate color, and labels.
+- A year bar timeline runs from 2026 to 2050. Each bar shows the depth at the measured rate, and a dot shows the upper bound (rate plus uncertainty). The NISAR year is marked.
 - Pickable parts open a card with numbers.
-- The page shows the year the bowl floor goes below high tide, with and without the ban.
-- The chart shows Sentinel-1 displacement before the ban and NISAR displacement from June 2026, with a ban line. The two sources are not joined into one line.
+- The chart shows the NISAR vertical series from June 2026 with its noise band.
+- **Removed until real data exists:** the years before 2026, the ban comparison, and the high-tide year. They need Sentinel-1 rates, DEMNAS heights, and a high-tide datum.
 - Heights are exaggerated, and the page states the factor.
 - **New:** the twin also opens for a water farming site (F15) and a developer parcel (F16). **Not built.**
 
@@ -263,12 +263,10 @@ Gap: the clean-signal share comes from a roughness rule on the browse image (`RO
 
 **Acceptance criteria:**
 
-- Each number opens a short text with the source, product, dates, scale, and method. **Built for depth, rate, and projection.**
-- The evidence states "This prototype shows example values. They are not measurements." while values are synthetic. **Built.**
-- Satellite measurements, model estimates, projections, illustrations, and example values have different labels. **Built.**
-- Scores show their inputs and weights. **Not built.**
-- Old, missing, and low-coherence data have different states. **Not built.**
-- The Overview "AI Insight" card is a fixed template. **Gap:** rename the card, because section 3 says no language model is used.
+- Each bowl shows its evidence as an icon list: product, pairs, period, grid, noise floor, and method. **Built.**
+- Satellite measurements, projections, and illustrations have different labels. The app shows no example values. **Built.**
+- Scores show their inputs and weights. **Partial:** the triage sort names its one input (signal, rate, or people).
+- Old, missing, and low-coherence data have different states. **Partial:** cells show radar coverage, and bowls without usable pixels say so.
 
 #### F8. Share a view — Built
 
@@ -328,9 +326,11 @@ Gap: the clean-signal share comes from a roughness rule on the browse image (`RO
 - The panel appears on the bowl page, the area page, the site report, and (simplified) the area check.
 - A projection is labeled "at current assumptions". It is not a forecast.
 
-#### F13. Recharge priority (N2) — Not built
+#### F13. Recharge priority (N2) — Partial
 
 **Story:** As a KemenLH or Dinas SDA officer, I want a ranked list of fast-sinking areas that are suitable for recharge or injection so that I know where to survey first.
+
+**Built today:** the Recharge layer ranks 480 m cells by measured sinking × WorldPop people. The cell panel adds a cell to the recharge plan and moves it through proposed, surveyed, approved, built. The plan exports as CSV. Missing: recharge suitability (no hydrogeology data), the suggested method, and the rate before and after a build.
 
 **Acceptance criteria:**
 
@@ -341,9 +341,11 @@ Gap: the clean-signal share comes from a roughness rule on the browse image (`RO
 - The officer can add an area to a plan (proposed, surveyed, approved, built) and see the rate before and after the build.
 - Label: "screening, needs a field survey".
 
-#### F14. Pipe priority (N3) — Not built
+#### F14. Pipe priority (N3) — Partial
 
 **Story:** As a PAM Jaya planner, I want areas ranked by the people a pipe would serve and the groundwater it would replace so that I can plan extension to 100% coverage.
+
+**Built today:** the Pipes layer ranks cells by people without pipes, with a boost for sinking. People come from WorldPop 2026. Coverage per area is not public, so "without pipes" uses the city-wide 83.59% (PAM Jaya, September 2026) and says so. The cell panel adds a cell to the pipe plan, and the plan exports as CSV. Missing: real per-area coverage, BPS scaling, the demand gap, and the distance to the main.
 
 **Acceptance criteria:**
 
@@ -353,9 +355,11 @@ Gap: the clean-signal share comes from a roughness rule on the browse image (`RO
 - The planner can add areas to the pipe plan and export the plan as CSV.
 - After a build, if the local rate does not slow within a set number of passes, the area returns to the pumping lead list (F3) with a note.
 
-#### F15. Water farming monitor (N4) — Not built
+#### F15. Water farming monitor (N4) — Partial
 
 **Story:** As a KemenLH or DLH officer, I want to see which registered groundwater users do their water farming measures so that I can visit the right sites.
+
+**Built today:** 58 public water bodies (waduk, embung, situ, retention ponds) from OpenStreetMap (`fetch_water_bodies.py`, `import:sites`) are seeded as macro-scale sites. The Water farming layer colors a site red when it needs a visit: still unchecked and its cell sinks 20 mm/yr or more, or its last visit found the measures failing. The site list uses the triage panel and the Bowls desk type filter. Visits use the F9 flow with two outcomes: measures working, measures failing. The layer legend has a "Does water help?" chart: the mean sinking of cells within 500 m of a water body against cells farther away, with errors and a plain verdict. On run 1, cells near water sink slightly faster (2.8 ± 0.9 against −1.1 ± 0.3 mm/yr). The chart says this is a link, not a cause. Missing: site registration by drawing, declared measures, optical checks, the area impact vs control areas (needs a second NISAR run), and role-based visibility.
 
 **Acceptance criteria:**
 
@@ -372,9 +376,11 @@ Gap: the clean-signal share comes from a roughness rule on the browse image (`RO
 - Site data is visible only to KemenLH and the DLH of that region.
 - The terms follow the press release of 2 June 2026. Update them when the final regulation is published.
 
-#### F16. Site report (N5) — Not built
+#### F16. Site report (N5) — Partial
 
 **Story:** As a developer, I want a report on a parcel so that I can judge ground risk and the groundwater rules before I buy land or design.
+
+**Built today:** "Site report" in the cell panel opens `/report?at=lon,lat`, a printable page (sign-in): rate ± uncertainty and class, depth added by 2035 and 2050 at the measured rate, people per km², people without pipes, the nearest pump lead and water body, plan status, radar coverage, the three rules (permit above 100 m³ per month, water farming draft, groundwater-free zones), and the screening disclaimer. It is its own page so it can print and be shared as a link. Missing: parcel drawing, the parcel twin, the groundwater balance (F12), and the calculator (F21).
 
 **Acceptance criteria:**
 
@@ -384,9 +390,11 @@ Gap: the clean-signal share comes from a roughness rule on the browse image (`RO
 - The report can be shared as a link (map URL with the parcel) and printed with the print stylesheet.
 - The report states it is a screening document, not a geotechnical survey or a legal opinion.
 
-#### F17. Public area check (N6) — Not built
+#### F17. Public area check (N6) — Partial
 
 **Story:** As a person who wants to buy or sell a house, I want to check how fast an area sinks so that I understand the area.
+
+**Built today:** public `/check`, linked from the landing page. A 2D map of 480 m cells. Tap a cell or use "my location". The result shows the class (slow, medium, fast) as a color and a three-step bar, the rate in centimeters a year, the drop by 2035, and what the result means and does not mean. The page sends rounded rates only, with no people counts. It links to PAM Jaya. An address search (OpenStreetMap Nominatim, through a server action, limited to Jakarta) moves the map to the address. The result leads with a percentile ("sinks faster than 82% of the mapped area") and a drawing of a person in the ground drop by 2035. The selected cell is in the URL, and a share button sends the link. Missing: the trend since 2023 (needs Sentinel-1).
 
 **Acceptance criteria:**
 
@@ -490,7 +498,7 @@ The product uses no language model and trains no model. Fixed, tested processing
 - **NISAR time series (not built).** MintPy on the GUNW stack per track.
 - **Sentinel-1 rate (not built).** `sentinel1_rate.py`, Path A or B above.
 - **Points to grid (not built).** `grid_points.py` turns PS points into a velocity grid for the bowl detector, with the point count per cell.
-- **Vertical motion (not built).** Combine ascending track 10 and descending track 18.
+- **Vertical motion (built as a stack).** `stack_nisar_rate.py` combines ascending track 10 and descending track 18 (frame 92) with the LOS vectors from the product, north motion set to zero.
 - **Rate check (not built).** `validate_rates.py` compares our rates with CORS stations and with Handika et al. 2024 (same geometry, same period) each pass. A fail stops the pass at the quality gate.
 - **Groundwater balance (not built).** Estimates A and B, ratio, scenarios (F12).
 - **Priority scores (not built).** Lead, recharge, and pipe scores (F3, F13, F14).
@@ -523,7 +531,7 @@ flowchart LR
     DB[(Neon PostgreSQL: auth, roles, inspections, permits, sites, plans)] <--> W
     OSM[OpenStreetMap] --> W
     W --> P[Public: landing, area check]
-    W --> D[Map with 4 priority layers and filter, bowl page, desks: Overview, Bowls, Team]
+    W --> D[Map with leads triage, sinking and people cells, bowl page, desks: Overview, Bowls, Team]
 ```
 
 - **Batch jobs** are idempotent.
@@ -535,24 +543,24 @@ flowchart LR
 
 ### Integration Points
 
-| Source                                                                                               | Use                                                                     | State                                                                                                                                                                                                                                 |
-| ---------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| NISAR L2 GUNW                                                                                        | 2026 displacement, coherence, pass timeline                             | Browse images for 8 pairs on track 10 ascending. One HDF5 pair read by `detect_bowls.py`. Descending track 18 not loaded. HDF5 needs an Earthdata login. [ASF availability](https://nisar-docs.asf.alaska.edu/availability-overview/) |
-| NISAR GCOV                                                                                           | Optional: water and fish ponds from polarizations                       | Not used                                                                                                                                                                                                                              |
-| Sentinel-1                                                                                           | Rate 2015–2023, C-band side of the split view                           | Synthetic series in the seed                                                                                                                                                                                                          |
-| Sentinel-2                                                                                           | Optical check for water farming sites                                   | Not used                                                                                                                                                                                                                              |
-| WorldPop and BPS                                                                                     | Population per cell and per kelurahan (F12, F14, priority filter)       | Not used                                                                                                                                                                                                                              |
-| Economic activity: OpenStreetMap land use and building types, VIIRS night lights, BPS Sensus Ekonomi | Economic activity factor in the priority filter (F1): low, medium, high | OSM building types are already read by the building layer. Night lights and Sensus Ekonomi not used                                                                                                                                   |
-| PAM Jaya                                                                                             | Service area, coverage, network (F12, F14)                              | Not used. Needs a data agreement. City coverage 82% (May 2026) as a public fallback                                                                                                                                                   |
-| Groundwater permits (Badan Geologi, DKI)                                                             | Permitted wells and volumes (F3, F12)                                   | Not used. Needs a data agreement. Synthetic seed until then                                                                                                                                                                           |
-| Water farming registry (KemenLH, DLH)                                                                | Sites and declared measures (F15)                                       | Not used. Entered in the app                                                                                                                                                                                                          |
-| Hydrogeology map                                                                                     | Recharge suitability (F13)                                              | Not used                                                                                                                                                                                                                              |
-| Groundwater monitoring wells (Badan Geologi)                                                         | Direct evidence of recharge for the water farming area check (F15)      | Not used. Needs a data agreement                                                                                                                                                                                                      |
-| DEMNAS (BIG)                                                                                         | Ground height for the projection                                        | Example heights in the seed                                                                                                                                                                                                           |
-| High-tide level                                                                                      | Sea level in the twin                                                   | Example value 0.9 m in the seed                                                                                                                                                                                                       |
-| Ina-CORS (BIG)                                                                                       | Ground check                                                            | Not used. Fallback: published station rates                                                                                                                                                                                           |
-| OpenStreetMap                                                                                        | Basemap and buildings                                                   | Built                                                                                                                                                                                                                                 |
-| Administrative boundaries                                                                            | Kecamatan and kelurahan                                                 | Kecamatan names in the seed                                                                                                                                                                                                           |
+| Source                                                                                               | Use                                                                     | State                                                                                                                                                                                                                                                                    |
+| ---------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| NISAR L2 GUNW                                                                                        | 2026 displacement, coherence, pass timeline                             | Browse images for 8 pairs on track 10 ascending. The mainland Jakarta window of 8 HDF5 pairs on track 10 and 8 on track 18 (frame 92) read with range requests. HDF5 needs an Earthdata login. [ASF availability](https://nisar-docs.asf.alaska.edu/availability-overview/) |
+| NISAR GCOV                                                                                           | Optional: water and fish ponds from polarizations                       | Not used                                                                                                                                                                                                                                                                 |
+| Sentinel-1                                                                                           | Rate 2015–2023, C-band side of the split view                           | Synthetic series in the seed                                                                                                                                                                                                                                             |
+| Sentinel-2                                                                                           | Optical check for water farming sites                                   | Not used                                                                                                                                                                                                                                                                 |
+| WorldPop and BPS                                                                                     | Population per cell and per kelurahan (F12, F14, people layer)          | WorldPop 2026 constrained 100 m summed into the 480 m cells (`fetch_worldpop.py`). BPS scaling not done                                                                                                                                                                  |
+| Economic activity: OpenStreetMap land use and building types, VIIRS night lights, BPS Sensus Ekonomi | Economic activity factor in the priority filter (F1): low, medium, high | OSM building types are already read by the building layer. Night lights and Sensus Ekonomi not used                                                                                                                                                                      |
+| PAM Jaya                                                                                             | Service area, coverage, network (F12, F14)                              | Not used. Needs a data agreement. City coverage 82% (May 2026) as a public fallback                                                                                                                                                                                      |
+| Groundwater permits (Badan Geologi, DKI)                                                             | Permitted wells and volumes (F3, F12)                                   | Not used. Needs a data agreement. Synthetic seed until then                                                                                                                                                                                                              |
+| Water farming registry (KemenLH, DLH)                                                                | Sites and declared measures (F15)                                       | Not used. Entered in the app                                                                                                                                                                                                                                             |
+| Hydrogeology map                                                                                     | Recharge suitability (F13)                                              | Not used                                                                                                                                                                                                                                                                 |
+| Groundwater monitoring wells (Badan Geologi)                                                         | Direct evidence of recharge for the water farming area check (F15)      | Not used. Needs a data agreement                                                                                                                                                                                                                                         |
+| DEMNAS (BIG)                                                                                         | Ground height for the projection                                        | Example heights in the seed                                                                                                                                                                                                                                              |
+| High-tide level                                                                                      | Sea level in the twin                                                   | Example value 0.9 m in the seed                                                                                                                                                                                                                                          |
+| Ina-CORS (BIG)                                                                                       | Ground check                                                            | Not used. Fallback: published station rates                                                                                                                                                                                                                              |
+| OpenStreetMap                                                                                        | Basemap and buildings                                                   | Built                                                                                                                                                                                                                                                                    |
+| Administrative boundaries                                                                            | Kecamatan and kelurahan                                                 | Kecamatan names in the seed                                                                                                                                                                                                                                              |
 
 **Regulation context.**
 
@@ -583,7 +591,7 @@ Each phase ships a working product. The next phase starts only when the last one
 
 | Phase                              | Date                                              | Scope                                                                                                                                                                                                                      | Exit criteria                                                     |
 | ---------------------------------- | ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
-| 0. Hackathon prototype             | Up to 15 Nov 2026                                 | F1, F2, F4, F8–F11 on synthetic values and real NISAR browse images. Bowl detector on one pair.                                                                                                                            | Submission complete.                                              |
+| 0. Hackathon prototype             | Up to 15 Nov 2026                                 | F1, F2, F4, F8–F11 on real NISAR data: browse images, a 16-pair two-track stack, three bowls, 480 m cells, and WorldPop people, in PostgreSQL. | Submission complete.                                              |
 | 1. Real radar data                 | Dec 2026 – Jan 2027                               | NISAR stack with MintPy, both tracks, vertical motion. Sentinel-1 rate. Bowl detector on the stack. Lead score (F3). GNSS check (F6). Evidence states (F7). Rasters to R2.                                                 | No seed values in rates (KPI 9). KPI 7 holds.                     |
 | 2. Projection and planning         | Feb – Apr 2027                                    | Roles (F18). Groundwater use projection (F12). Pipe priority (F14). Recharge priority (F13). Case report (F19). Pass digest for agencies (F20). Synthetic permit and network seeds, then real data where agreements exist. | KPI 4 on test areas. Demo to PAM Jaya and Dinas SDA.              |
 | 3. Pilot and water farming         | May – Sep 2027, or when the KemenLH rule is final | Water farming monitor (F15) with optical checks and the calculator (F21). Pilot with one agency per desk.                                                                                                                  | KPIs 1, 2, 3, 5, 6.                                               |
@@ -593,23 +601,23 @@ Each phase ships a working product. The next phase starts only when the last one
 
 ### Technical and Product Risks
 
-| Risk                                                             | Effect                                                                                   | Response                                                                                                                                                      |
-| ---------------------------------------------------------------- | ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| All bowl values are synthetic on `main`                          | Users and judges cannot trust the numbers.                                               | Phase 1 replaces them. The evidence panel says "example values" until then.                                                                                   |
-| A short NISAR record                                             | At 5–10 cm/yr the ground moves only a few cm in months, close to atmosphere noise.       | Sentinel-1 for the long-term rate. Use a stack and both tracks. Show uncertainty.                                                                             |
-| Water vapor in a single pair looks like motion                   | Users read noise as sinking.                                                             | Never show a single pair as a rate.                                                                                                                           |
-| No permit or network data from agencies                          | Lead score and pipe priority lose inputs.                                                | Synthetic seeds for the demo. Public fallbacks (city coverage, published rates). Data agreements as open decisions.                                           |
-| Calibration factor `k` is unknown                                | Estimate B in m³ is wrong.                                                               | Show B as an index until calibrated. Calibrate where meters exist.                                                                                            |
-| WorldPop does not match BPS                                      | Wrong people counts for pipes.                                                           | Scale WorldPop to BPS kelurahan totals. KPI 4.                                                                                                                |
-| The KemenLH rule changes before it is final                      | F15 terms are wrong.                                                                     | Keep site rules as data, not code. Update the flow when the rule is published.                                                                                |
-| Recharge or water farming takes years to show in the ground rate | The NISAR check looks like failure.                                                      | NISAR measures impact per area group vs control areas, never per site. Success means slower sinking, not uplift. Optical and field checks decide site status. |
-| A lead is read as an accusation                                  | Harm to a person or business.                                                            | No names. "Lead for inspection" label. The well is an illustration.                                                                                           |
-| Public area check affects property prices                        | Harm to owners, legal risk.                                                              | Coarse cells, plain limits, no "do not buy". Decide launch timing (Open Decision 8).                                                                          |
-| Site report is used as a geotechnical survey                     | Wrong building decisions.                                                                | Clear label. No foundation design.                                                                                                                            |
-| Seed bowl "Doksli Rumah Zaki" (Sukasari, Bandung)                | A bowl named after a person's house, outside North Jakarta. It breaks the no-names rule. | Remove it or rename it to a synthetic area name.                                                                                                              |
-| "AI Insight" label                                               | Users think a model makes the text.                                                      | Rename the card.                                                                                                                                              |
-| Worker size limits                                               | Pages fail on Cloudflare (seen in commit `6f78a99`).                                     | Large data in R2, not in the bundle.                                                                                                                          |
-| Line-of-sight is mistaken for vertical motion                    | Wrong rates.                                                                             | Combine both tracks. State the method.                                                                                                                        |
+| Risk                                                             | Effect                                                                                      | Response                                                                                                                                                      |
+| ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Only 3.5 months of NISAR data                                    | Few bowls pass the tests, and each rate is only 1.5 to 2 times its uncertainty.              | Lower thresholds are stated in the evidence. Each new pass is imported as a new run, and bowls keep their ids.                                                 |
+| A short NISAR record                                             | At 5–10 cm/yr the ground moves only a few cm in months, close to atmosphere noise.          | Sentinel-1 for the long-term rate. Use a stack and both tracks. Show uncertainty.                                                                             |
+| Water vapor in a single pair looks like motion                   | Users read noise as sinking.                                                                | Never show a single pair as a rate.                                                                                                                           |
+| No permit or network data from agencies                          | Lead score and pipe priority lose inputs.                                                   | Synthetic seeds for the demo. Public fallbacks (city coverage, published rates). Data agreements as open decisions.                                           |
+| Calibration factor `k` is unknown                                | Estimate B in m³ is wrong.                                                                  | Show B as an index until calibrated. Calibrate where meters exist.                                                                                            |
+| WorldPop does not match BPS                                      | Wrong people counts for pipes.                                                              | Scale WorldPop to BPS kelurahan totals. KPI 4.                                                                                                                |
+| The KemenLH rule changes before it is final                      | F15 terms are wrong.                                                                        | Keep site rules as data, not code. Update the flow when the rule is published.                                                                                |
+| Recharge or water farming takes years to show in the ground rate | The NISAR check looks like failure.                                                         | NISAR measures impact per area group vs control areas, never per site. Success means slower sinking, not uplift. Optical and field checks decide site status. |
+| A lead is read as an accusation                                  | Harm to a person or business.                                                               | No names. "Lead for inspection" label. The well is an illustration.                                                                                           |
+| Public area check affects property prices                        | Harm to owners, legal risk.                                                                 | Coarse cells, plain limits, no "do not buy". Decide launch timing (Open Decision 8).                                                                          |
+| Site report is used as a geotechnical survey                     | Wrong building decisions.                                                                   | Clear label. No foundation design.                                                                                                                            |
+| Worker size limits                                               | Pages fail on Cloudflare (seen in commit `6f78a99`).                                        | Large data in R2, not in the bundle.                                                                                                                          |
+| Line-of-sight is mistaken for vertical motion                    | Wrong rates.                                                                                | Combine both tracks. State the method.                                                                                                                        |
+| A NISAR candidate id comes from its rounded centre               | A rerun that moves the peak by one pixel gives a new id, and the visit stays on the old id. | Accept for the hackathon. Before the pilot, match a new candidate to an old one by distance and keep the old id.                                              |
+| A candidate seen on one track only                               | It may be noise or motion the second track would not confirm.                               | Label it "One track only, not confirmed by the second track" on the map, the list, and the desk.                                                              |
 
 ### Open Decisions
 

@@ -21,7 +21,6 @@ export function DeskHeader({
   return (
     <PageHeader
       title={title}
-      tag={t.common.exampleData}
       meta={
         <>
           {fill(t.desk.lastPass, { date: formatDateShort(locale, latestPassDate) })}.{" "}

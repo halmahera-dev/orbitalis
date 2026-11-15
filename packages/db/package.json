@@ -10,11 +10,12 @@
     }
   },
   "scripts": {
-    "db:push": "drizzle-kit push",
     "db:generate": "drizzle-kit generate",
-    "db:migrate:deploy": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio",
-    "db:migrate": "drizzle-kit migrate"
+    "db:migrate": "bun --env-file=../../apps/web/.env src/migrate.ts",
+    "import:nisar": "bun --env-file=../../apps/web/.env src/import-nisar-run.ts",
+    "import:sites": "bun --env-file=../../apps/web/.env src/import-water-sites.ts",
+    "test": "bun test"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",

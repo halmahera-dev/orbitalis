@@ -4,6 +4,23 @@ Status: Draft. Date: 15 November 2026. Scope: the product after the NASA Space A
 
 This document shows who does what, in what order, and what each step gives to the next. The HLD tells how the system is built. The PRD tells what each feature must do.
 
+## 0. Flows in the app today
+
+Each need has one path through the app. Sections 4 to 9 show the full target flows.
+
+| Need | User | Path in the app | Ends with |
+| --- | --- | --- | --- |
+| N1 Illegal pump hints | Dinas SDA, Badan Geologi | Map, **Pump leads** layer, triage list (sort by signal, rate, people), bowl panel or bowl page | Schedule visit, then outcome: pump found, no pump, natural compaction |
+| N2 Fast sinking, needs injection | KemenLH, Dinas SDA | Map, **Recharge** layer, ranked cells (sinking × people), cell panel | Recharge plan: proposed, surveyed, approved, built. CSV export |
+| N3 Pipe extension with people count | PAM Jaya | Map, **Pipes** layer, ranked cells (people without pipes), cell panel | Pipe plan with the same steps. CSV export |
+| N4 Water farming monitoring | KemenLH, DLH | Map, **Water farming** layer (58 public water bodies), red sites need a visit. Or Bowls desk, type "Water farming sites" | Schedule visit, then outcome: measures working, measures failing |
+| N5 Developer planning | Developers | Map, any cell, **Site report** | Printable report: rate, depth by 2035 and 2050, people, nearest lead and water body, rules |
+| N6 Buy or sell a house | Public | Landing, **Check an area** (`/check`, no sign-in), tap the map or use my location | Plain class (slow, medium, fast), cm per year, what it means and does not mean |
+
+The **Start** page (`/start`, in the sidebar) shows these six needs as cards. A card opens the map on the right layer, or the area check. On the map, a click on a pump lead opens its 3D bowl page.
+
+The Overview shows the open pump leads, the triage list, water farming site status, and the progress of both plans.
+
 ## 1. Actors
 
 | Actor                 | Organization                              | Role in the flow                                                                                                                       |

@@ -48,13 +48,11 @@ export function HowToStart({
                 <div className="mt-auto flex items-center justify-between gap-3 pt-4">
                   <p className="type-label-mono text-muted-foreground">{offer.terms}</p>
                   {index === 0 ? (
-                    <Button
-                      variant="link"
-                      nativeButton={false}
-                      render={<Link href={`/${locale}/map`} />}
-                    >
-                      {t.seeMap}
-                    </Button>
+                    <form action={signInAsGuest.bind(null, locale, "map")}>
+                      <Button type="submit" variant="link">
+                        {t.openMapAsGuest}
+                      </Button>
+                    </form>
                   ) : null}
                   {isFeatured ? (
                     <form action={signInAsGuest.bind(null, locale)}>

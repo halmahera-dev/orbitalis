@@ -24,6 +24,10 @@ export function formatDate(locale: Locale, date: string | Date) {
   }).format(new Date(date));
 }
 
+export function formatNumber(locale: Locale, value: number) {
+  return new Intl.NumberFormat(locale).format(value);
+}
+
 export function formatDateShort(locale: Locale, date: string | Date) {
   return new Intl.DateTimeFormat(locale, {
     day: "numeric",

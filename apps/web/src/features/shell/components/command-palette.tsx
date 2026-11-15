@@ -1,6 +1,14 @@
 "use client";
 
 import {
+  CompassIcon,
+  DashboardSquare01Icon,
+  ListViewIcon,
+  MapsGlobal02Icon,
+  UserMultipleIcon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
+import {
   Command,
   CommandDialog,
   CommandEmpty,
@@ -11,13 +19,6 @@ import {
   CommandSeparator,
   CommandShortcut,
 } from "@repo/ui/components/command";
-import {
-  DashboardSquare01Icon,
-  ListViewIcon,
-  MapsGlobal02Icon,
-  UserMultipleIcon,
-} from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -39,6 +40,7 @@ export function CommandPalette({
   const home = `/${locale}`;
   const pages = [
     { title: labels.nav.today, href: home, icon: DashboardSquare01Icon },
+    { title: labels.nav.start, href: `${home}/start`, icon: CompassIcon },
     { title: labels.nav.bowls, href: `${home}/bowls`, icon: ListViewIcon },
     { title: labels.nav.team, href: `${home}/team`, icon: UserMultipleIcon },
     { title: labels.nav.map, href: `${home}/map`, icon: MapsGlobal02Icon },

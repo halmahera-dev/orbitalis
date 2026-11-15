@@ -11,6 +11,7 @@ Start here. This page links to every product and design document in the repo. Up
 | 3   | [Business Flow](business-flow.md) | Who does what, in what order, for each need                                         | You design a user flow or talk to an agency             |
 | 4   | [HLD](hld-orbitalis.md)           | How the system is built: parts, data flow, projection, scores, map layers, database | You plan a technical change                             |
 | 5   | [Services](services.md)           | What runs in `apps/`: `web`, `jobs`, `notifier`, and each job script                | You add or change a service or a job                    |
+| 6   | [Submission](submission.md)       | The Space Apps 2026 project page text, checklist, NASA data, and references         | You fill in or review the hackathon submission          |
 
 The feature map is an HTML file. Open it in a browser. The other documents are Markdown with Mermaid diagrams.
 
@@ -25,10 +26,12 @@ The feature map is an HTML file. Open it in a browser. The other documents are M
 
 ## Plans and older documents
 
-| Document                                                 | State                                                                                                                    |
-| -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| [Plans index](../plans/README.md)                        | Animation plans 001–004, all done                                                                                        |
-| [Goal: dashboard prototype](goal-dashboard-prototype.md) | 7 November 2026. The map-first goal for the hackathon prototype. The PRD replaces it for the product after the hackathon |
+| Document                                                                                | State                                                                                                                    |
+| --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| [Plans index](../plans/README.md)                                                       | Animation plans 001–004, all done                                                                                        |
+| [Goal: dashboard prototype](goal-dashboard-prototype.md)                                | 7 November 2026. The map-first goal for the hackathon prototype. The PRD replaces it for the product after the hackathon |
+| [Design: real NISAR evidence](superpowers/specs/2026-11-15-nisar-hackathon-a-design.md) | 15 November 2026. Two-track vertical rate, the bowl series, NISAR leads, guest map. Approved                             |
+| [Plan: real NISAR evidence](superpowers/plans/2026-11-15-nisar-hackathon-a.md)          | 15 November 2026. Nine tasks for the design above, done                                                                  |
 
 ## How the documents connect
 
@@ -52,4 +55,4 @@ flowchart LR
 - CNBC Indonesia, [groundwater permit rule](https://www.cnbcindonesia.com/news/20231113152455-4-488628/ngebor-air-tanah-wajib-izin-pemerintah-blak-blakan) (Kepmen ESDM 291.K/GL.01/MEM.G/2023), 13 November 2023
 - Handika, Widodo, Pravitasari, [PS-InSAR and MICMAC for Jakarta](https://ejournal.brin.go.id/JTL/article/view/1125/2515), Jurnal Teknologi Lingkungan 25(1), 2024
 - Fielding, [ARSET InSAR notebooks](https://github.com/EJFielding/ARSET_notebooks)
-- Katadata, [piped water coverage 82%](https://katadata.co.id/berita/nasional/6a60436dec29e/air-perpipaan-tembus-82-persen-pemprov-dki-kurangi-penggunaan-air-tanah), May 2026
+- Katadata, [piped water coverage 82%](https://katadata.co.id/berita/nasional/6a60436dec29e/air-perpipaan-tembus-82-persen-pemprov-dki-kurangi-penggunaan-air-tanah) (coverage in May 2026), 22 July 2026

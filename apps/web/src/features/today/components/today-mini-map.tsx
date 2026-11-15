@@ -11,10 +11,13 @@ type MiniBowl = {
   id: string;
   name: string;
   center: [number, number];
-  rateAfterBanMmYr: number;
+  rateMmYr: number | null;
 };
 
-function rateTone(rate: number) {
+function rateTone(rate: number | null) {
+  if (rate === null) {
+    return "bg-muted-foreground";
+  }
   if (rate >= fastRateMmYr) {
     return "bg-rate-fast";
   }
@@ -58,8 +61,8 @@ export function TodayMiniMap({
       </div>
       <div className="relative min-h-0 flex-1">
         <Map
-          center={[106.81, -6.13]}
-          zoom={11.2}
+          center={[106.83, -6.22]}
+          zoom={10.2}
           pitch={48}
           bearing={-18}
           className="absolute inset-0"
@@ -77,7 +80,7 @@ export function TodayMiniMap({
                   title={bowl.name}
                   className={cn(
                     "block size-2.5 rounded-full ring-2 ring-card",
-                    rateTone(bowl.rateAfterBanMmYr),
+                    rateTone(bowl.rateMmYr),
                   )}
                 />
               </MarkerContent>

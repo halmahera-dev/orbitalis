@@ -10,6 +10,7 @@ from pathlib import Path
 
 import h5py
 import numpy as np
+
 from PIL import Image, ImageDraw
 from pyproj import Transformer
 from scipy import ndimage
@@ -17,6 +18,7 @@ from scipy import ndimage
 SPEED_OF_LIGHT = 299_792_458.0
 DAYS_PER_YEAR = 365.0
 NORTH_JAKARTA_LAND = (106.70, -6.20, 106.98, -6.10)
+JAKARTA_LAND = (106.68, -6.38, 106.98, -6.08)
 COHERENCE_LIMIT = 0.6
 LOCAL_SIGMA_PIXELS = 4
 REGIONAL_SIGMA_PIXELS = 40
@@ -41,20 +43,32 @@ class PairWindow:
     wavelength_m: float
     days: int
     incidence_degrees: float
+    los_unit_vector: tuple[float, float, float]
 
 
-def read_incidence_degrees(product, center_x, center_y):
+def read_radar_grid_value(product, name, center_x, center_y):
     heights = product[f"{RADAR_GRID}/heightAboveEllipsoid"][:]
     xs = product[f"{RADAR_GRID}/xCoordinates"][:]
     ys = product[f"{RADAR_GRID}/yCoordinates"][:]
     layer = int(np.argmin(np.abs(heights)))
     column = int(np.argmin(np.abs(xs - center_x)))
     row = int(np.argmin(np.abs(ys - center_y)))
-    return float(product[f"{RADAR_GRID}/incidenceAngle"][layer, row, column])
+    return float(product[f"{RADAR_GRID}/{name}"][layer, row, column])
 
 
-def read_pair_window(h5_path):
-    west, south, east, north = NORTH_JAKARTA_LAND
+def read_incidence_degrees(product, center_x, center_y):
+    return read_radar_grid_value(product, "incidenceAngle", center_x, center_y)
+
+
+def read_los_unit_vector(product, center_x, center_y):
+    """East, north, and up parts of the ground-to-sensor line of sight."""
+    east = read_radar_grid_value(product, "losUnitVectorX", center_x, center_y)
+    north = read_radar_grid_value(product, "losUnitVectorY", center_x, center_y)
+    return (east, north, float(np.sqrt(1 - east**2 - north**2)))
+
+
+def read_pair_window(h5_path, bounds=NORTH_JAKARTA_LAND):
+    west, south, east, north = bounds
     with h5py.File(h5_path, "r") as product:
         epsg = int(product[f"{UNWRAPPED_GRID}/HH/projection"].attrs["epsg_code"])
         to_utm = Transformer.from_crs(4326, epsg, always_xy=True)
@@ -83,6 +97,7 @@ def read_pair_window(h5_path):
             wavelength_m=SPEED_OF_LIGHT / frequency_hz,
             days=days,
             incidence_degrees=read_incidence_degrees(product, center_x, center_y),
+            los_unit_vector=read_los_unit_vector(product, center_x, center_y),
         )
 
 
@@ -100,11 +115,14 @@ def find_usable_pixels(window):
     )
 
 
-def sinking_millimeters(window):
+def range_increase_millimeters(window):
     ionosphere_free_phase = window.phase - window.ionosphere
-    # ponytail: sign follows ISCE3 (reference x conj(secondary)); confirm on a known point.
-    range_increase_m = ionosphere_free_phase * window.wavelength_m / (4 * np.pi)
-    return range_increase_m * 1000 / np.cos(np.radians(window.incidence_degrees))
+    # Sign follows ISCE3 (reference x conj(secondary)); the known fast-sinking areas come out positive.
+    return ionosphere_free_phase * window.wavelength_m / (4 * np.pi) * 1000
+
+
+def sinking_millimeters(window):
+    return range_increase_millimeters(window) / np.cos(np.radians(window.incidence_degrees))
 
 
 def masked_gaussian(values, is_valid, sigma):
