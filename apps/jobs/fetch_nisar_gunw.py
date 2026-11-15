@@ -1,10 +1,13 @@
-"""Read the North Jakarta window of every NISAR GUNW pair on track 10 ascending.
+"""Read the North Jakarta window of every NISAR GUNW pair on one track.
 
-The HDF5 products are about 2.3 GB each. HTTP range requests read only the chunks that cover
-North Jakarta, so one pair takes under a minute. Needs an Earthdata Login user token in
-NASA_API_KEY (run with `uv run --env-file ../../.env fetch_nisar_gunw.py`).
+Track 10 is ascending. Track 18 is descending, and only its frame 92 has an unbroken chain of
+pairs over North Jakarta. The HDF5 products are about 2.3 GB each; HTTP range requests read only
+the chunks that cover the window, so one pair takes under a minute. Needs an Earthdata Login
+user token in NASA_API_KEY:
+`uv run --env-file ../../.env fetch_nisar_gunw.py --track 18`.
 """
 
+import argparse
 import json
 import os
 import sys
@@ -19,12 +22,17 @@ import requests
 from detect_bowls import PairWindow, read_pair_window
 
 JAKARTA = "POINT(106.82 -6.12)"
-ASCENDING_TRACK = 10
+FRAMES_BY_TRACK = {10: None, 18: 92}
 WINDOW_DIR = Path(__file__).resolve().parent / "out" / "gunw"
 RANGE_BLOCK_BYTES = 8 * 1024 * 1024
 
 
-def search_gunw_granules() -> list[dict]:
+def is_wanted(properties: dict, track: int) -> bool:
+    frame = FRAMES_BY_TRACK[track]
+    return properties["pathNumber"] == track and frame in (None, properties.get("frameNumber"))
+
+
+def search_gunw_granules(track: int) -> list[dict]:
     query = urllib.parse.urlencode(
         {
             "dataset": "NISAR",
@@ -37,7 +45,7 @@ def search_gunw_granules() -> list[dict]:
     url = f"https://api.daac.asf.alaska.edu/services/search/param?{query}"
     with urllib.request.urlopen(url, timeout=120) as response:
         features = json.load(response)["features"]
-    track_features = [f for f in features if f["properties"]["pathNumber"] == ASCENDING_TRACK]
+    track_features = [f for f in features if is_wanted(f["properties"], track)]
     return sorted(track_features, key=lambda f: f["properties"]["startTime"])
 
 
@@ -85,19 +93,24 @@ def save_window(scene: str, window: PairWindow, path: Path) -> None:
         wavelength_m=window.wavelength_m,
         days=window.days,
         incidence_degrees=window.incidence_degrees,
+        los_unit_vector=np.array(window.los_unit_vector),
         reference_date=reference_date,
         secondary_date=secondary_date,
     )
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--track", type=int, choices=sorted(FRAMES_BY_TRACK), required=True)
+    track = parser.parse_args().track
     token = os.environ.get("NASA_API_KEY", "").strip()
     if not token:
         sys.exit("NASA_API_KEY is empty. It must hold an Earthdata Login user token.")
-    WINDOW_DIR.mkdir(parents=True, exist_ok=True)
-    for feature in search_gunw_granules():
+    track_dir = WINDOW_DIR / str(track)
+    track_dir.mkdir(parents=True, exist_ok=True)
+    for feature in search_gunw_granules(track):
         scene = feature["properties"]["sceneName"]
-        path = WINDOW_DIR / f"{scene}.npz"
+        path = track_dir / f"{scene}.npz"
         if path.exists():
             print(f"skip {scene[61:76]} (already read)", file=sys.stderr)
             continue
