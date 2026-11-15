@@ -15,7 +15,7 @@ import { Switch } from "@repo/ui/components/switch";
 import { ToggleGroup, ToggleGroupItem } from "@repo/ui/components/toggle-group";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@repo/ui/components/tooltip";
 import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 import type { Bowl, Cell } from "@/features/bowls/bowls-queries";
@@ -283,6 +283,7 @@ export function OrbitalisMap({
 }) {
   const t = labels.map;
   const pathname = usePathname();
+  const router = useRouter();
   const searchParams = useSearchParams();
   const pairs = interferogramCatalog.pairs;
   const positionTimerRef = useRef(0);
@@ -327,7 +328,8 @@ export function OrbitalisMap({
         site.outcome === "measures_failing" ||
         (site.status === "lead" && (site.rateMmYr ?? 0) >= slowRateMmYr),
     }));
-  const hasPanel = selectedBowl !== null || selectedCell !== null;
+  const selectedSite = isFarming ? selectedBowl : null;
+  const hasPanel = selectedSite !== null || selectedCell !== null;
 
   function setParams(updates: Record<string, string | null>) {
     const nextParams = new URLSearchParams(window.location.search);
@@ -345,8 +347,8 @@ export function OrbitalisMap({
     setParams({ [name]: value });
   }
 
-  function selectBowl(bowlId: string | null) {
-    setParams({ show: null, cell: null, lead: bowlId });
+  function openBowl(bowlId: string) {
+    router.push(`/${locale}/bowls/${bowlId}`);
   }
 
   function rememberPosition(position: Position) {
@@ -451,7 +453,7 @@ export function OrbitalisMap({
             <BowlLayer
               bowls={visibleLeads}
               selectedBowlId={selectedBowl?.id ?? null}
-              onSelect={(bowlId) => setParam("lead", bowlId)}
+              onSelect={openBowl}
               onDeselect={() => setParam("lead", null)}
             />
           )}
@@ -487,10 +489,10 @@ export function OrbitalisMap({
             bowls={leads}
             status={triageStatus}
             sort={triageSort}
-            selectedId={null}
+            selectedId={selectedBowl?.id ?? null}
             onStatusChange={(status) => setParam("status", status === "lead" ? null : status)}
             onSortChange={(sort) => setParam("sort", sort === "signal" ? null : sort)}
-            onSelect={(bowlId) => setParam("lead", bowlId)}
+            onSelect={openBowl}
             labels={labels}
           />
         )}
@@ -518,17 +520,17 @@ export function OrbitalisMap({
             labels={labels}
           />
         )}
-        {selectedBowl && (
+        {selectedSite && (
           <BowlPanel
-            key={selectedBowl.id}
+            key={selectedSite.id}
             locale={locale}
-            bowl={selectedBowl}
+            bowl={selectedSite}
             labels={labels}
             onClose={() => setParam("lead", null)}
             actions={
               <BowlActions
-                bowl={selectedBowl}
-                status={selectedBowl.status}
+                bowl={selectedSite}
+                status={selectedSite.status}
                 labels={labels.actions}
                 inspectors={inspectors}
               />
@@ -544,7 +546,7 @@ export function OrbitalisMap({
             nearestLead={nearestLead}
             labels={labels}
             onClose={() => setParam("cell", null)}
-            onSelectBowl={selectBowl}
+            onSelectBowl={openBowl}
             planKind={planKind}
             planStatus={selectedPlan?.status ?? null}
           />
