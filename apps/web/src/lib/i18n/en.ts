@@ -676,6 +676,7 @@ export const en = {
     candidateSizeValue: "{radius} m",
     candidatePairs: "NISAR pairs",
     candidatePairsValue: "{count} on 2 tracks",
+    candidatePairsOneTrack: "{count} on track 10",
     candidateStatus: "Status",
     candidateEvidence:
       "Found by stacking {count} NISAR L2 GUNW pairs over North Jakarta. The rate is the extra sinking compared with the ground within about 3 km. Noise floor: {noise} mm/yr. Detection: a local peak at least 2 pixels wide, at least {snr} times the noise floor, and at least twice its own uncertainty.",

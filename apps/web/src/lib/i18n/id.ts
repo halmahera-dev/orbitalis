@@ -685,6 +685,7 @@ export const id: Dictionary = {
     candidateSizeValue: "{radius} m",
     candidatePairs: "Pasangan NISAR",
     candidatePairsValue: "{count} pada 2 lintasan",
+    candidatePairsOneTrack: "{count} pada lintasan 10",
     candidateStatus: "Status",
     candidateEvidence:
       "Ditemukan dengan menumpuk {count} pasangan NISAR L2 GUNW di atas Jakarta Utara. Laju ini adalah penurunan tambahan dibanding tanah dalam jarak sekitar 3 km. Batas derau: {noise} mm/thn. Deteksi: puncak lokal selebar minimal 2 piksel, minimal {snr} kali batas derau, dan minimal dua kali ketidakpastiannya sendiri.",

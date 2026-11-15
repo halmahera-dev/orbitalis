@@ -15,29 +15,30 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import type { PriorityAreaSet } from "@/features/areas/areas-queries";
-import type { PublicBowl } from "@/features/bowls/bowls-queries";
+import type { NisarLead, PublicBowl } from "@/features/bowls/bowls-queries";
 
 import { AppLogo } from "@/components/app-logo";
 import { Map, useMap } from "@/components/ui/map";
 import {
+  candidateLabel,
   parsePriorityFilter,
   priorityFilterParams,
   rankAreas,
+  rankCandidates,
   rankLeads,
   type PriorityFilter as Filter,
   type PriorityLayer,
   type RankedArea,
 } from "@/features/areas/areas-priority";
+import { BowlActions, type BowlActionLabels } from "@/features/bowls/components/bowl-actions";
 import { dropMeters, fastRateMmYr, slowRateMmYr } from "@/features/map/bowl-rates";
 import { AreaLayer } from "@/features/map/components/area-layer";
 import { AreaPanel } from "@/features/map/components/area-panel";
 import { BarTimeline, usePlayback } from "@/features/map/components/bar-timeline";
 import { BowlLayer } from "@/features/map/components/bowl-layer";
+import { CandidatePanel, type CandidateEvidence } from "@/features/map/components/candidate-panel";
 import { MapRankedList, type RankedListItem } from "@/features/map/components/map-ranked-list";
-import {
-  NisarCandidateLayer,
-  type CandidateRing,
-} from "@/features/map/components/nisar-candidate-layer";
+import { NisarCandidateLayer } from "@/features/map/components/nisar-candidate-layer";
 import { PriorityFilter } from "@/features/map/components/priority-filter";
 import { isPriorityLayer, mapLayers, parseMapLayer } from "@/features/map/map-layers";
 import { BuildingsLayer, InterferogramLayer } from "@/features/nisar/components/nisar-layers";
@@ -191,14 +192,23 @@ export function OrbitalisMap({
   locale,
   bowls,
   areaSet,
-  nisarCandidates,
+  nisarLeads,
+  candidateEvidence,
+  inspectors,
   labels,
 }: {
   locale: Locale;
   bowls: PublicBowl[];
   areaSet: PriorityAreaSet;
-  nisarCandidates: (CandidateRing & { rateMmYr: number; uncertaintyMmYr: number })[];
-  labels: { map: Dictionary["map"]; common: Dictionary["common"] };
+  nisarLeads: NisarLead[];
+  candidateEvidence: CandidateEvidence;
+  inspectors: string[];
+  labels: {
+    map: Dictionary["map"];
+    common: Dictionary["common"];
+    statuses: Dictionary["bowls"]["statuses"];
+    actions: BowlActionLabels;
+  };
 }) {
   const t = labels.map;
   const router = useRouter();
@@ -256,6 +266,13 @@ export function OrbitalisMap({
     }));
   }, [rankedAreas, filter]);
   const selectedArea = rankedAreas.find((ranked) => ranked.area.id === selectedAreaId) ?? null;
+  const rankedCandidates = useMemo(
+    () => rankCandidates(nisarLeads, areaSet.areas, filter),
+    [nisarLeads, areaSet.areas, filter],
+  );
+  const selectedLeadId = isLeads ? searchParams.get("lead") : null;
+  const selectedLead = nisarLeads.find((lead) => lead.id === selectedLeadId) ?? null;
+  const hasPanel = selectedArea !== null || selectedLead !== null;
 
   function setParams(updates: Record<string, string | null>) {
     const nextParams = new URLSearchParams(window.location.search);
@@ -279,6 +296,10 @@ export function OrbitalisMap({
 
   function selectArea(areaId: string | null) {
     setParam("area", areaId);
+  }
+
+  function selectLead(leadId: string | null) {
+    setParam("lead", leadId);
   }
 
   function rememberPosition(position: Position) {
@@ -367,14 +388,29 @@ export function OrbitalisMap({
         value: areaListValue(ranked, priorityLayer, filter, locale, t.priority),
       }));
     }
-    return matchingLeads.map((ranked) => ({
+    const candidateItems = rankedCandidates
+      .filter((ranked) => ranked.matches)
+      .map((ranked) => ({
+        id: ranked.candidate.id,
+        rank: ranked.rank ?? 0,
+        name: fill(t.nearBowl, { name: ranked.candidate.name }),
+        detail:
+          candidateLabel(ranked.candidate.basis) === "oneTrack"
+            ? t.oneTrackOnly
+            : ranked.candidate.kecamatan,
+        value: fill(t.priority.sinkingValue, { value: ranked.candidate.rateMmYr }),
+        group: t.foundInNisar,
+      }));
+    const bowlItems = matchingLeads.map((ranked) => ({
       id: ranked.lead.id,
       rank: ranked.rank ?? 0,
       name: ranked.lead.name,
       detail: ranked.lead.kecamatan,
       value: leadListValue(ranked),
       href: `/${locale}/bowls/${ranked.lead.id}`,
+      group: candidateItems.length > 0 ? t.exampleBowls : undefined,
     }));
+    return [...candidateItems, ...bowlItems];
   }
 
   function describeView() {
@@ -450,7 +486,13 @@ export function OrbitalisMap({
           onViewportChange={rememberPosition}
         >
           <BuildingsLayer />
-          {isLeads && <NisarCandidateLayer candidates={nisarCandidates} />}
+          {isLeads && (
+            <NisarCandidateLayer
+              candidates={nisarLeads}
+              selectedId={selectedLead?.id ?? null}
+              onSelect={selectLead}
+            />
+          )}
           {isLeads && (
             <BowlLayer
               bowls={visibleBowls}
@@ -476,7 +518,7 @@ export function OrbitalisMap({
         <div
           className={cn(
             "absolute top-4 bottom-4 left-4 flex h-fit max-w-64 flex-col gap-2 overflow-y-auto rounded-4xl border border-transparent glass p-3 text-xs text-muted-foreground shadow-md",
-            selectedArea && "max-md:hidden",
+            hasPanel && "max-md:hidden",
           )}
         >
           {isLeads && (
@@ -487,13 +529,14 @@ export function OrbitalisMap({
                 <span>{fastRateMmYr} mm/yr</span>
               </div>
               <p>{fill(t.rateLegend, { year: defaultYear })}</p>
-              {nisarCandidates.length > 0 && (
+              {nisarLeads.length > 0 && (
                 <p>
                   {fill(t.candidateLegend, {
-                    count: nisarCandidates.length,
-                    rate: Math.round(nisarCandidates[0].rateMmYr),
-                    uncertainty: Math.round(nisarCandidates[0].uncertaintyMmYr),
+                    count: nisarLeads.length,
+                    rate: Math.round(nisarLeads[0].rateMmYr),
+                    uncertainty: Math.round(nisarLeads[0].uncertaintyMmYr),
                   })}
+                  {candidateLabel(nisarLeads[0].basis) === "oneTrack" && ` ${t.oneTrackOnly}.`}
                 </p>
               )}
             </>
@@ -524,7 +567,7 @@ export function OrbitalisMap({
             />
           )}
         </div>
-        {!isRadar && !selectedArea && (
+        {!isRadar && !hasPanel && (
           <MapRankedList
             items={listItems()}
             title={priorityLayer ? t.priority.areaListTitle : t.listTitle}
@@ -536,7 +579,24 @@ export function OrbitalisMap({
             rankTemplate={t.rankLabel}
             showLabel={priorityLayer ? t.priority.showAreaList : t.showList}
             hideLabel={priorityLayer ? t.priority.hideAreaList : t.hideList}
-            onSelect={selectArea}
+            onSelect={priorityLayer ? selectArea : selectLead}
+          />
+        )}
+        {selectedLead && (
+          <CandidatePanel
+            key={selectedLead.id}
+            lead={selectedLead}
+            evidence={candidateEvidence}
+            labels={labels}
+            actions={
+              <BowlActions
+                bowl={{ id: selectedLead.id, name: fill(t.nearBowl, { name: selectedLead.name }) }}
+                status={selectedLead.status}
+                labels={labels.actions}
+                inspectors={inspectors}
+              />
+            }
+            onClose={() => selectLead(null)}
           />
         )}
         {priorityLayer && selectedArea && (

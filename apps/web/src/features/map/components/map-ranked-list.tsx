@@ -15,6 +15,7 @@ export type RankedListItem = {
   detail: string;
   value: string;
   href?: string;
+  group?: string;
 };
 
 const rowClassName =
@@ -81,10 +82,14 @@ export function MapRankedList({
       )}
       {isOpen && items.length > 0 && (
         <ol className="flex flex-col">
-          {items.map((item) => {
+          {items.map((item, index) => {
             const label = `${item.name}, ${fill(rankTemplate, { rank: item.rank })}`;
+            const startsGroup = item.group !== undefined && item.group !== items[index - 1]?.group;
             return (
               <li key={item.id}>
+                {startsGroup && (
+                  <h3 className="px-3 pt-2 pb-1 text-xs text-muted-foreground">{item.group}</h3>
+                )}
                 {item.href ? (
                   <Link
                     href={item.href}
