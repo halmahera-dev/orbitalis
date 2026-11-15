@@ -442,7 +442,7 @@ export const en = {
     rate: "Rate (mm/yr)",
     depth: "Depth",
     afterBan: "Change after ban",
-    trend: "Trend",
+    trend: "NISAR trend (2026)",
     viewOnMap: "View on map",
     empty: "No bowl matches these filters.",
     inspectionTitle: "Inspection",

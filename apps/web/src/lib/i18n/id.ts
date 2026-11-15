@@ -449,7 +449,7 @@ export const id: Dictionary = {
     rate: "Laju (mm/thn)",
     depth: "Kedalaman",
     afterBan: "Perubahan setelah larangan",
-    trend: "Tren",
+    trend: "Tren NISAR (2026)",
     viewOnMap: "Lihat di peta",
     empty: "Tidak ada cekungan yang cocok dengan filter ini.",
     inspectionTitle: "Inspeksi",

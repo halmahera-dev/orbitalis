@@ -43,10 +43,6 @@ export function getBowlSeries(bowlId: string) {
   return seed.bowls.find((bowl) => bowl.id === bowlId)?.series ?? null;
 }
 
-export function getBowlSeriesById() {
-  return Object.fromEntries(seed.bowls.map((bowl) => [bowl.id, bowl.series]));
-}
-
 type InspectionRow = typeof inspection.$inferSelect;
 
 export type InspectionFields = Pick<

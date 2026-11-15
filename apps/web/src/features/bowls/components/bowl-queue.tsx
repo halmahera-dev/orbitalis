@@ -1,10 +1,12 @@
 import { Skeleton } from "@repo/ui/components/skeleton";
 
 import { KpiCards } from "@/components/kpi-cards";
-import { getBowlSeriesById, getBowls } from "@/features/bowls/bowls-queries";
+import { getBowls, getNisarLeads, type InspectionFields } from "@/features/bowls/bowls-queries";
 import { anyValue, BowlFilters, overdueValue } from "@/features/bowls/components/bowl-filters";
 import { BowlTable } from "@/features/bowls/components/bowl-table";
+import { NisarLeads } from "@/features/bowls/components/nisar-leads";
 import { calendarDate, isVisitOverdue } from "@/features/bowls/visit";
+import { nisarRateForBowl } from "@/features/nisar/nisar-queries";
 import { getTeamMembers } from "@/features/team/team-queries";
 import { getDictionary, type Locale } from "@/lib/i18n";
 
@@ -16,6 +18,8 @@ export type BowlQueueFilters = {
   overdue: boolean;
 };
 
+type QueueItem = InspectionFields & { name: string; kecamatan: string };
+
 export async function BowlQueue({
   locale,
   filters,
@@ -26,24 +30,32 @@ export async function BowlQueue({
   const dictionary = getDictionary(locale);
   const t = dictionary.bowls;
   const { search, kecamatan, status, assignee, overdue } = filters;
-  const [allBowls, members] = await Promise.all([getBowls(), getTeamMembers()]);
+  const [allBowls, allNisarLeads, members] = await Promise.all([
+    getBowls(),
+    getNisarLeads(),
+    getTeamMembers(),
+  ]);
   const inspectors = members.filter((member) => member.active).map((member) => member.name);
   const membersByName = Object.fromEntries(members.map((member) => [member.name, member]));
   const searchText = search.toLowerCase();
   const today = calendarDate();
-  const bowls = allBowls
-    .filter((bowl) => (status ? bowl.status === status : bowl.status !== "dismissed"))
-    .filter((bowl) => !kecamatan || bowl.kecamatan === kecamatan)
-    .filter((bowl) => !assignee || bowl.assignee === assignee)
-    .filter((bowl) => !overdue || isVisitOverdue(bowl, today))
-    .filter(
-      (bowl) =>
-        !searchText ||
-        bowl.name.toLowerCase().includes(searchText) ||
-        bowl.kecamatan.toLowerCase().includes(searchText) ||
-        (bowl.assignee?.toLowerCase().includes(searchText) ?? false),
-    )
-    .toSorted((a, b) => a.rank - b.rank);
+
+  function matchesQueue(item: QueueItem) {
+    return (
+      (status ? item.status === status : item.status !== "dismissed") &&
+      (!kecamatan || item.kecamatan === kecamatan) &&
+      (!assignee || item.assignee === assignee) &&
+      (!overdue || isVisitOverdue(item, today)) &&
+      (!searchText ||
+        item.name.toLowerCase().includes(searchText) ||
+        item.kecamatan.toLowerCase().includes(searchText) ||
+        (item.assignee?.toLowerCase().includes(searchText) ?? false))
+    );
+  }
+
+  const bowls = allBowls.filter(matchesQueue).toSorted((a, b) => a.rank - b.rank);
+  const nisarLeads = allNisarLeads.filter(matchesQueue);
+  const queueItems: QueueItem[] = [...nisarLeads, ...bowls];
   const kecamatanNames = [...new Set(allBowls.map((bowl) => bowl.kecamatan))].toSorted();
   const assigneeNames = [
     ...new Set([
@@ -53,10 +65,10 @@ export async function BowlQueue({
   ].toSorted();
   const fastestRate = Math.max(0, ...bowls.map((bowl) => bowl.rateAfterBanMmYr));
   const nisarByBowlId = Object.fromEntries(
-    Object.entries(getBowlSeriesById()).map(([id, series]) => [
-      id,
-      series.nisar.map((point) => point.mm),
-    ]),
+    allBowls.map((bowl) => {
+      const rate = nisarRateForBowl(bowl.id);
+      return [bowl.id, rate.measured ? rate.series.map((point) => -point.mm) : []];
+    }),
   );
   const actionLabels = {
     dialogs: t.dialogs,
@@ -75,15 +87,15 @@ export async function BowlQueue({
     <>
       <KpiCards
         items={[
-          { label: t.kpiInView, value: bowls.length },
-          { label: t.kpiLeads, value: bowls.filter((bowl) => bowl.status === "lead").length },
+          { label: t.kpiInView, value: queueItems.length },
+          { label: t.kpiLeads, value: queueItems.filter((item) => item.status === "lead").length },
           {
             label: t.kpiScheduled,
-            value: bowls.filter((bowl) => bowl.status === "scheduled").length,
+            value: queueItems.filter((item) => item.status === "scheduled").length,
           },
           {
             label: t.kpiOverdue,
-            value: bowls.filter((bowl) => isVisitOverdue(bowl, today)).length,
+            value: queueItems.filter((item) => isVisitOverdue(item, today)).length,
           },
           { label: t.kpiFastest, value: fastestRate },
         ]}
@@ -123,6 +135,13 @@ export async function BowlQueue({
           }}
         />
       </div>
+      <NisarLeads
+        locale={locale}
+        leads={nisarLeads}
+        today={today}
+        inspectors={inspectors}
+        labels={{ map: dictionary.map, bowls: t, actions: actionLabels }}
+      />
       <BowlTable
         bowls={bowls}
         locale={locale}
