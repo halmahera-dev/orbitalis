@@ -3,7 +3,9 @@ import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { asc, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/bun-sql";
 import { migrate } from "drizzle-orm/bun-sql/migrator";
-import { readFile } from "node:fs/promises";
+import { cp, mkdtemp, readFile, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 
 import { importNisarRun, nisarRunFile, type NisarRunFile } from "./import-nisar-run";
 import { migrationsFolder } from "./migrate";
@@ -85,6 +87,17 @@ const movedByHundredMetres = {
 };
 const secondRun = makeRun([movedByHundredMetres], "2026-11-05");
 
+async function migrationsUpTo(lastTag: string) {
+  const folder = await mkdtemp(join(tmpdir(), "orbitalis-migrations-"));
+  await cp(migrationsFolder, folder, { recursive: true });
+  const journalPath = join(folder, "meta", "_journal.json");
+  const journal: { entries: { tag: string }[] } = JSON.parse(await readFile(journalPath, "utf8"));
+  const lastIndex = journal.entries.findIndex((entry) => entry.tag === lastTag);
+  journal.entries = journal.entries.slice(0, lastIndex + 1);
+  await writeFile(journalPath, JSON.stringify(journal));
+  return folder;
+}
+
 async function rowCounts(db: ReturnType<typeof drizzle>) {
   const [runs, bowls, measurements, cells] = await Promise.all([
     db.$count(nisarRun),
@@ -106,19 +119,16 @@ describe.skipIf(!serverUrl)("NISAR run import", () => {
     db = drizzle(testDatabaseUrl());
     const pushedSchema = await readFile(`${migrationsFolder}/0000_baseline.sql`, "utf8");
     await db.$client.unsafe(pushedSchema.replaceAll("--> statement-breakpoint", ""));
-    await db.$client`INSERT INTO inspection (bowl_id, status) VALUES ('muara-baru', 'lead')`;
-    await migrate(db, { migrationsFolder });
+    await db.$client`
+      INSERT INTO inspection (bowl_id, status) VALUES
+        ('muara-baru', 'lead'), (${penjaringan.id}, 'scheduled'), ('nisar-106000-6000', 'lead')`;
+    await migrate(db, { migrationsFolder: await migrationsUpTo("0001_nisar_runs") });
   });
 
   afterAll(async () => {
     await db?.$client.close();
     await admin?.unsafe(`DROP DATABASE IF EXISTS ${testDatabase} WITH (FORCE)`);
     await admin?.close();
-  });
-
-  test("migrations apply on top of push-created tables", async () => {
-    const [applied] = await db.$client`SELECT count(*)::int AS n FROM drizzle.__drizzle_migrations`;
-    expect(applied.n).toBeGreaterThanOrEqual(2);
   });
 
   test("importing the same run twice changes nothing the second time", async () => {
@@ -137,6 +147,18 @@ describe.skipIf(!serverUrl)("NISAR run import", () => {
     expect(series).toEqual({ kind: "array", points: 2 });
     const [tracks] = await db.$client`SELECT jsonb_typeof(tracks) AS kind FROM nisar_run`;
     expect(tracks.kind).toBe("array");
+  });
+
+  test("the inspection migration keeps rows of imported bowls only and adds the foreign key", async () => {
+    await migrate(db, { migrationsFolder });
+
+    const kept = await db.$client`SELECT bowl_id FROM inspection ORDER BY bowl_id`;
+    expect(kept).toEqual([{ bowl_id: penjaringan.id }]);
+    const [foreignKey] = await db.$client`
+      SELECT convalidated FROM pg_constraint WHERE conname = 'inspection_bowl_id_bowl_id_fk'`;
+    expect(foreignKey).toEqual({ convalidated: true });
+    const orphanInsert = db.$client`INSERT INTO inspection (bowl_id, status) VALUES ('muara-baru', 'lead')`;
+    await expect(orphanInsert.execute()).rejects.toThrow("foreign key");
   });
 
   test("a peak that moved 100 m keeps its bowl id", async () => {
