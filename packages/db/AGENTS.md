@@ -15,6 +15,10 @@ Drizzle schema, migrations and the NISAR run importer.
 - The import runs in one transaction. Importing the same run again changes nothing.
 - A detection within max(radius, 250 m) of a known NISAR bowl keeps that bowl's id.
 
+## Water farming sites
+
+- `bun run import:sites ../../apps/jobs/out/water-sites.json` imports the public water bodies from `fetch_water_bodies.py` as bowls with source `farming` plus a `farming_site` row. Running it again updates the rows in place.
+
 ## Tests
 
 `TEST_DATABASE_URL=postgres://user@localhost:5432/postgres bun test` needs a throwaway local server. The test creates and drops its own database. Never point it at Neon.

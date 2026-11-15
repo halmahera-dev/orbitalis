@@ -13,7 +13,7 @@ import {
   timestamp,
 } from "drizzle-orm/pg-core";
 
-export const bowlSources = ["nisar", "manual"] as const;
+export const bowlSources = ["nisar", "manual", "farming"] as const;
 
 export type NisarTrack = {
   track: number;
@@ -60,10 +60,10 @@ export const bowl = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => [
-    check("bowl_source_check", sql`${table.source} IN ('nisar', 'manual')`),
+    check("bowl_source_check", sql`${table.source} IN ('nisar', 'manual', 'farming')`),
     check(
       "bowl_nisar_place_check",
-      sql`${table.source} = 'manual' OR (${table.name} IS NOT NULL AND ${table.kecamatan} IS NOT NULL)`,
+      sql`${table.source} <> 'nisar' OR (${table.name} IS NOT NULL AND ${table.kecamatan} IS NOT NULL)`,
     ),
     check("bowl_lon_check", sql`${table.lon} BETWEEN -180 AND 180`),
     check("bowl_lat_check", sql`${table.lat} BETWEEN -90 AND 90`),
