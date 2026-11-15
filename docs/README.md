@@ -26,10 +26,12 @@ The feature map is an HTML file. Open it in a browser. The other documents are M
 
 ## Plans and older documents
 
-| Document                                                 | State                                                                                                                    |
-| -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| [Plans index](../plans/README.md)                        | Animation plans 001–004, all done                                                                                        |
-| [Goal: dashboard prototype](goal-dashboard-prototype.md) | 7 November 2026. The map-first goal for the hackathon prototype. The PRD replaces it for the product after the hackathon |
+| Document                                                                                | State                                                                                                                    |
+| --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| [Plans index](../plans/README.md)                                                       | Animation plans 001–004, all done                                                                                        |
+| [Goal: dashboard prototype](goal-dashboard-prototype.md)                                | 7 November 2026. The map-first goal for the hackathon prototype. The PRD replaces it for the product after the hackathon |
+| [Design: real NISAR evidence](superpowers/specs/2026-11-15-nisar-hackathon-a-design.md) | 15 November 2026. Two-track vertical rate, the bowl series, NISAR leads, guest map. Approved                             |
+| [Plan: real NISAR evidence](superpowers/plans/2026-11-15-nisar-hackathon-a.md)          | 15 November 2026. Nine tasks for the design above, done                                                                  |
 
 ## How the documents connect
 
