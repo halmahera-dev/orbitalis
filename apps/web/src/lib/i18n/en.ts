@@ -1,6 +1,6 @@
 export const en = {
   meta: {
-    description: "ORBITALIS uses NISAR radar to show where North Jakarta sinks the fastest.",
+    description: "ORBITALIS uses NISAR radar to show where Jakarta sinks the fastest.",
   },
   common: {
     signIn: "Sign in",
@@ -208,7 +208,7 @@ export const en = {
       offers: [
         {
           name: "Guest map",
-          body: "See North Jakarta sink without your own account. Ground motion, bowls, and the sea plane.",
+          body: "See Jakarta sink without your own account. Ground motion, bowls, and the sea plane.",
           terms: "One click as a guest",
         },
         {
@@ -232,7 +232,7 @@ export const en = {
       weekend: "Weekend",
       note: "Review the catalog on pass days. Act on rank changes after the new pair lands.",
       milestones: {
-        "1": "Pass window opens over North Jakarta.",
+        "1": "Pass window opens over Jakarta.",
         "2": "Raw radar arrives at the archive.",
         "3": "Interferogram pair is ready to browse.",
         "4": "Bowl rates update on the desk.",
@@ -297,7 +297,8 @@ export const en = {
         },
         {
           question: "Who can open the map?",
-          answer: "Anyone, as a guest. A guest needs no account of their own. A public area check is planned for later.",
+          answer:
+            "Anyone, as a guest. A guest needs no account of their own. A public area check is planned for later.",
         },
         {
           question: "What radar does ORBITALIS use?",
@@ -306,7 +307,7 @@ export const en = {
         },
         {
           question: "How often does the view refresh?",
-          answer: "NISAR revisits North Jakarta about every 12 days when the catalog has the pair.",
+          answer: "NISAR revisits Jakarta about every 12 days when the catalog has the pair.",
         },
         {
           question: "How do I try the desk?",
@@ -344,7 +345,7 @@ export const en = {
     noOutcomes: "No inspection has an outcome yet.",
     noHitRateNext: "Schedule a visit to close the first lead.",
     hitRateBody: "{pump} of {total} inspected leads had a pump.",
-    heartbeat: "NISAR passes over North Jakarta",
+    heartbeat: "NISAR passes over Jakarta",
     latestPass: "The latest pass arrived on {date}.",
     nextPassFuture: "The next pass is due on {date}.",
     nextPassLate: "The next pass was due on {date}, and it is not in the catalog yet.",
@@ -681,7 +682,7 @@ export const en = {
     candidatePairsOneTrack: "{count} on track 10",
     candidateStatus: "Status",
     candidateEvidence:
-      "Found by stacking {count} NISAR L2 GUNW pairs over North Jakarta. The rate is the extra sinking compared with the ground within about 3 km. Noise floor: {noise} mm/yr. Detection: a local peak at least 2 pixels wide, at least {snr} times the noise floor, and at least twice its own uncertainty.",
+      "Found by stacking {count} NISAR L2 GUNW pairs over Jakarta. The rate is the extra sinking compared with the ground within about 3 km. Noise floor: {noise} mm/yr. Detection: a local peak at least 2 pixels wide, at least {snr} times the noise floor, and at least twice its own uncertainty.",
     depthTitle: "How deep the bowl is",
     depthToday: "Now: {cm} cm",
     depthProjected: "By {year}: {cm} cm",

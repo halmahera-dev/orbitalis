@@ -59,9 +59,9 @@ type Option = { value: string; label: string };
 type Position = { center: [number, number]; zoom: number };
 
 const overviewCamera = {
-  center: [106.81, -6.13] as [number, number],
-  zoom: 12,
-  pitch: 58,
+  center: [106.83, -6.2] as [number, number],
+  zoom: 10.9,
+  pitch: 45,
   bearing: -20,
 };
 

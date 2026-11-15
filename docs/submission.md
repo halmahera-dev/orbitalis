@@ -31,9 +31,9 @@ Dancing with the SARs
 
 ## High-level summary
 
-Orbitalis turns NISAR radar into inspection leads for the people who manage groundwater in North Jakarta. Parts of North Jakarta sink more than 10 cm a year, mostly because deep wells pump out groundwater. Jakarta banned groundwater use in large zones in 2023, but regulators cannot see where pumping goes on. Orbitalis reads NISAR L-band interferograms (GUNW) over North Jakarta from two directions, stacks sixteen pairs from June to October 2026, and finds places that sink faster than the ground around them: the bowl shape a hidden pump leaves. The web app shows these bowls on a 3D map, opens a digital twin of the ground under each one, and lets a regulator schedule and record field visits. New map layers rank areas for water pipe extension, groundwater recharge, and water farming checks. Every number links to its source, and the app marks each value as measured or as an example. A lead is a reason to inspect, never proof. With NISAR's 12-day repeat, the same pipeline can check after every pass whether enforcement, pipes, and recharge slow the sinking.
+Orbitalis turns NISAR radar into inspection leads for the people who manage groundwater in Jakarta. Parts of North Jakarta sink more than 10 cm a year, mostly because deep wells pump out groundwater. Jakarta banned groundwater use in large zones in 2023, but regulators cannot see where pumping goes on. Orbitalis reads NISAR L-band interferograms (GUNW) over all of mainland Jakarta from two directions, stacks sixteen pairs from June to October 2026, and finds places that sink faster than the ground around them: the bowl shape a hidden pump leaves. The web app shows these bowls on a 3D map, opens a digital twin of the ground under each one, and lets a regulator schedule and record field visits. New map layers rank areas for water pipe extension, groundwater recharge, and water farming checks. Every number links to its source, and the app marks each value as measured or as an example. A lead is a reason to inspect, never proof. With NISAR's 12-day repeat, the same pipeline can check after every pass whether enforcement, pipes, and recharge slow the sinking.
 
-(180 words. The limit is 50 to 200.)
+(181 words. The limit is 50 to 200.)
 
 ## Link to project demo
 
@@ -58,7 +58,7 @@ The map has five layers (pumping leads, recharge priority, pipe priority, water 
 
 ### How it works
 
-1. **NISAR data.** A Python job searches ASF for NISAR L2 GUNW products over Jakarta: track 10 ascending and track 18 descending (frame 92), 8 consecutive pairs each. Each product is about 2.3 GB. The job reads only the North Jakarta window (137 × 388 pixels on an 80 m grid) with HTTP range requests and an Earthdata Login token, so one pair takes about 0.5 MB and under a minute.
+1. **NISAR data.** A Python job searches ASF for NISAR L2 GUNW products over Jakarta: track 10 ascending and track 18 descending (frame 92), 8 consecutive pairs each. Each product is about 2.3 GB. The job reads only the mainland Jakarta window (about 33 × 33 km, 413 × 416 pixels on an 80 m grid) with HTTP range requests and an Earthdata Login token, so one pair takes about 1.7 MB and under two minutes.
 2. **Per pair.** The job masks water and pixels with coherence below 0.6, removes the ionosphere phase screen that comes with the product, and converts phase to millimeters of range change.
 3. **Stack per track.** It removes the regional ramp (atmosphere, orbit, and the slow sinking of the whole city), adds the pairs, and divides by the total time. The result is the extra range change of each place compared with the ground within about 3 km. The uncertainty comes from the spread between pairs.
 4. **Two directions to vertical.** NISAR looks left, so the two tracks see the ground from the east and from the west. With the line-of-sight vectors from the product metadata, the job solves the two range rates for vertical and east motion, with north motion set to zero, and checks the solver on a known case before it runs. It also builds a vertical displacement series at 9 dates per bowl, because the two tracks fly one day apart.
@@ -67,9 +67,9 @@ The map has five layers (pumping leads, recharge priority, pipe priority, water 
 
 ### First results from real NISAR data
 
-- About 72% of the window has coherence of 0.6 or more in each pair. 58% of the pixels have at least five usable pairs on both tracks, so they get a vertical rate.
-- On track 10 alone, the areas that published studies name as the fastest sinking show positive extra sinking (Muara Baru, Pluit, Penjaringan). With both tracks, Muara Baru shows 33 ± 59 mm/yr of extra vertical sinking. The uncertainty is still larger than most values, because there are only 3.5 months of data.
-- No candidate passes the tests on the vertical map yet. One strong candidate stands out on track 10: an area of about 170 m radius in the Marunda industrial zone (106.949 E, 6.126 S, near Cilincing) sinks 88 ± 17 mm/yr of line of sight faster than the ground around it. Track 18 has no usable pixels there, so the second direction cannot confirm it. The app shows it as a lead with the label "One track only, not confirmed by the second track". It is a reason for a field visit, not proof of a pump.
+- On average, 76% of the land in the window has coherence of 0.6 or more in each pair. 62% of the pixels have at least five usable pairs on both tracks, so they get a vertical rate. The vertical noise floor is 15 mm/yr.
+- On track 10 alone, the areas that published studies name as the fastest sinking show positive extra sinking (Muara Baru, Pluit, Penjaringan). With both tracks, Muara Baru shows 34 ± 62 mm/yr of extra vertical sinking. The uncertainty is still larger than most values, because there are only 3.5 months of data.
+- Across all of mainland Jakarta, one candidate passes every test on the vertical map: an area of about 190 m radius in Penjaringan (106.805 E, 6.107 S, near the Pluit and Muara Baru coast) sinks 82 ± 39 mm/yr faster than the ground around it, at 5.3 times the noise floor. Both tracks see it. The app shows it as a lead named after its kelurahan from OpenStreetMap. It is a reason for a field visit, not proof of a pump.
 
 ### Benefits
 
@@ -85,8 +85,8 @@ Replace every example value with processed NISAR and Sentinel-1 data, run a full
 
 - The NISAR rate is relative to the ground within about 3 km, not an absolute rate. The vertical rate sets north motion to zero.
 - It is a simple stack, not a full time series (MintPy is planned).
-- The one candidate is seen on one track only.
-- Bowl depths, the Sentinel-1 series, the projection to 2050, the bowl rates in the desk table, the Overview chart, and the area layers (population, piped water, economic activity) are example values. The app labels them so.
+- The one candidate passes the tests by a small margin: its rate is about twice its uncertainty. More passes will confirm or drop it.
+- Bowl depths, the Sentinel-1 series, the projection to 2050, the bowl rates in the desk table, and the area layers (population, piped water, economic activity) are example values. The app labels them so.
 - The water farming rule is a draft (KemenLH, June 2026).
 
 ### Tools
@@ -120,7 +120,7 @@ NISAR is a joint NASA and ISRO mission. We used no other partner data in this ve
 Data and services:
 
 - NASA, JPL, ISRO, ASF DAAC: NISAR L2 GUNW products and browse images
-- OpenStreetMap contributors and CARTO: basemap and building footprints
+- OpenStreetMap contributors and CARTO: basemap and building footprints. Nominatim (OpenStreetMap) reverse geocoding for the kelurahan name of each candidate
 
 Science and policy:
 

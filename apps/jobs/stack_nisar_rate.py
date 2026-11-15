@@ -4,14 +4,17 @@ Each pair is masked, corrected for the ionosphere, and smoothed. The regional ra
 orbit, and the slow sinking of the whole city) is removed, so every rate is relative to the
 ground within about 3 km, not absolute. Each track is stacked in range units, then the ascending
 track 10 and the descending track 18 are decomposed into vertical and east rates with the north
-rate set to zero. This is a stack, not a MintPy time series.
+rate set to zero. This is a stack, not a MintPy time series. The window covers mainland Jakarta.
+Candidates are named by OpenStreetMap reverse geocoding (Nominatim), cached in out/.
 """
 
 import json
+import time
 from dataclasses import dataclass
 from pathlib import Path
 
 import numpy as np
+import requests
 from pyproj import Transformer
 from scipy import ndimage
 
@@ -30,8 +33,12 @@ from detect_bowls import (
 )
 
 JOBS_DIR = Path(__file__).resolve().parent
-WINDOW_DIR = JOBS_DIR / "out" / "gunw"
+WINDOW_DIR = JOBS_DIR / "out" / "gunw-jakarta"
 PREVIEW_PATH = JOBS_DIR / "out" / "nisar-stack-rate.png"
+GEOCODE_CACHE_PATH = JOBS_DIR / "out" / "geocode-cache.json"
+NOMINATIM_URL = "https://nominatim.openstreetmap.org/reverse"
+NOMINATIM_HEADERS = {"User-Agent": "orbitalis-jobs/0.1 (NISAR subsidence research)"}
+NOMINATIM_PAUSE_SECONDS = 1.1
 WEB_APP = JOBS_DIR.parent / "web"
 BOWLS_PATH = WEB_APP / "src" / "features" / "bowls" / "bowls-seed.json"
 RATES_PATH = WEB_APP / "src" / "features" / "nisar" / "nisar-rates.json"
@@ -214,14 +221,30 @@ def bowl_rate(bowl, vertical, ascending, descending, los) -> dict:
         }
 
 
-def nearest_bowl(longitude: float, latitude: float, bowls: list[dict]) -> dict:
-    return min(
-        bowls,
-        key=lambda bowl: (bowl["center"][0] - longitude) ** 2 + (bowl["center"][1] - latitude) ** 2,
-    )
+def place_from_address(address: dict) -> dict:
+    """Kelurahan and kecamatan from a Nominatim address; Jakarta tags them village and city_district."""
+    city = address.get("city", "Jakarta")
+    kecamatan = address.get("city_district") or address.get("suburb") or city
+    name = address.get("village") or address.get("suburb") or address.get("neighbourhood") or kecamatan
+    return {"name": name, "kecamatan": kecamatan}
 
 
-def find_candidates(rate, uncertainty, window, bowls, basis) -> list[dict]:
+def reverse_geocode(longitude: float, latitude: float, cache: dict) -> dict:
+    key = f"{longitude:.4f},{latitude:.4f}"
+    if key not in cache:
+        time.sleep(NOMINATIM_PAUSE_SECONDS)
+        response = requests.get(
+            NOMINATIM_URL,
+            params={"lat": latitude, "lon": longitude, "format": "jsonv2", "zoom": 14},
+            headers=NOMINATIM_HEADERS,
+            timeout=30,
+        )
+        response.raise_for_status()
+        cache[key] = place_from_address(response.json().get("address", {}))
+    return cache[key]
+
+
+def find_candidates(rate, uncertainty, window, basis, geocode_cache) -> list[dict]:
     noise = float(robust_noise(rate))
     filled = np.nan_to_num(rate, nan=-np.inf)
     is_peak = filled == ndimage.maximum_filter(filled, size=PEAK_NEIGHBOURHOOD_PIXELS)
@@ -236,13 +259,13 @@ def find_candidates(rate, uncertainty, window, bowls, basis) -> list[dict]:
         if radius_pixels < MIN_CANDIDATE_RADIUS_PIXELS or value < MIN_RATE_TO_UNCERTAINTY * spread:
             continue
         longitude, latitude = to_lonlat.transform(window.xs[column], window.ys[row])
-        near = nearest_bowl(longitude, latitude, bowls)
+        place = reverse_geocode(longitude, latitude, geocode_cache)
         candidates.append(
             {
                 "id": f"nisar-{round(longitude * 1000)}-{round(-latitude * 1000)}",
                 "basis": basis,
-                "name": near["name"],
-                "kecamatan": near["kecamatan"],
+                "name": place["name"],
+                "kecamatan": place["kecamatan"],
                 "center": [round(longitude, 5), round(latitude, 5)],
                 "radiusM": round(radius_pixels * pixel_meters),
                 "rateMmYr": round(value, 1),
@@ -286,11 +309,15 @@ def main() -> None:
 
     bowls = json.loads(BOWLS_PATH.read_text(encoding="utf-8"))["bowls"]
     window = ascending.window
-    candidates = find_candidates(sinking, vertical["uncertainty"], window, bowls, "vertical")
+    geocode_cache = (
+        json.loads(GEOCODE_CACHE_PATH.read_text(encoding="utf-8")) if GEOCODE_CACHE_PATH.exists() else {}
+    )
+    candidates = find_candidates(sinking, vertical["uncertainty"], window, "vertical", geocode_cache)
     if not candidates:
         candidates = find_candidates(
-            ascending.rate, ascending.uncertainty, window, bowls, f"track{ASCENDING_TRACK}"
+            ascending.rate, ascending.uncertainty, window, f"track{ASCENDING_TRACK}", geocode_cache
         )
+    GEOCODE_CACHE_PATH.write_text(json.dumps(geocode_cache, indent=2), encoding="utf-8")
 
     document = {
         "synthetic": False,

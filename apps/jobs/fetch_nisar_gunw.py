@@ -1,8 +1,8 @@
-"""Read the North Jakarta window of every NISAR GUNW pair on one track.
+"""Read the Jakarta window of every NISAR GUNW pair on one track.
 
 Track 10 is ascending. Track 18 is descending, and only its frame 92 has an unbroken chain of
-pairs over North Jakarta. The HDF5 products are about 2.3 GB each; HTTP range requests read only
-the chunks that cover the window, so one pair takes under a minute. Needs an Earthdata Login
+pairs over Jakarta. The HDF5 products are about 2.3 GB each; HTTP range requests read only the
+chunks that cover the window, so one pair takes a minute or two. Needs an Earthdata Login
 user token in NASA_API_KEY:
 `uv run --env-file ../../.env fetch_nisar_gunw.py --track 18`.
 """
@@ -19,11 +19,11 @@ import fsspec
 import numpy as np
 import requests
 
-from detect_bowls import PairWindow, read_pair_window
+from detect_bowls import JAKARTA_LAND, PairWindow, read_pair_window
 
 JAKARTA = "POINT(106.82 -6.12)"
 FRAMES_BY_TRACK = {10: None, 18: 92}
-WINDOW_DIR = Path(__file__).resolve().parent / "out" / "gunw"
+WINDOW_DIR = Path(__file__).resolve().parent / "out" / "gunw-jakarta"
 RANGE_BLOCK_BYTES = 8 * 1024 * 1024
 
 
@@ -66,7 +66,7 @@ def read_remote_window(product_url: str, token: str) -> PairWindow:
     with filesystem.open(
         signed_url(product_url, token), block_size=RANGE_BLOCK_BYTES, cache_type="blockcache"
     ) as remote:
-        return read_pair_window(remote)
+        return read_pair_window(remote, JAKARTA_LAND)
 
 
 def scene_dates(scene: str) -> tuple[str, str]:

@@ -42,21 +42,21 @@
     }
   ],
   "gridM": 80,
-  "noiseFloorMmYr": 14.1,
+  "noiseFloorMmYr": 15.3,
   "detectionSnr": 3,
   "script": "apps/jobs/stack_nisar_rate.py",
   "bowls": [
     {
       "id": "muara-baru",
       "measured": true,
-      "verticalRateMmYr": 32.5,
-      "verticalUncertaintyMmYr": 58.8,
-      "eastRateMmYr": 15.5,
+      "verticalRateMmYr": 34.1,
+      "verticalUncertaintyMmYr": 61.7,
+      "eastRateMmYr": 17.5,
       "losRateMmYr": {
-        "10": 16.3,
-        "18": 36.2
+        "10": 15.4,
+        "18": 37.7
       },
-      "pixels": 47,
+      "pixels": 55,
       "pairs": 16,
       "series": [
         {
@@ -67,54 +67,54 @@
         {
           "date": "2026-07-08",
           "mm": -1.2,
-          "bandMm": 3.1
+          "bandMm": 3.3
         },
         {
           "date": "2026-07-20",
-          "mm": 4.7,
-          "bandMm": 4.3
+          "mm": 4.8,
+          "bandMm": 4.6
         },
         {
           "date": "2026-08-13",
-          "mm": 2.1,
-          "bandMm": 5.2
+          "mm": 2.3,
+          "bandMm": 5.4
         },
         {
           "date": "2026-08-25",
-          "mm": 4.6,
-          "bandMm": 6.5
+          "mm": 4.8,
+          "bandMm": 6.3
         },
         {
           "date": "2026-09-06",
-          "mm": -1.9,
-          "bandMm": 7.6
+          "mm": -2.0,
+          "bandMm": 7.0
         },
         {
           "date": "2026-09-18",
-          "mm": 3.0,
-          "bandMm": 8.6
+          "mm": 3.1,
+          "bandMm": 8.5
         },
         {
           "date": "2026-09-30",
-          "mm": 2.3,
-          "bandMm": 9.9
+          "mm": 1.9,
+          "bandMm": 10.1
         },
         {
           "date": "2026-10-12",
-          "mm": 6.9,
-          "bandMm": 10.4
+          "mm": 6.7,
+          "bandMm": 10.8
         }
       ]
     },
     {
       "id": "pluit",
       "measured": true,
-      "verticalRateMmYr": 2.6,
-      "verticalUncertaintyMmYr": 37.6,
-      "eastRateMmYr": -19.9,
+      "verticalRateMmYr": 2.4,
+      "verticalUncertaintyMmYr": 37.3,
+      "eastRateMmYr": -20.4,
       "losRateMmYr": {
-        "10": 13.8,
-        "18": -10.9
+        "10": 14.0,
+        "18": -11.3
       },
       "pixels": 118,
       "pairs": 16,
@@ -126,69 +126,115 @@
         },
         {
           "date": "2026-07-08",
-          "mm": -4.7,
-          "bandMm": 3.1
+          "mm": -4.6,
+          "bandMm": 3.3
         },
         {
           "date": "2026-07-20",
-          "mm": -1.4,
-          "bandMm": 4.3
+          "mm": -1.2,
+          "bandMm": 4.6
         },
         {
           "date": "2026-08-13",
-          "mm": 0.7,
-          "bandMm": 5.2
+          "mm": 0.9,
+          "bandMm": 5.4
         },
         {
           "date": "2026-08-25",
-          "mm": -3.7,
-          "bandMm": 6.5
+          "mm": -3.6,
+          "bandMm": 6.3
         },
         {
           "date": "2026-09-06",
-          "mm": -0.8,
-          "bandMm": 7.6
+          "mm": -0.7,
+          "bandMm": 7.0
         },
         {
           "date": "2026-09-18",
           "mm": -2.3,
-          "bandMm": 8.6
+          "bandMm": 8.5
         },
         {
           "date": "2026-09-30",
-          "mm": 2.4,
-          "bandMm": 9.9
+          "mm": 2.3,
+          "bandMm": 10.1
         },
         {
           "date": "2026-10-12",
           "mm": 0.7,
-          "bandMm": 10.4
+          "bandMm": 10.8
         }
       ]
     },
     {
       "id": "kamal-muara",
       "measured": true,
-      "verticalRateMmYr": -9.6,
-      "verticalUncertaintyMmYr": 82.4,
-      "eastRateMmYr": 9.0,
+      "verticalRateMmYr": -3.2,
+      "verticalUncertaintyMmYr": 64.4,
+      "eastRateMmYr": 12.0,
       "losRateMmYr": {
-        "10": -9.9,
-        "18": -1.3
+        "10": -9.4,
+        "18": 5.5
       },
-      "pixels": 6,
-      "pairs": 15,
-      "series": []
+      "pixels": 11,
+      "pairs": 16,
+      "series": [
+        {
+          "date": "2026-06-26",
+          "mm": 0.0,
+          "bandMm": 0.0
+        },
+        {
+          "date": "2026-07-08",
+          "mm": 0.7,
+          "bandMm": 3.3
+        },
+        {
+          "date": "2026-07-20",
+          "mm": -1.0,
+          "bandMm": 4.6
+        },
+        {
+          "date": "2026-08-13",
+          "mm": 0.2,
+          "bandMm": 5.4
+        },
+        {
+          "date": "2026-08-25",
+          "mm": -6.5,
+          "bandMm": 6.3
+        },
+        {
+          "date": "2026-09-06",
+          "mm": 5.4,
+          "bandMm": 7.0
+        },
+        {
+          "date": "2026-09-18",
+          "mm": -2.0,
+          "bandMm": 8.5
+        },
+        {
+          "date": "2026-09-30",
+          "mm": -0.6,
+          "bandMm": 10.1
+        },
+        {
+          "date": "2026-10-12",
+          "mm": 1.5,
+          "bandMm": 10.8
+        }
+      ]
     },
     {
       "id": "kapuk-muara",
       "measured": true,
-      "verticalRateMmYr": 3.5,
-      "verticalUncertaintyMmYr": 78.4,
-      "eastRateMmYr": 3.1,
+      "verticalRateMmYr": 3.1,
+      "verticalUncertaintyMmYr": 78.8,
+      "eastRateMmYr": 0.9,
       "losRateMmYr": {
-        "10": 0.5,
-        "18": 5.3
+        "10": 1.5,
+        "18": 3.6
       },
       "pixels": 68,
       "pairs": 16,
@@ -200,55 +246,55 @@
         },
         {
           "date": "2026-07-08",
-          "mm": 4.4,
-          "bandMm": 3.1
+          "mm": 4.9,
+          "bandMm": 3.3
         },
         {
           "date": "2026-07-20",
-          "mm": 5.1,
-          "bandMm": 4.3
+          "mm": 5.9,
+          "bandMm": 4.6
         },
         {
           "date": "2026-08-13",
-          "mm": 7.3,
-          "bandMm": 5.2
+          "mm": 8.0,
+          "bandMm": 5.4
         },
         {
           "date": "2026-08-25",
-          "mm": -4.4,
-          "bandMm": 6.5
+          "mm": -3.8,
+          "bandMm": 6.3
         },
         {
           "date": "2026-09-06",
-          "mm": 8.0,
-          "bandMm": 7.6
+          "mm": 8.2,
+          "bandMm": 7.0
         },
         {
           "date": "2026-09-18",
-          "mm": 13.7,
-          "bandMm": 8.6
+          "mm": 14.4,
+          "bandMm": 8.5
         },
         {
           "date": "2026-09-30",
-          "mm": 3.0,
-          "bandMm": 9.9
+          "mm": 3.3,
+          "bandMm": 10.1
         },
         {
           "date": "2026-10-12",
           "mm": 2.3,
-          "bandMm": 10.4
+          "bandMm": 10.8
         }
       ]
     },
     {
       "id": "penjaringan",
       "measured": true,
-      "verticalRateMmYr": 0.9,
-      "verticalUncertaintyMmYr": 42.3,
-      "eastRateMmYr": -26.0,
+      "verticalRateMmYr": 0.7,
+      "verticalUncertaintyMmYr": 42.9,
+      "eastRateMmYr": -26.5,
       "losRateMmYr": {
-        "10": 18.3,
-        "18": -19.2
+        "10": 18.5,
+        "18": -19.6
       },
       "pixels": 31,
       "pairs": 16,
@@ -260,58 +306,58 @@
         },
         {
           "date": "2026-07-08",
-          "mm": -0.5,
-          "bandMm": 3.1
+          "mm": -0.4,
+          "bandMm": 3.3
         },
         {
           "date": "2026-07-20",
-          "mm": 1.9,
-          "bandMm": 4.3
+          "mm": 2.0,
+          "bandMm": 4.6
         },
         {
           "date": "2026-08-13",
-          "mm": 4.0,
-          "bandMm": 5.2
+          "mm": 4.2,
+          "bandMm": 5.4
         },
         {
           "date": "2026-08-25",
           "mm": -3.9,
-          "bandMm": 6.5
+          "bandMm": 6.3
         },
         {
           "date": "2026-09-06",
-          "mm": 2.7,
-          "bandMm": 7.6
+          "mm": 2.8,
+          "bandMm": 7.0
         },
         {
           "date": "2026-09-18",
-          "mm": 0.3,
-          "bandMm": 8.6
+          "mm": 0.4,
+          "bandMm": 8.5
         },
         {
           "date": "2026-09-30",
           "mm": 2.8,
-          "bandMm": 9.9
+          "bandMm": 10.1
         },
         {
           "date": "2026-10-12",
           "mm": -0.5,
-          "bandMm": 10.4
+          "bandMm": 10.8
         }
       ]
     },
     {
       "id": "kalibaru",
       "measured": true,
-      "verticalRateMmYr": 37.3,
-      "verticalUncertaintyMmYr": 52.6,
-      "eastRateMmYr": 26.2,
+      "verticalRateMmYr": 32.0,
+      "verticalUncertaintyMmYr": 50.5,
+      "eastRateMmYr": 15.7,
       "losRateMmYr": {
-        "10": 11.1,
-        "18": 44.8
+        "10": 17.8,
+        "18": 34.1
       },
-      "pixels": 18,
-      "pairs": 14,
+      "pixels": 32,
+      "pairs": 15,
       "series": []
     },
     {
@@ -325,7 +371,7 @@
       "verticalUncertaintyMmYr": 46.9,
       "eastRateMmYr": 11.0,
       "losRateMmYr": {
-        "10": -7.3,
+        "10": -7.4,
         "18": 5.3
       },
       "pixels": 26,
@@ -339,54 +385,54 @@
         {
           "date": "2026-07-08",
           "mm": -5.4,
-          "bandMm": 3.1
+          "bandMm": 3.3
         },
         {
           "date": "2026-07-20",
           "mm": 0.3,
-          "bandMm": 4.3
+          "bandMm": 4.6
         },
         {
           "date": "2026-08-13",
           "mm": -4.3,
-          "bandMm": 5.2
+          "bandMm": 5.4
         },
         {
           "date": "2026-08-25",
-          "mm": -3.7,
-          "bandMm": 6.5
+          "mm": -3.8,
+          "bandMm": 6.3
         },
         {
           "date": "2026-09-06",
           "mm": -7.9,
-          "bandMm": 7.6
+          "bandMm": 7.0
         },
         {
           "date": "2026-09-18",
-          "mm": -3.3,
-          "bandMm": 8.6
+          "mm": -3.2,
+          "bandMm": 8.5
         },
         {
           "date": "2026-09-30",
-          "mm": -7.9,
-          "bandMm": 9.9
+          "mm": -8.0,
+          "bandMm": 10.1
         },
         {
           "date": "2026-10-12",
           "mm": -3.8,
-          "bandMm": 10.4
+          "bandMm": 10.8
         }
       ]
     },
     {
       "id": "sunter-agung",
       "measured": true,
-      "verticalRateMmYr": -6.6,
-      "verticalUncertaintyMmYr": 22.3,
-      "eastRateMmYr": 18.7,
+      "verticalRateMmYr": -6.5,
+      "verticalUncertaintyMmYr": 23.1,
+      "eastRateMmYr": 18.9,
       "losRateMmYr": {
-        "10": -16.3,
-        "18": 7.3
+        "10": -16.4,
+        "18": 7.4
       },
       "pixels": 45,
       "pairs": 16,
@@ -398,43 +444,43 @@
         },
         {
           "date": "2026-07-08",
-          "mm": -2.3,
-          "bandMm": 3.1
+          "mm": -2.4,
+          "bandMm": 3.3
         },
         {
           "date": "2026-07-20",
-          "mm": -2.8,
-          "bandMm": 4.3
+          "mm": -2.9,
+          "bandMm": 4.6
         },
         {
           "date": "2026-08-13",
-          "mm": -0.8,
-          "bandMm": 5.2
+          "mm": -0.7,
+          "bandMm": 5.4
         },
         {
           "date": "2026-08-25",
-          "mm": -2.7,
-          "bandMm": 6.5
+          "mm": -3.1,
+          "bandMm": 6.3
         },
         {
           "date": "2026-09-06",
-          "mm": -1.1,
-          "bandMm": 7.6
+          "mm": -1.0,
+          "bandMm": 7.0
         },
         {
           "date": "2026-09-18",
-          "mm": 2.8,
-          "bandMm": 8.6
+          "mm": 2.9,
+          "bandMm": 8.5
         },
         {
           "date": "2026-09-30",
-          "mm": 0.2,
-          "bandMm": 9.9
+          "mm": 0.0,
+          "bandMm": 10.1
         },
         {
           "date": "2026-10-12",
           "mm": -1.8,
-          "bandMm": 10.4
+          "bandMm": 10.8
         }
       ]
     },
@@ -445,15 +491,15 @@
   ],
   "candidates": [
     {
-      "id": "nisar-106949-6126",
-      "basis": "track10",
-      "name": "Cilincing",
-      "kecamatan": "Cilincing",
-      "center": [106.94859, -6.1256],
-      "radiusM": 169,
-      "rateMmYr": 87.7,
-      "uncertaintyMmYr": 17.0,
-      "snr": 7.1
+      "id": "nisar-106805-6107",
+      "basis": "vertical",
+      "name": "Penjaringan",
+      "kecamatan": "Penjaringan",
+      "center": [106.80471, -6.10657],
+      "radiusM": 191,
+      "rateMmYr": 81.7,
+      "uncertaintyMmYr": 39.4,
+      "snr": 5.3
     }
   ]
 }

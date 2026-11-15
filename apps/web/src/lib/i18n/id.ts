@@ -3,7 +3,7 @@ import type { Dictionary } from "./en";
 export const id: Dictionary = {
   meta: {
     description:
-      "ORBITALIS memakai radar NISAR untuk menunjukkan bagian Jakarta Utara yang paling cepat turun.",
+      "ORBITALIS memakai radar NISAR untuk menunjukkan bagian Jakarta yang paling cepat turun.",
   },
   common: {
     signIn: "Masuk",
@@ -214,7 +214,7 @@ export const id: Dictionary = {
       offers: [
         {
           name: "Peta tamu",
-          body: "Lihat Jakarta Utara turun tanpa akun sendiri. Gerak tanah, cekungan, dan bidang laut.",
+          body: "Lihat Jakarta turun tanpa akun sendiri. Gerak tanah, cekungan, dan bidang laut.",
           terms: "Satu klik sebagai tamu",
         },
         {
@@ -238,7 +238,7 @@ export const id: Dictionary = {
       weekend: "Akhir pekan",
       note: "Tinjau katalog pada hari lintasan. Bertindak pada perubahan peringkat setelah pasangan baru masuk.",
       milestones: {
-        "1": "Jendela lintasan terbuka di atas Jakarta Utara.",
+        "1": "Jendela lintasan terbuka di atas Jakarta.",
         "2": "Radar mentah tiba di arsip.",
         "3": "Pasangan interferogram siap dilihat.",
         "4": "Laju cekungan diperbarui di meja.",
@@ -303,7 +303,8 @@ export const id: Dictionary = {
         },
         {
           question: "Siapa yang dapat membuka peta?",
-          answer: "Siapa saja, sebagai tamu. Tamu tidak perlu membuat akun sendiri. Cek area untuk publik direncanakan nanti.",
+          answer:
+            "Siapa saja, sebagai tamu. Tamu tidak perlu membuat akun sendiri. Cek area untuk publik direncanakan nanti.",
         },
         {
           question: "Radar apa yang dipakai ORBITALIS?",
@@ -313,7 +314,7 @@ export const id: Dictionary = {
         {
           question: "Seberapa sering tampilan diperbarui?",
           answer:
-            "NISAR mengunjungi ulang Jakarta Utara sekitar setiap 12 hari ketika katalog punya pasangannya.",
+            "NISAR mengunjungi ulang Jakarta sekitar setiap 12 hari ketika katalog punya pasangannya.",
         },
         {
           question: "Bagaimana saya mencoba meja?",
@@ -351,7 +352,7 @@ export const id: Dictionary = {
     noOutcomes: "Belum ada inspeksi yang punya hasil.",
     noHitRateNext: "Jadwalkan kunjungan untuk menutup petunjuk pertama.",
     hitRateBody: "{pump} dari {total} petunjuk yang diperiksa memiliki pompa.",
-    heartbeat: "Lintasan NISAR di atas Jakarta Utara",
+    heartbeat: "Lintasan NISAR di atas Jakarta",
     latestPass: "Lintasan terakhir tiba pada {date}.",
     nextPassFuture: "Lintasan berikutnya dijadwalkan pada {date}.",
     nextPassLate: "Lintasan berikutnya dijadwalkan pada {date}, tetapi belum ada di katalog.",
@@ -690,7 +691,7 @@ export const id: Dictionary = {
     candidatePairsOneTrack: "{count} pada lintasan 10",
     candidateStatus: "Status",
     candidateEvidence:
-      "Ditemukan dengan menumpuk {count} pasangan NISAR L2 GUNW di atas Jakarta Utara. Laju ini adalah penurunan tambahan dibanding tanah dalam jarak sekitar 3 km. Batas derau: {noise} mm/thn. Deteksi: puncak lokal selebar minimal 2 piksel, minimal {snr} kali batas derau, dan minimal dua kali ketidakpastiannya sendiri.",
+      "Ditemukan dengan menumpuk {count} pasangan NISAR L2 GUNW di atas Jakarta. Laju ini adalah penurunan tambahan dibanding tanah dalam jarak sekitar 3 km. Batas derau: {noise} mm/thn. Deteksi: puncak lokal selebar minimal 2 piksel, minimal {snr} kali batas derau, dan minimal dua kali ketidakpastiannya sendiri.",
     depthTitle: "Seberapa dalam cekungan",
     depthToday: "Sekarang: {cm} cm",
     depthProjected: "Pada {year}: {cm} cm",

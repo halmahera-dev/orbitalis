@@ -18,6 +18,7 @@ from scipy import ndimage
 SPEED_OF_LIGHT = 299_792_458.0
 DAYS_PER_YEAR = 365.0
 NORTH_JAKARTA_LAND = (106.70, -6.20, 106.98, -6.10)
+JAKARTA_LAND = (106.68, -6.38, 106.98, -6.08)
 COHERENCE_LIMIT = 0.6
 LOCAL_SIGMA_PIXELS = 4
 REGIONAL_SIGMA_PIXELS = 40
@@ -66,8 +67,8 @@ def read_los_unit_vector(product, center_x, center_y):
     return (east, north, float(np.sqrt(1 - east**2 - north**2)))
 
 
-def read_pair_window(h5_path):
-    west, south, east, north = NORTH_JAKARTA_LAND
+def read_pair_window(h5_path, bounds=NORTH_JAKARTA_LAND):
+    west, south, east, north = bounds
     with h5py.File(h5_path, "r") as product:
         epsg = int(product[f"{UNWRAPPED_GRID}/HH/projection"].attrs["epsg_code"])
         to_utm = Transformer.from_crs(4326, epsg, always_xy=True)

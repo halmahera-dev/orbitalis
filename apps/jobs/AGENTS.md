@@ -14,7 +14,7 @@ Python batch jobs that turn satellite data into the files `apps/web` reads. Read
 ## NISAR rate chain
 
 1. `fetch_nisar_browse.py` writes the pass images and `nisar-pairs.json`.
-2. `fetch_nisar_gunw.py --track 10` and `--track 18` read the North Jakarta window and LOS vector of each GUNW pair with HTTP range requests into `out/gunw/<track>/`.
-3. `stack_nisar_rate.py` stacks each track, solves the two for vertical and east motion, and writes `nisar-rates.json` and `out/nisar-stack-rate.png`. It stops if its decomposition self-check fails.
+2. `fetch_nisar_gunw.py --track 10` and `--track 18` read the mainland Jakarta window (`JAKARTA_LAND`) and LOS vector of each GUNW pair with HTTP range requests into `out/gunw-jakarta/<track>/`.
+3. `stack_nisar_rate.py` stacks each track, solves the two for vertical and east motion, and writes `nisar-rates.json` and `out/nisar-stack-rate.png`. It stops if its decomposition self-check fails. Candidate names come from OpenStreetMap reverse geocoding (Nominatim, 1 request per second, cached in `out/geocode-cache.json`).
 
 Every rate is relative to the ground within about 3 km. A candidate with `"basis": "track10"` is seen on one track only. Say both wherever they are shown.
