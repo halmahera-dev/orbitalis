@@ -164,3 +164,10 @@ The home page is in `/sitemap.xml`. Pages use `noindex`. `/robots.txt` blocks on
 - Product PRD: `docs/prd-orbitalis.md`
 - Design rules: `design.md`
 - Agent guidance: `AGENTS.md`
+- Space Apps 2026 submission draft: `docs/submission.md`
+
+## Data and AI use
+
+- **Real data:** NISAR L2 GUNW products and browse images (NASA, JPL, ISRO, through the ASF DAAC), and OpenStreetMap data through CARTO tiles. The stacked NISAR rate is in `apps/web/src/features/nisar/nisar-rates.json`.
+- **Example data:** bowl depths and series (`bowls-seed.json`) and the priority areas (`areas-seed.json`) are synthetic. Each file has `"synthetic": true`, and the app labels these values as examples.
+- **AI use:** parts of the code, the documents, and the submission text were written with the help of Claude Code (Anthropic) and reviewed by the team. No AI model runs inside the product.

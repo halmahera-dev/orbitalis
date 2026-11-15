@@ -11,6 +11,7 @@ Start here. This page links to every product and design document in the repo. Up
 | 3   | [Business Flow](business-flow.md) | Who does what, in what order, for each need                                         | You design a user flow or talk to an agency             |
 | 4   | [HLD](hld-orbitalis.md)           | How the system is built: parts, data flow, projection, scores, map layers, database | You plan a technical change                             |
 | 5   | [Services](services.md)           | What runs in `apps/`: `web`, `jobs`, `notifier`, and each job script                | You add or change a service or a job                    |
+| 6   | [Submission](submission.md)       | The Space Apps 2026 project page text, checklist, NASA data, and references         | You fill in or review the hackathon submission          |
 
 The feature map is an HTML file. Open it in a browser. The other documents are Markdown with Mermaid diagrams.
 
