@@ -16,6 +16,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { Skeleton } from "@repo/ui/components/skeleton";
 import Link from "next/link";
 
+import { InsightCard, type InsightSentence } from "@/components/insight-card";
 import { cellAt, getBowls, getCells, getLatestRun } from "@/features/bowls/bowls-queries";
 import { RateRange } from "@/features/bowls/components/rate-range";
 import { isFarmingSite } from "@/features/bowls/visit";
@@ -111,6 +112,26 @@ export async function SiteReport({
   const site = nearest(bowls.filter(isFarmingSite), point);
   const plans = planEntries.filter((entry) => entry.cellId === cell.id);
   const unit = dictionary.common.mmPerYear;
+  const insightYear = projectionYears[0];
+  const insightSentences: InsightSentence[] = [
+    rate > 0
+      ? {
+          template: t.insight,
+          values: {
+            rate: Math.round(rate),
+            unit,
+            cm: Math.round((rate * (insightYear - currentYear)) / 10),
+            year: insightYear,
+          },
+        }
+      : { template: t.insightStable },
+  ];
+  if (lead) {
+    insightSentences.push({
+      template: t.insightLead,
+      values: { name: lead.item.name, km: lead.km.toFixed(1) },
+    });
+  }
 
   return (
     <article className="flex flex-col gap-4">
@@ -150,6 +171,8 @@ export async function SiteReport({
         />
         <p className="text-xs text-muted-foreground">{dictionary.map.relativeNote}</p>
       </section>
+
+      <InsightCard title={dictionary.common.insight} sentences={insightSentences} />
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         {projectionYears.map((year) => (
@@ -226,6 +249,7 @@ export function SiteReportSkeleton() {
     <div className="flex flex-col gap-4" aria-busy="true">
       <Skeleton className="h-12 w-72" />
       <Skeleton className="h-36" />
+      <Skeleton className="h-24" />
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         {[0, 1, 2, 3].map((index) => (
           <Skeleton key={index} className="h-24" />

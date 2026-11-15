@@ -1,5 +1,6 @@
 import { Skeleton } from "@repo/ui/components/skeleton";
 
+import { InsightCard } from "@/components/insight-card";
 import { anyValue, TeamFilters } from "@/features/team/components/team-filters";
 import { TeamTable } from "@/features/team/components/team-table";
 import { getTeamInsights, getTeamMembers } from "@/features/team/team-queries";
@@ -52,12 +53,12 @@ export async function TeamBoard({
     save: dictionary.common.save,
   };
 
-  const insightLine = insights.heaviest
-    ? fill(t.insightHeaviest, {
-        name: insights.heaviest.name,
-        count: insights.heaviest.openVisits,
-      })
-    : t.insightQuiet;
+  const insightSentence = insights.heaviest
+    ? {
+        template: t.insightHeaviest,
+        values: { name: insights.heaviest.name, count: insights.heaviest.openVisits },
+      }
+    : { template: t.insightQuiet };
 
   return (
     <>
@@ -92,7 +93,9 @@ export async function TeamBoard({
           }
         />
       </div>
-      <p className="border-b px-4 py-3 text-sm text-muted-foreground sm:px-6">{insightLine}</p>
+      <div className="border-b px-4 py-4 sm:px-6">
+        <InsightCard title={dictionary.common.insight} sentences={[insightSentence]} />
+      </div>
       <div className="flex flex-wrap items-center justify-between gap-3 border-b px-4 py-3 sm:px-6">
         <TeamFilters
           search={search}
@@ -135,7 +138,7 @@ export function TeamBoardSkeleton() {
           <Skeleton key={index} className="h-22" />
         ))}
       </div>
-      <Skeleton className="h-5 w-80 max-w-full" />
+      <Skeleton className="h-24" />
       <Skeleton className="h-8 w-96 max-w-full" />
       <Skeleton className="h-64" />
     </div>

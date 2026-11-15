@@ -17,6 +17,7 @@ export const id: Dictionary = {
     dark: "Gelap",
     system: "Sistem",
     switchLanguage: "English",
+    insight: "Wawasan",
     language: "Bahasa",
     indonesian: "Bahasa Indonesia",
     english: "English",
@@ -368,6 +369,9 @@ export const id: Dictionary = {
     plans: "Rencana resapan dan pipa",
     meanMovement: "Rata-rata gerak vertikal terukur NISAR",
     passCount: "{count} lintasan",
+    insightLeads: "**{open}** dari **{total}** cekungan menunggu kunjungan pertama.",
+    insightNoLeads: "Tidak ada cekungan yang menunggu kunjungan pertama.",
+    insightFastest: "Yang tercepat adalah **{name}** dengan **{rate} {unit}**.",
   },
   team: {
     title: "Tim",
@@ -396,7 +400,7 @@ export const id: Dictionary = {
     kpiHeaviest: "Beban terberat",
     kpiHeaviestEmpty: "Tidak ada",
     kpiHeaviestDetail: "{count} terbuka",
-    insightHeaviest: "{name} punya {count} kunjungan terbuka.",
+    insightHeaviest: "**{name}** punya **{count}** kunjungan terbuka.",
     insightQuiet: "Belum ada kunjungan terbuka yang ditugaskan.",
     statuses: {
       active: "Aktif",
@@ -446,6 +450,8 @@ export const id: Dictionary = {
     empty: "Tidak ada cekungan yang cocok dengan filter ini.",
     inspectionTitle: "Inspeksi",
     twin: {
+      insight: "Dengan laju **{rate} {unit}**, pusat cekungan ini sedalam **{cm} cm** pada **{year}**.",
+      insightNoRate: "NISAR belum punya laju terukur untuk cekungan ini.",
       viewLabel: "Tampilan",
       views: {
         overview: "Ikhtisar",
@@ -728,6 +734,9 @@ export const id: Dictionary = {
     deeperBy: "Lebih dalam pada {year}, dengan laju sekarang",
     withoutPipes: "Warga tanpa pipa (perkiraan)",
     around: "Di sekitar lokasi ini",
+    insight: "Dengan laju **{rate} {unit}**, lokasi ini **{cm} cm** lebih rendah pada **{year}**.",
+    insightStable: "Lokasi ini tidak turun pada pemrosesan NISAR terbaru.",
+    insightLead: "Petunjuk pompa terdekat, **{name}**, berjarak **{km} km**.",
     nearestLead: "Petunjuk pompa terdekat: {name}",
     noLead: "Tidak ada petunjuk pompa di dekat sini",
     nearestSite: "Badan air terdekat: {name}",

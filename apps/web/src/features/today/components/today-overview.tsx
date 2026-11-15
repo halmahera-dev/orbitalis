@@ -2,6 +2,7 @@ import { Skeleton } from "@repo/ui/components/skeleton";
 import { cn } from "@repo/ui/lib/utils";
 import Link from "next/link";
 
+import { InsightCard, type InsightSentence } from "@/components/insight-card";
 import { getBowls, getLatestRun, type Bowl } from "@/features/bowls/bowls-queries";
 import { RateRange } from "@/features/bowls/components/rate-range";
 import { isFarmingSite, statusDotColors } from "@/features/bowls/visit";
@@ -81,8 +82,24 @@ export async function TodayOverview({ locale }: { locale: Locale }) {
     }))
     .toSorted((a, b) => b.count - a.count);
 
+  const insightSentences: InsightSentence[] = [
+    openLeads.length > 0
+      ? {
+          template: t.insightLeads,
+          values: { open: openLeads.length, total: activeBowls.length },
+        }
+      : { template: t.insightNoLeads },
+  ];
+  if (fastest?.rateMmYr != null) {
+    insightSentences.push({
+      template: t.insightFastest,
+      values: { name: fastest.name, rate: Math.round(fastest.rateMmYr), unit },
+    });
+  }
+
   return (
     <div className="flex flex-col gap-3">
+      <InsightCard title={dictionary.common.insight} sentences={insightSentences} />
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Metric
           label={t.openLeads}
@@ -300,6 +317,7 @@ export async function TodayOverview({ locale }: { locale: Locale }) {
 export function TodayOverviewSkeleton() {
   return (
     <div className="flex flex-col gap-3" aria-busy="true">
+      <Skeleton className="h-24" />
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {[0, 1, 2, 3].map((index) => (
           <Skeleton key={index} className="h-24" />
