@@ -6,6 +6,7 @@ import { anyValue, BowlFilters, overdueValue } from "@/features/bowls/components
 import { BowlTable } from "@/features/bowls/components/bowl-table";
 import { NisarLeads } from "@/features/bowls/components/nisar-leads";
 import { calendarDate, isVisitOverdue } from "@/features/bowls/visit";
+import { fastestMeasuredSinking } from "@/features/nisar/measured-sinking";
 import { nisarRateForBowl } from "@/features/nisar/nisar-queries";
 import { getTeamMembers } from "@/features/team/team-queries";
 import { getDictionary, type Locale } from "@/lib/i18n";
@@ -63,7 +64,32 @@ export async function BowlQueue({
       ...allBowls.flatMap((bowl) => (bowl.assignee ? [bowl.assignee] : [])),
     ]),
   ].toSorted();
-  const fastestRate = Math.max(0, ...bowls.map((bowl) => bowl.rateAfterBanMmYr));
+  const measuredSites = [
+    ...bowls.flatMap((bowl) => {
+      const rate = nisarRateForBowl(bowl.id);
+      if (!rate.measured) {
+        return [];
+      }
+      return [
+        {
+          id: bowl.id,
+          name: bowl.name,
+          rateMmYr: rate.verticalRateMmYr,
+          kind: "bowl" as const,
+          seriesDownMm: rate.series.map((point) => -point.mm),
+        },
+      ];
+    }),
+    ...nisarLeads.map((lead) => ({
+      id: lead.id,
+      name: lead.name,
+      rateMmYr: lead.rateMmYr,
+      kind: "candidate" as const,
+      seriesDownMm: [] as number[],
+    })),
+  ];
+  const fastestMeasured = fastestMeasuredSinking(measuredSites);
+  const fastestRate = fastestMeasured ? Math.round(fastestMeasured.rateMmYr) : 0;
   const nisarByBowlId = Object.fromEntries(
     allBowls.map((bowl) => {
       const rate = nisarRateForBowl(bowl.id);

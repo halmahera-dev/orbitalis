@@ -1,3 +1,5 @@
+import { Analytics01Icon, ArrowRight02Icon, FileSearchIcon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { Button } from "@repo/ui/components/button";
 import { Skeleton } from "@repo/ui/components/skeleton";
 import {
@@ -10,11 +12,13 @@ import {
 } from "@repo/ui/components/table";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@repo/ui/components/tooltip";
 import { cn } from "@repo/ui/lib/utils";
-import { Analytics01Icon, ArrowRight02Icon, FileSearchIcon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
 import Link from "next/link";
 
-import { getBowlSeries, getBowls, type Bowl } from "@/features/bowls/bowls-queries";
+import { getBowlSeries, getBowls, getNisarLeads, type Bowl } from "@/features/bowls/bowls-queries";
+import {
+  fastestMeasuredSinking,
+  type MeasuredSinkingSite,
+} from "@/features/nisar/measured-sinking";
 import { interferogramCatalog } from "@/features/nisar/nisar-catalog";
 import { nisarRateForBowl } from "@/features/nisar/nisar-queries";
 import { Sparkline } from "@/features/today/components/sparkline";
@@ -110,6 +114,27 @@ function measuredVerticalSeries(bowlId: string) {
   return rate.series.map((point) => ({ date: point.date, mm: -point.mm }));
 }
 
+function measuredBowlSite(bowl: Pick<Bowl, "id" | "name">): MeasuredSinkingSite | null {
+  const rate = nisarRateForBowl(bowl.id);
+  if (!rate.measured) {
+    return null;
+  }
+  return {
+    id: bowl.id,
+    name: bowl.name,
+    rateMmYr: rate.verticalRateMmYr,
+    kind: "bowl",
+    seriesDownMm: rate.series.map((point) => -point.mm),
+  };
+}
+
+function measuredSiteHref(locale: Locale, site: MeasuredSinkingSite) {
+  if (site.kind === "candidate") {
+    return `/${locale}/map?show=leads&lead=${encodeURIComponent(site.id)}`;
+  }
+  return `/${locale}/bowls/${site.id}`;
+}
+
 function meanByIndex(seriesList: { mm: number }[][]) {
   if (seriesList.length === 0) {
     return [];
@@ -121,7 +146,13 @@ function meanByIndex(seriesList: { mm: number }[][]) {
   });
 }
 
-function InsightText({ template, values }: { template: string; values: Record<string, string | number> }) {
+function InsightText({
+  template,
+  values,
+}: {
+  template: string;
+  values: Record<string, string | number>;
+}) {
   return (
     <>
       {fill(template, values)
@@ -142,10 +173,26 @@ function InsightText({ template, values }: { template: string; values: Record<st
 export async function TodayOverview({ locale }: { locale: Locale }) {
   const dictionary = getDictionary(locale);
   const t = dictionary.today;
-  const bowls = await getBowls();
+  const [bowls, nisarLeads] = await Promise.all([getBowls(), getNisarLeads()]);
   const activeBowls = bowls.filter((bowl) => bowl.status !== "dismissed");
   const bowlsBySpeed = activeBowls.toSorted((a, b) => b.rateAfterBanMmYr - a.rateAfterBanMmYr);
-  const fastestBowl = bowlsBySpeed[0];
+  const measuredSites: MeasuredSinkingSite[] = [
+    ...activeBowls.flatMap((bowl) => {
+      const site = measuredBowlSite(bowl);
+      return site ? [site] : [];
+    }),
+    ...nisarLeads
+      .filter((lead) => lead.status !== "dismissed")
+      .map((lead) => ({
+        id: lead.id,
+        name: lead.name,
+        rateMmYr: lead.rateMmYr,
+        kind: "candidate" as const,
+        seriesDownMm: [],
+      })),
+  ];
+  const fastestMeasured = fastestMeasuredSinking(measuredSites);
+  const fastestMeasuredRate = fastestMeasured ? Math.round(fastestMeasured.rateMmYr) : null;
   const notSlowingCount = activeBowls.filter((bowl) => rateShare(bowl) >= notSlowingShare).length;
   const notSlowingPercent = Math.round((notSlowingCount / Math.max(activeBowls.length, 1)) * 100);
   const closedBowls = bowls.filter((bowl) => bowl.outcome !== null);
@@ -172,9 +219,7 @@ export async function TodayOverview({ locale }: { locale: Locale }) {
     mm,
   }));
   const meanSentinel = meanByIndex(seriesList.map((series) => series.sentinel1));
-  const fastestSeries = fastestBowl
-    ? (measuredVerticalSeries(fastestBowl.id)?.map((point) => point.mm) ?? [])
-    : [];
+  const fastestSeries = fastestMeasured?.seriesDownMm ?? [];
   const knownByPass = pairs.map(
     (_, passIndex) => activeBowls.filter((bowl) => bowl.firstSeenPass <= passIndex).length,
   );
@@ -207,43 +252,43 @@ export async function TodayOverview({ locale }: { locale: Locale }) {
 
   return (
     <div className="flex flex-col gap-3">
-      {fastestBowl ? (
-        <section
-          aria-labelledby="overview-insight"
-          className="insight-card flex min-w-0 flex-col gap-3 p-4"
-        >
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <HugeiconsIcon icon={Analytics01Icon} strokeWidth={2} className="size-4" />
-            <h2 id="overview-insight" className="flex-1">
-              {t.insightTitle}
-            </h2>
-            <Tooltip>
-              <TooltipTrigger render={<span className="inline-flex" />}>
-                <Button
-                  variant="ghost"
-                  size="icon-sm"
-                  nativeButton={false}
-                  aria-label={t.insightLeads}
-                  render={<Link href={`${bowlsPath}?status=lead`} />}
-                >
-                  <HugeiconsIcon icon={FileSearchIcon} strokeWidth={2} />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>{t.insightLeads}</TooltipContent>
-            </Tooltip>
-          </div>
-          <p className="type-title text-xl text-muted-foreground">
-            <InsightText
-              template={t.insightBody}
-              values={{
-                share: notSlowingPercent,
-                name: fastestBowl.name,
-                rate: fastestBowl.rateAfterBanMmYr,
-              }}
-            />
-          </p>
-        </section>
-      ) : null}
+      <section
+        aria-labelledby="overview-insight"
+        className="flex min-w-0 flex-col gap-3 insight-card p-4"
+      >
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <HugeiconsIcon icon={Analytics01Icon} strokeWidth={2} className="size-4" />
+          <h2 id="overview-insight" className="flex-1">
+            {t.insightTitle}
+          </h2>
+          <Tooltip>
+            <TooltipTrigger render={<span className="inline-flex" />}>
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                nativeButton={false}
+                aria-label={t.insightLeads}
+                render={<Link href={`${bowlsPath}?status=lead`} />}
+              >
+                <HugeiconsIcon icon={FileSearchIcon} strokeWidth={2} />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>{t.insightLeads}</TooltipContent>
+          </Tooltip>
+        </div>
+        <p className="type-title text-xl text-muted-foreground">
+          <InsightText template={t.insightBody} values={{ share: notSlowingPercent }} />
+          {fastestMeasured && fastestMeasuredRate !== null ? (
+            <>
+              {" "}
+              <InsightText
+                template={t.insightMeasured}
+                values={{ name: fastestMeasured.name, rate: fastestMeasuredRate }}
+              />
+            </>
+          ) : null}
+        </p>
+      </section>
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Metric label={t.activeBowls} value={String(activeBowls.length)} href={bowlsPath}>
@@ -251,9 +296,9 @@ export async function TodayOverview({ locale }: { locale: Locale }) {
         </Metric>
         <Metric
           label={t.worstRate}
-          value={`${fastestBowl?.rateAfterBanMmYr ?? 0} ${unit}`}
-          detail={fastestBowl?.name}
-          href={fastestBowl ? `${bowlsPath}/${fastestBowl.id}` : bowlsPath}
+          value={fastestMeasuredRate !== null ? `${fastestMeasuredRate} ${unit}` : "—"}
+          detail={fastestMeasured?.name}
+          href={fastestMeasured ? measuredSiteHref(locale, fastestMeasured) : bowlsPath}
         >
           <Sparkline values={fastestSeries} color="var(--brand)" />
         </Metric>
@@ -290,7 +335,7 @@ export async function TodayOverview({ locale }: { locale: Locale }) {
       </div>
 
       <div className="grid grid-cols-1 items-stretch gap-3 xl:grid-cols-3">
-        <div className="min-h-56 h-full xl:col-span-2">
+        <div className="h-full min-h-56 xl:col-span-2">
           <TodayMiniMapLazy
             locale={locale}
             bowls={bowlsBySpeed.slice(0, mapPinLimit)}

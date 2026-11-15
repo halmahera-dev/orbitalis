@@ -361,7 +361,8 @@ export const id: Dictionary = {
     insightTitle: "Wawasan",
     insightLeads: "Buka petunjuk",
     insightBody:
-      "**{share}%** cekungan masih turun hampir sama cepatnya seperti sebelum larangan. Yang tercepat adalah **{name}** dengan **{rate} mm/thn**.",
+      "**{share}%** cekungan masih turun hampir sama cepatnya seperti sebelum larangan (laju contoh).",
+    insightMeasured: "Laju NISAR terukur tercepat adalah **{name}** dengan **{rate} mm/thn**.",
     mapCardTitle: "Cekungan di peta",
     openMapCard: "Buka peta",
     seeAll: "Lihat semua",

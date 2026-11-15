@@ -353,8 +353,8 @@ export const en = {
     finding: "The fastest bowl is {name} at {rate} mm/yr, and its status is {status}.",
     insightTitle: "Insight",
     insightLeads: "Open leads",
-    insightBody:
-      "**{share}%** of bowls still sink at nearly their pre-ban rate. The fastest is **{name}** at **{rate} mm/yr**.",
+    insightBody: "**{share}%** of bowls still sink at nearly their pre-ban rate (example rates).",
+    insightMeasured: "The fastest measured NISAR rate is **{name}** at **{rate} mm/yr**.",
     mapCardTitle: "Bowls on the map",
     openMapCard: "Open the map",
     seeAll: "See all",
