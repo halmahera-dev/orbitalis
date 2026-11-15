@@ -6,6 +6,12 @@ This monorepo holds the Next.js web app, shared packages under the `@repo` scope
 
 **Live demo:** [orbitalis.halmahera.site/en/map](https://orbitalis.halmahera.site/en/map). It opens with no sign-in. Other public pages: `/en/landing` and `/en/check` (check an address). Use `/id/...` for Indonesian.
 
+## Screenshots
+
+| Digital twin of a bowl | Recharge priority |
+| --- | --- |
+| ![Digital twin of the Kalideres bowl on the 3D map](docs/images/digital-twin.png) | ![Recharge priority map over Jakarta](docs/images/recharge-priority.png) |
+
 ## How it works
 
 1. Jobs read NISAR L-band interferograms (GUNW) over Jakarta from two tracks and stack 16 pairs from June to October 2026.
