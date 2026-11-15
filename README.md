@@ -8,7 +8,7 @@ This monorepo holds the Next.js web app, shared packages under the `@repo` scope
 
 ## Screenshots
 
-| Digital twin of a bowl                                                            | Recharge priority                                                        |
+| Digital twin of a bowl                                                            | Groundwater Usage Map                                                    |
 | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
 | ![Digital twin of the Kalideres bowl on the 3D map](docs/images/digital-twin.png) | ![Recharge priority map over Jakarta](docs/images/recharge-priority.png) |
 
