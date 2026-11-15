@@ -13,7 +13,7 @@ This monorepo holds the Next.js web app, shared packages under the `@repo` scope
 - **Better Auth** (`@repo/auth`)
 - **Cloudflare Workers** via OpenNext (`@opennextjs/cloudflare`)
 - **Oxlint** and **Oxfmt**
-- **Python** jobs in `apps/jobs` (NISAR browse fetch, GUNW window read, rate stack)
+- **Python** jobs in `apps/jobs` (NISAR fetch, GUNW rate stack, water sites, WorldPop)
 
 ## Quick start
 
@@ -58,7 +58,7 @@ bun run dev:web
 orbitalis/
 ├── apps/
 │   ├── web/          # Next.js app (landing, desk, map, bowl twin)
-│   └── jobs/         # Python NISAR jobs
+│   └── jobs/         # Python data jobs (NISAR, WorldPop, water sites)
 ├── packages/
 │   ├── auth/         # @repo/auth — Better Auth setup and demo seed
 │   ├── config/       # @repo/config — shared TypeScript config
@@ -96,6 +96,7 @@ npx shadcn@latest add accordion dialog popover sheet table -c packages/ui
 | `bun run dev:web`      | Start only the web app                       |
 | `bun run deploy:web`   | Build with OpenNext and deploy to Cloudflare |
 | `bun run check-types`  | Typecheck the workspace                      |
+| `bun run lint`         | Run Oxlint without writing                   |
 | `bun run check`        | Oxlint and Oxfmt                             |
 | `bun run db:generate`  | Generate migrations                          |
 | `bun run db:migrate`   | Run migrations                               |
@@ -160,7 +161,11 @@ The home page is in `/sitemap.xml`. Pages use `noindex`. `/robots.txt` blocks on
 
 ## Docs
 
+Start at `docs/README.md` for the full document index.
+
 - Product PRD: `docs/prd-orbitalis.md`
+- High-level design: `docs/hld-orbitalis.md`
+- Services and jobs: `docs/services.md`
 - Design rules: `design.md`
 - Agent guidance: `AGENTS.md`
 - Space Apps 2026 submission draft: `docs/submission.md`
