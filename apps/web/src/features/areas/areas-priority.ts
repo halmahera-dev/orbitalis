@@ -150,6 +150,44 @@ export function nearestArea(center: [number, number], areas: PriorityArea[]) {
   return nearest;
 }
 
+type Candidate = { id: string; rateMmYr: number; center: [number, number] };
+
+export type RankedCandidate<T extends Candidate> = {
+  candidate: T;
+  matches: boolean;
+  rank: number | null;
+};
+
+export function candidateLabel(basis: "vertical" | "track10") {
+  return basis === "track10" ? "oneTrack" : "confirmed";
+}
+
+export function rankCandidates<T extends Candidate>(
+  candidates: T[],
+  areas: PriorityArea[],
+  filter: PriorityFilter,
+): RankedCandidate<T>[] {
+  const scored = candidates.map((candidate): RankedCandidate<T> => {
+    const area = nearestArea(candidate.center, areas);
+    return {
+      candidate,
+      matches: matchesFilter(
+        {
+          sinkingMmYr: candidate.rateMmYr,
+          populationPerKm2: area?.populationPerKm2 ?? 0,
+          economy: area?.economy ?? "low",
+        },
+        filter,
+      ),
+      rank: null,
+    };
+  });
+  const sorted = scored.toSorted(
+    (a, b) => matchesFirst(a, b) || b.candidate.rateMmYr - a.candidate.rateMmYr,
+  );
+  return assignRanks(sorted);
+}
+
 export function rankLeads<T extends Lead>(
   leads: T[],
   areas: PriorityArea[],

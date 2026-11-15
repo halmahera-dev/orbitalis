@@ -1,11 +1,13 @@
 import { expect, test } from "bun:test";
 
 import {
+  candidateLabel,
   defaultPriorityFilter,
   layerWeights,
   parsePriorityFilter,
   priorityFilterParams,
   rankAreas,
+  rankCandidates,
   rankLeads,
   type PriorityArea,
 } from "./areas-priority";
@@ -132,4 +134,27 @@ test("priorityFilterParams writes only values that differ from the default", () 
     rank: "economy",
   });
   expect(parsePriorityFilter(new URLSearchParams("rate=30&rank=economy"))).toEqual(filter);
+});
+
+test("rankCandidates keeps matches first and sorts them by rate", () => {
+  const nearAreas = [area({ id: "near", center: [106.94, -6.12], populationPerKm2: 20_000 })];
+  const candidates = [
+    { id: "slow", rateMmYr: 30, center: [106.94, -6.12] as [number, number] },
+    { id: "fast", rateMmYr: 110, center: [106.94, -6.12] as [number, number] },
+    { id: "middle", rateMmYr: 70, center: [106.94, -6.12] as [number, number] },
+  ];
+  const ranked = rankCandidates(candidates, nearAreas, {
+    ...defaultPriorityFilter,
+    minSinkingMmYr: 50,
+  });
+  expect(ranked.map((item) => [item.candidate.id, item.matches, item.rank])).toEqual([
+    ["fast", true, 1],
+    ["middle", true, 2],
+    ["slow", false, null],
+  ]);
+});
+
+test("candidateLabel marks a track 10 candidate as one track only", () => {
+  expect(candidateLabel("track10")).toBe("oneTrack");
+  expect(candidateLabel("vertical")).toBe("confirmed");
 });

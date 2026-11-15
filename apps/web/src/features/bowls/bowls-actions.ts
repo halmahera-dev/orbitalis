@@ -7,13 +7,19 @@ import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import * as z from "zod";
 
+import { nisarCandidates } from "@/features/nisar/nisar-queries";
 import { getActiveInspectorNames } from "@/features/team/team-queries";
 
 import seed from "./bowls-seed.json";
 
 type ActionResult = { ok: true } | { ok: false; error: string };
 
-const bowlId = z.enum(seed.bowls.map((bowl) => bowl.id) as [string, ...string[]]);
+const leadIds = [
+  ...seed.bowls.map((bowl) => bowl.id),
+  ...nisarCandidates().map((candidate) => candidate.id),
+] as [string, ...string[]];
+
+const bowlId = z.enum(leadIds);
 
 const moveInput = z.object({
   bowlId,

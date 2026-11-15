@@ -4,6 +4,8 @@ import { inspection } from "@repo/db/schema/inspection";
 import { connection } from "next/server";
 import { cache } from "react";
 
+import { nisarCandidates, type NisarCandidate } from "@/features/nisar/nisar-queries";
+
 import seed from "./bowls-seed.json";
 
 export type BowlStatus = (typeof inspection.$inferSelect)["status"];
@@ -45,26 +47,46 @@ export function getBowlSeriesById() {
   return Object.fromEntries(seed.bowls.map((bowl) => [bowl.id, bowl.series]));
 }
 
-async function loadBowls(): Promise<Bowl[]> {
+type InspectionRow = typeof inspection.$inferSelect;
+
+export type InspectionFields = Pick<
+  Bowl,
+  "status" | "assignee" | "visitDate" | "outcome" | "note" | "updatedAt"
+>;
+
+export type NisarLead = NisarCandidate & InspectionFields;
+
+const getInspectionRowsById = cache(async () => {
   await connection();
   const rows = await db.select().from(inspection);
-  const rowByBowlId = new Map(rows.map((row) => [row.bowlId, row]));
+  return new Map(rows.map((row) => [row.bowlId, row]));
+});
 
-  return getPublicBowls().map((bowl) => {
-    const row = rowByBowlId.get(bowl.id);
-    return {
-      ...bowl,
-      status: row?.status ?? "lead",
-      assignee: row?.assignee ?? null,
-      visitDate: row?.visitDate ?? null,
-      outcome: row?.outcome ?? null,
-      note: row?.note ?? null,
-      updatedAt: row?.updatedAt?.toISOString() ?? null,
-    };
-  });
+function inspectionFields(row: InspectionRow | undefined): InspectionFields {
+  return {
+    status: row?.status ?? "lead",
+    assignee: row?.assignee ?? null,
+    visitDate: row?.visitDate ?? null,
+    outcome: row?.outcome ?? null,
+    note: row?.note ?? null,
+    updatedAt: row?.updatedAt?.toISOString() ?? null,
+  };
+}
+
+async function loadBowls(): Promise<Bowl[]> {
+  const rowById = await getInspectionRowsById();
+  return getPublicBowls().map((bowl) => ({ ...bowl, ...inspectionFields(rowById.get(bowl.id)) }));
 }
 
 export const getBowls = cache(loadBowls);
+
+export async function getNisarLeads(): Promise<NisarLead[]> {
+  const rowById = await getInspectionRowsById();
+  return nisarCandidates().map((candidate) => ({
+    ...candidate,
+    ...inspectionFields(rowById.get(candidate.id)),
+  }));
+}
 
 export async function getBowl(bowlId: string) {
   const bowls = await getBowls();
