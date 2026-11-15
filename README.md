@@ -1,8 +1,19 @@
 # Orbitalis
 
-Orbitalis helps groundwater regulators in Jakarta turn NISAR radar motion into inspection leads. A public landing page explains coastal subsidence. After sign-in, the desk shows a 3D map of subsidence bowls, a digital twin per bowl, and a visit workflow for the team.
+Orbitalis helps groundwater regulators in Jakarta turn NISAR radar motion into inspection leads. A public landing page explains coastal subsidence. Every other page opens with no sign-in form: a visitor gets a shared guest session. The desk shows a 3D map of subsidence bowls, a digital twin per bowl, and a visit workflow for the team.
 
 This monorepo holds the Next.js web app, shared packages under the `@repo` scope, and Python jobs that fetch NISAR browse images and stack NISAR GUNW pairs into a measured local sinking rate per bowl.
+
+**Live demo:** [orbitalis.halmahera.site/en/map](https://orbitalis.halmahera.site/en/map). It opens with no sign-in. Other public pages: `/en/landing` and `/en/check` (check an address). Use `/id/...` for Indonesian.
+
+## How it works
+
+1. Jobs read NISAR L-band interferograms (GUNW) over Jakarta from two tracks and stack 16 pairs from June to October 2026.
+2. They find places that sink faster than the ground within about 3 km. These are bowls, the shape a hidden pump leaves.
+3. WorldPop adds the number of people to each 480 m cell.
+4. `import:nisar` loads the run into Postgres. The web app shows bowls on a 3D map, opens a digital twin for each one, and tracks field visits.
+
+A bowl is a reason to inspect, never proof of a pump. Every number shows its source. The full design is in [docs/hld-orbitalis.md](docs/hld-orbitalis.md).
 
 ## Stack
 
@@ -13,7 +24,7 @@ This monorepo holds the Next.js web app, shared packages under the `@repo` scope
 - **Better Auth** (`@repo/auth`)
 - **Cloudflare Workers** via OpenNext (`@opennextjs/cloudflare`)
 - **Oxlint** and **Oxfmt**
-- **Python** jobs in `apps/jobs` (NISAR fetch, GUNW rate stack, water sites, WorldPop)
+- **Python** jobs in `apps/jobs` (NISAR browse fetch, GUNW window read, rate stack)
 
 ## Quick start
 
@@ -23,22 +34,23 @@ This monorepo holds the Next.js web app, shared packages under the `@repo` scope
 bun install
 ```
 
-2. Create `apps/web/.env` with:
+2. Copy `apps/web/.env.example` to `apps/web/.env` and fill it in. `DATABASE_URL` is a Postgres connection string. `BETTER_AUTH_SECRET` needs at least 32 characters. For the jobs, copy `.env.example` to `.env` in the repo root.
 
 ```bash
-DATABASE_URL=postgresql://...
-BETTER_AUTH_SECRET=at-least-32-characters-long-secret
-BETTER_AUTH_URL=http://localhost:3000
+cp apps/web/.env.example apps/web/.env
+cp .env.example .env
 ```
 
-3. Apply the migrations and seed demo accounts (the seed script prints emails and the shared password):
+3. Apply the migrations. The guest account is created on the first visit. `db:seed` is optional and adds synthetic team accounts (it prints their emails and the shared password):
 
 ```bash
 bun run db:migrate
 bun run db:seed
 ```
 
-4. Start the apps:
+4. Load the NISAR data (see [Jobs](#jobs)). Without it the map has no bowls.
+
+5. Start the apps:
 
 ```bash
 bun run dev
@@ -58,7 +70,7 @@ bun run dev:web
 orbitalis/
 ├── apps/
 │   ├── web/          # Next.js app (landing, desk, map, bowl twin)
-│   └── jobs/         # Python data jobs (NISAR, WorldPop, water sites)
+│   └── jobs/         # Python NISAR jobs
 ├── packages/
 │   ├── auth/         # @repo/auth — Better Auth setup and demo seed
 │   ├── config/       # @repo/config — shared TypeScript config
@@ -74,6 +86,28 @@ Import shared UI like this:
 ```tsx
 import { Button } from "@repo/ui/components/button";
 ```
+
+## Jobs
+
+Python 3.11 with [uv](https://docs.astral.sh/uv/). Jobs that read NISAR files need an Earthdata Login user token in `NASA_API_KEY` (root `.env`, git-ignored). Run from `apps/jobs`:
+
+```bash
+uv run --env-file ../../.env fetch_nisar_browse.py
+uv run --env-file ../../.env fetch_nisar_gunw.py --track 10
+uv run --env-file ../../.env fetch_nisar_gunw.py --track 18
+uv run stack_nisar_rate.py
+uv run fetch_worldpop.py
+bun run --cwd packages/db import:nisar ../../apps/jobs/out/nisar-run.json
+```
+
+Optional water farming sites:
+
+```bash
+uv run fetch_water_bodies.py
+bun run --cwd packages/db import:sites ../../apps/jobs/out/water-sites.json
+```
+
+The order and the method are in `apps/jobs/AGENTS.md`.
 
 ## UI package
 
@@ -96,7 +130,6 @@ npx shadcn@latest add accordion dialog popover sheet table -c packages/ui
 | `bun run dev:web`      | Start only the web app                       |
 | `bun run deploy:web`   | Build with OpenNext and deploy to Cloudflare |
 | `bun run check-types`  | Typecheck the workspace                      |
-| `bun run lint`         | Run Oxlint without writing                   |
 | `bun run check`        | Oxlint and Oxfmt                             |
 | `bun run db:generate`  | Generate migrations                          |
 | `bun run db:migrate`   | Run migrations                               |
@@ -161,11 +194,7 @@ The home page is in `/sitemap.xml`. Pages use `noindex`. `/robots.txt` blocks on
 
 ## Docs
 
-Start at `docs/README.md` for the full document index.
-
 - Product PRD: `docs/prd-orbitalis.md`
-- High-level design: `docs/hld-orbitalis.md`
-- Services and jobs: `docs/services.md`
 - Design rules: `design.md`
 - Agent guidance: `AGENTS.md`
 - Space Apps 2026 submission draft: `docs/submission.md`
