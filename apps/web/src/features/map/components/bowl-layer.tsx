@@ -62,7 +62,7 @@ export function predictionFor(
   return bowlId === selectedBowlId ? chosen : { years: baselineYears, withBan: true };
 }
 
-function circle(center: [number, number], radiusM: number) {
+export function circle(center: [number, number], radiusM: number) {
   const [longitude, latitude] = center;
   const latitudeRadius = radiusM / metersPerDegree;
   const longitudeRadius = latitudeRadius / Math.cos((latitude * Math.PI) / 180);

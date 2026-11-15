@@ -2,7 +2,7 @@
 
 Orbitalis helps groundwater regulators in North Jakarta turn NISAR radar motion into inspection leads. A public landing page explains coastal subsidence. After sign-in, the desk shows a 3D map of subsidence bowls, a digital twin per bowl, and a visit workflow for the team.
 
-This monorepo holds the Next.js web app, shared packages under the `@repo` scope, and Python jobs that fetch NISAR browse images.
+This monorepo holds the Next.js web app, shared packages under the `@repo` scope, and Python jobs that fetch NISAR browse images and stack NISAR GUNW pairs into a measured local sinking rate per bowl.
 
 ## Stack
 
@@ -13,7 +13,7 @@ This monorepo holds the Next.js web app, shared packages under the `@repo` scope
 - **Better Auth** (`@repo/auth`)
 - **Cloudflare Workers** via OpenNext (`@opennextjs/cloudflare`)
 - **Oxlint** and **Oxfmt**
-- **Python** jobs in `apps/jobs` (NISAR browse fetch)
+- **Python** jobs in `apps/jobs` (NISAR browse fetch, GUNW window read, rate stack)
 
 ## Quick start
 
@@ -58,7 +58,7 @@ bun run dev:web
 orbitalis/
 ├── apps/
 │   ├── web/          # Next.js app (landing, desk, map, bowl twin)
-│   └── jobs/         # Python NISAR browse jobs
+│   └── jobs/         # Python NISAR jobs
 ├── packages/
 │   ├── auth/         # @repo/auth — Better Auth setup and demo seed
 │   ├── config/       # @repo/config — shared TypeScript config

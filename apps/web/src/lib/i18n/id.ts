@@ -357,7 +357,7 @@ export const id: Dictionary = {
     nextPassLate: "Lintasan berikutnya dijadwalkan pada {date}, tetapi belum ada di katalog.",
     changes: "Perubahan sejak lintasan terakhir",
     finding: "Cekungan tercepat adalah {name} dengan {rate} mm/thn, dan statusnya {status}.",
-    insightTitle: "Wawasan AI",
+    insightTitle: "Wawasan",
     insightLeads: "Buka petunjuk",
     insightBody:
       "**{share}%** cekungan masih turun hampir sama cepatnya seperti sebelum larangan. Yang tercepat adalah **{name}** dengan **{rate} mm/thn**.",
@@ -622,7 +622,10 @@ export const id: Dictionary = {
   },
   map: {
     show: "Tampilkan",
-    showBowls: "Cekungan",
+    showLeads: "Petunjuk pemompaan",
+    showRecharge: "Prioritas resapan",
+    showPipe: "Prioritas pipa",
+    showFarming: "Water farming",
     showRadar: "Lintasan radar",
     year: "Tahun",
     pass: "Lintasan",
@@ -661,6 +664,8 @@ export const id: Dictionary = {
     view2d: "Tampilan 2D",
     rateLegend:
       "Laju penurunan dalam mm/thn. Tumpukan lebih tinggi berarti penurunan pada {year} lebih dalam. Pilih cekungan untuk membukanya.",
+    candidateLegend:
+      "Lingkaran putus-putus: {count} kandidat cekungan dari data NISAR asli. Yang terkuat turun {rate} ± {uncertainty} mm/thn lebih cepat dari tanah di sekitarnya. Petunjuk untuk inspeksi, bukan bukti.",
     depthTitle: "Seberapa dalam cekungan",
     depthToday: "Sekarang: {cm} cm",
     depthProjected: "Pada {year}: {cm} cm",
@@ -677,5 +682,79 @@ export const id: Dictionary = {
     evidenceProjection: "Penurunan pada {year}: {meters} m",
     evidenceProjectionBody:
       "Metode: laju dikali jumlah tahun sejak 2026. Laju dianggap tetap, tanpa tanggul laut, tanpa perubahan pemompaan, dan tanpa kenaikan muka laut. Ini proyeksi, bukan ramalan.",
+    evidenceMixed:
+      "Kedalaman, laju, dan proyeksi di prototipe ini adalah nilai contoh. Item terukur NISAR adalah hasil ukur asli.",
+    evidenceMeasured: "Terukur NISAR: {rate} ± {uncertainty} mm/thn lebih cepat dari tanah di sekitarnya",
+    evidenceMeasuredNone: "Terukur NISAR: tidak ada piksel yang bisa dipakai di sini",
+    evidenceMeasuredBody:
+      "Ini hasil ukur asli. Produk: NISAR L2 GUNW, {count} pasangan pada lintasan 10 naik, {start} sampai {end}, grid {grid} m. Metode: setiap pasangan disaring dari air dan koherensi rendah, lalu dikoreksi untuk ionosfer. Kemiringan di seluruh kota dibuang, jadi angka ini adalah penurunan tambahan dibanding tanah dalam jarak sekitar 3 km, bukan laju mutlak. Pasangan-pasangan ditumpuk untuk menekan derau uap air. Gerak searah pandang satelit ditampilkan sebagai gerak vertikal. Batas derau: {noise} mm/thn.",
+    evidenceMeasuredNoneBody:
+      "Pasangan NISAR tidak punya piksel yang bisa dipakai di dalam cekungan ini setelah saringan air dan koherensi. Laju di atas adalah nilai contoh.",
+    priority: {
+      layerLegend: {
+        recharge:
+          "Di mana air perlu dikembalikan ke tanah lebih dulu? Pilih area untuk membukanya.",
+        pipe: "Area mana yang perlu mendapat pipa air lebih dulu? Pilih area untuk membukanya.",
+        farming:
+          "Di mana pengguna air tanah besar yang wajib menjalankan water farming? Pilih area untuk membukanya.",
+      },
+      legendLow: "Prioritas rendah",
+      legendHigh: "Prioritas tinggi",
+      filterTitle: "Filter prioritas",
+      sinking: "Laju penurunan",
+      sinkingMin: "Mulai {value} mm/thn",
+      population: "Populasi",
+      populationMin: "Mulai {value} orang/km²",
+      economy: "Aktivitas ekonomi",
+      economyFrom: {
+        low: "Semua",
+        medium: "Sedang dan tinggi",
+        high: "Hanya tinggi",
+      },
+      economyLevel: {
+        low: "Rendah",
+        medium: "Sedang",
+        high: "Tinggi",
+      },
+      rankBy: "Urutkan menurut",
+      rankByOption: {
+        combined: "Gabungan",
+        sinking: "Penurunan",
+        population: "Populasi",
+        economy: "Ekonomi",
+      },
+      weights: "Skor gabungan: penurunan {sinking}%, populasi {population}%, ekonomi {economy}%.",
+      leadWeights: "Gabungan memakai peringkat cekungan. Skor petunjuk belum dibuat.",
+      pipePopulation: "Pada layer ini, populasi berarti warga tanpa air pipa.",
+      reset: "Atur ulang",
+      matchCount: "{count} dari {total} sesuai",
+      summary:
+        "Area {id} di {kecamatan} berada di peringkat pertama dari {count} area yang sesuai.",
+      noMatch: "Tidak ada yang sesuai filter. Turunkan nilai minimum.",
+      areaListTitle: "Area menurut peringkat",
+      showAreaList: "Tampilkan area menurut peringkat",
+      hideAreaList: "Sembunyikan area menurut peringkat",
+      peopleValue: "{value} orang",
+      unservedValue: "{value} tanpa pipa",
+      areaTitle: "Area {id}",
+      areaLabel: "{kecamatan}, area {id}",
+      score: "Skor prioritas",
+      scoreValue: "{score} dari 100",
+      sinkingValue: "{value} mm/thn",
+      populationValue: "{value} orang/km²",
+      people: "Warga di area ini",
+      unserved: "Warga tanpa air pipa",
+      piped: "Cakupan air pipa",
+      percentValue: "{value}%",
+      layerNote: {
+        recharge: "Hasil penyaringan, perlu survei lapangan.",
+        pipe: "Bahan perencanaan, cocokkan dengan data jaringan PAM Jaya.",
+        farming:
+          "Belum ada lokasi water farming yang terdaftar. Skor ini menunjukkan di mana pengguna besar mungkin berada.",
+      },
+      evidenceSource: "Sumber: data contoh dari {script}. Grid: sel {size} m. Periode: {period}.",
+      evidenceMethod:
+        "Metode: laju penurunan adalah laju latar ditambah kurva lonceng di sekitar setiap cekungan contoh. Populasi, air pipa, dan aktivitas ekonomi adalah angka acak tetap yang dibentuk oleh jarak ke pantai, pelabuhan, dan kawasan industri.",
+    },
   },
 };

@@ -1,0 +1,111 @@
+{
+  "synthetic": false,
+  "product": "NISAR L2 GUNW provisional, unwrapped phase (HDF5)",
+  "track": 10,
+  "direction": "ascending",
+  "pairCount": 8,
+  "period": {
+    "start": "2026-06-26",
+    "end": "2026-10-12"
+  },
+  "gridM": 80,
+  "incidenceDegrees": 37.0,
+  "noiseFloorMmYr": 15.6,
+  "detectionSnr": 3,
+  "evidence": {
+    "script": "apps/jobs/stack_nisar_rate.py",
+    "pairs": [
+      "NISAR_L2_PR_GUNW_024_010_A_174_025_4000_SH_20260626T223921_20260626T223956_20260708T223920_20260708T223955_P05023_N_F_J_001",
+      "NISAR_L2_PR_GUNW_025_010_A_174_026_4000_SH_20260708T223920_20260708T223955_20260720T223920_20260720T223954_P05023_N_F_J_001",
+      "NISAR_L2_PR_GUNW_026_010_A_174_028_4000_SH_20260720T223920_20260720T223954_20260813T223919_20260813T223953_P05023_N_F_J_001",
+      "NISAR_L2_PR_GUNW_028_010_A_174_029_4000_SH_20260813T223919_20260813T223953_20260825T223918_20260825T223953_P05023_N_F_J_001",
+      "NISAR_L2_PR_GUNW_029_010_A_174_030_4000_SH_20260825T223918_20260825T223953_20260906T223918_20260906T223953_P05023_N_F_J_001",
+      "NISAR_L2_PR_GUNW_030_010_A_174_031_4000_SH_20260906T223918_20260906T223953_20260918T223918_20260918T223953_P05023_F_F_J_001",
+      "NISAR_L2_PR_GUNW_031_010_A_174_032_4000_SH_20260918T223918_20260918T223953_20260930T223918_20260930T223953_P05023_N_F_J_001",
+      "NISAR_L2_PR_GUNW_032_010_A_174_033_4000_SH_20260930T223918_20260930T223953_20261012T223918_20261012T223953_P05023_N_F_J_001"
+    ]
+  },
+  "bowls": [
+    {
+      "id": "muara-baru",
+      "measured": true,
+      "relativeRateMmYr": 20.4,
+      "uncertaintyMmYr": 38.7,
+      "pixels": 92,
+      "pairs": 8
+    },
+    {
+      "id": "pluit",
+      "measured": true,
+      "relativeRateMmYr": 17.3,
+      "uncertaintyMmYr": 56.5,
+      "pixels": 129,
+      "pairs": 8
+    },
+    {
+      "id": "kamal-muara",
+      "measured": true,
+      "relativeRateMmYr": -12.4,
+      "uncertaintyMmYr": 43.3,
+      "pixels": 11,
+      "pairs": 8
+    },
+    {
+      "id": "kapuk-muara",
+      "measured": true,
+      "relativeRateMmYr": 0.7,
+      "uncertaintyMmYr": 37.9,
+      "pixels": 75,
+      "pairs": 8
+    },
+    {
+      "id": "penjaringan",
+      "measured": true,
+      "relativeRateMmYr": 23.0,
+      "uncertaintyMmYr": 43.9,
+      "pixels": 41,
+      "pairs": 8
+    },
+    {
+      "id": "kalibaru",
+      "measured": true,
+      "relativeRateMmYr": 13.9,
+      "uncertaintyMmYr": 52.6,
+      "pixels": 66,
+      "pairs": 8
+    },
+    {
+      "id": "marunda",
+      "measured": false
+    },
+    {
+      "id": "ancol",
+      "measured": true,
+      "relativeRateMmYr": -9.1,
+      "uncertaintyMmYr": 43.1,
+      "pixels": 49,
+      "pairs": 8
+    },
+    {
+      "id": "sunter-agung",
+      "measured": true,
+      "relativeRateMmYr": -20.4,
+      "uncertaintyMmYr": 25.9,
+      "pixels": 45,
+      "pairs": 8
+    },
+    {
+      "id": "cilincing",
+      "measured": false
+    }
+  ],
+  "candidates": [
+    {
+      "center": [106.94859, -6.1256],
+      "radiusM": 169,
+      "relativeRateMmYr": 109.8,
+      "uncertaintyMmYr": 21.3,
+      "snr": 7.1
+    }
+  ]
+}

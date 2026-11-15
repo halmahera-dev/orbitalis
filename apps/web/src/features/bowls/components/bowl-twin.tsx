@@ -10,9 +10,30 @@ import {
 } from "@/features/bowls/bowls-queries";
 import { BowlActions } from "@/features/bowls/components/bowl-actions";
 import { BowlTwinView } from "@/features/bowls/components/bowl-twin-view";
+import { nisarRateForBowl, nisarStack } from "@/features/nisar/nisar-queries";
 import { getActiveInspectorNames } from "@/features/team/team-queries";
 import { requireSession } from "@/features/user/user-queries";
-import { fill, formatDate, getDictionary, type Locale } from "@/lib/i18n";
+import { fill, formatDate, getDictionary, type Dictionary, type Locale } from "@/lib/i18n";
+
+function measuredEvidence(bowlId: string, locale: Locale, t: Dictionary["map"]) {
+  const rate = nisarRateForBowl(bowlId);
+  if (!rate.measured) {
+    return { summary: t.evidenceMeasuredNone, body: t.evidenceMeasuredNoneBody };
+  }
+  return {
+    summary: fill(t.evidenceMeasured, {
+      rate: rate.relativeRateMmYr,
+      uncertainty: rate.uncertaintyMmYr,
+    }),
+    body: fill(t.evidenceMeasuredBody, {
+      count: rate.pairs,
+      start: formatDate(locale, nisarStack.period.start),
+      end: formatDate(locale, nisarStack.period.end),
+      grid: nisarStack.gridM,
+      noise: nisarStack.noiseFloorMmYr,
+    }),
+  };
+}
 
 export async function BowlTwin({ locale, bowlId }: { locale: Locale; bowlId: string }) {
   await requireSession(locale);
@@ -39,6 +60,7 @@ export async function BowlTwin({ locale, bowlId }: { locale: Locale; bowlId: str
         .map(({ id, name, rank }) => ({ id, name, rank }))
         .sort((a, b) => a.rank - b.rank)}
       labels={{ map: dictionary.map, bowls: t, common: dictionary.common }}
+      measured={measuredEvidence(bowlId, locale, dictionary.map)}
       actions={
         <BowlActions
           bowl={{ id: bowl.id, name: bowl.name }}

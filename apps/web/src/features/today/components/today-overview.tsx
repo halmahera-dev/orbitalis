@@ -10,7 +10,7 @@ import {
 } from "@repo/ui/components/table";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@repo/ui/components/tooltip";
 import { cn } from "@repo/ui/lib/utils";
-import { ArrowRight02Icon, FileSearchIcon, SparklesIcon } from "@hugeicons/core-free-icons";
+import { Analytics01Icon, ArrowRight02Icon, FileSearchIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import Link from "next/link";
 
@@ -194,12 +194,12 @@ export async function TodayOverview({ locale }: { locale: Locale }) {
     <div className="flex flex-col gap-3">
       {fastestBowl ? (
         <section
-          aria-labelledby="ai-insight"
+          aria-labelledby="overview-insight"
           className="insight-card flex min-w-0 flex-col gap-3 p-4"
         >
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <HugeiconsIcon icon={SparklesIcon} strokeWidth={2} className="size-4" />
-            <h2 id="ai-insight" className="flex-1">
+            <HugeiconsIcon icon={Analytics01Icon} strokeWidth={2} className="size-4" />
+            <h2 id="overview-insight" className="flex-1">
               {t.insightTitle}
             </h2>
             <Tooltip>

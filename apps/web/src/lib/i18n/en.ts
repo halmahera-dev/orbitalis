@@ -350,7 +350,7 @@ export const en = {
     nextPassLate: "The next pass was due on {date}, and it is not in the catalog yet.",
     changes: "Changed since the last pass",
     finding: "The fastest bowl is {name} at {rate} mm/yr, and its status is {status}.",
-    insightTitle: "AI Insight",
+    insightTitle: "Insight",
     insightLeads: "Open leads",
     insightBody:
       "**{share}%** of bowls still sink at nearly their pre-ban rate. The fastest is **{name}** at **{rate} mm/yr**.",
@@ -614,7 +614,10 @@ export const en = {
   },
   map: {
     show: "Show",
-    showBowls: "Bowls",
+    showLeads: "Pumping leads",
+    showRecharge: "Recharge priority",
+    showPipe: "Pipe priority",
+    showFarming: "Water farming",
     showRadar: "Radar passes",
     year: "Year",
     pass: "Pass",
@@ -653,6 +656,8 @@ export const en = {
     view2d: "2D view",
     rateLegend:
       "Sinking rate in mm/yr. A taller stack means a deeper drop by {year}. Select a bowl to open it.",
+    candidateLegend:
+      "Dashed ring: {count} bowl candidate found in real NISAR data. The strongest sinks {rate} ± {uncertainty} mm/yr faster than the ground around it. A lead for inspection, not proof.",
     depthTitle: "How deep the bowl is",
     depthToday: "Now: {cm} cm",
     depthProjected: "By {year}: {cm} cm",
@@ -669,6 +674,79 @@ export const en = {
     evidenceProjection: "Drop by {year}: {meters} m",
     evidenceProjectionBody:
       "Method: the rate times the years since 2026. It assumes a constant rate, with no sea wall, no pumping change, and no sea-level rise. This is a projection and not a forecast.",
+    evidenceMixed:
+      "Depth, rates, and projections in this prototype are example values. The NISAR measured item is a real measurement.",
+    evidenceMeasured: "NISAR measured: {rate} ± {uncertainty} mm/yr faster than the ground around it",
+    evidenceMeasuredNone: "NISAR measured: no usable pixels here",
+    evidenceMeasuredBody:
+      "This is a real measurement. Product: NISAR L2 GUNW, {count} pairs on track 10 ascending, {start} to {end}, {grid} m grid. Method: each pair is masked for water and low coherence and corrected for the ionosphere. The ramp over the whole city is removed, so the number is the extra sinking compared with the ground within about 3 km, not the absolute rate. The pairs are stacked to lower the water vapor noise. Line-of-sight motion is shown as vertical. Noise floor: {noise} mm/yr.",
+    evidenceMeasuredNoneBody:
+      "The NISAR pairs have no usable pixels inside this bowl after the water and coherence mask. The rate above is an example value.",
+    priority: {
+      layerLegend: {
+        recharge: "Where should water go back into the ground first? Select an area to open it.",
+        pipe: "Which areas should get water pipes first? Select an area to open it.",
+        farming:
+          "Where are the large groundwater users that water farming must reach? Select an area to open it.",
+      },
+      legendLow: "Low priority",
+      legendHigh: "High priority",
+      filterTitle: "Priority filter",
+      sinking: "Sinking rate",
+      sinkingMin: "From {value} mm/yr",
+      population: "Population",
+      populationMin: "From {value} people/km²",
+      economy: "Economic activity",
+      economyFrom: {
+        low: "Any",
+        medium: "Medium and high",
+        high: "High only",
+      },
+      economyLevel: {
+        low: "Low",
+        medium: "Medium",
+        high: "High",
+      },
+      rankBy: "Rank by",
+      rankByOption: {
+        combined: "Combined",
+        sinking: "Sinking",
+        population: "Population",
+        economy: "Economy",
+      },
+      weights: "Combined score: sinking {sinking}%, population {population}%, economy {economy}%.",
+      leadWeights: "Combined uses the bowl rank. The lead score is not built yet.",
+      pipePopulation: "On this layer, population means people without piped water.",
+      reset: "Reset",
+      matchCount: "{count} of {total} match",
+      summary: "Area {id} in {kecamatan} ranks first of {count} matching areas.",
+      noMatch: "Nothing matches the filter. Lower a minimum.",
+      areaListTitle: "Ranked areas",
+      showAreaList: "Show ranked areas",
+      hideAreaList: "Hide ranked areas",
+      peopleValue: "{value} people",
+      unservedValue: "{value} without pipes",
+      areaTitle: "Area {id}",
+      areaLabel: "{kecamatan}, area {id}",
+      score: "Priority score",
+      scoreValue: "{score} of 100",
+      sinkingValue: "{value} mm/yr",
+      populationValue: "{value} people/km²",
+      people: "People in the area",
+      unserved: "People without piped water",
+      piped: "Piped water coverage",
+      percentValue: "{value}%",
+      layerNote: {
+        recharge: "Screening, needs a field survey.",
+        pipe: "Plan input, check with the PAM Jaya network data.",
+        farming:
+          "No water farming sites are registered yet. The score shows where large users are likely.",
+      },
+      evidenceSource:
+        "Source: synthetic seed from {script}. Grid: {size} m cells. Period: {period}.",
+      evidenceMethod:
+        "Method: the sinking rate is a background rate plus a bell curve around each seed bowl. Population, piped water, and economic activity are fixed random draws shaped by distance to the coast, ports, and industrial zones.",
+    },
   },
 };
 

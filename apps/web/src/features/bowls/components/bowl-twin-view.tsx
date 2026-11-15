@@ -22,6 +22,7 @@ import {
 } from "@repo/ui/components/tooltip";
 import {
   Alert02Icon,
+  Analytics01Icon,
   ArrowDown01Icon,
   ArrowLeft01Icon,
   ArrowRight01Icon,
@@ -52,7 +53,6 @@ import {
   ShieldCheckIcon,
   ShieldOffIcon,
   SlidersHorizontalIcon,
-  SparklesIcon,
   Leaf01Icon,
   PaletteIcon,
   Tag01Icon,
@@ -292,10 +292,12 @@ export function BowlTwinView({
   highTideM,
   bowlOptions,
   labels,
+  measured,
   actions,
   inspection,
 }: {
   highTideM: number;
+  measured: { summary: string; body: string };
   bowlOptions: { id: string; name: string; rank: number }[];
   locale: Locale;
   bowl: Bowl;
@@ -687,6 +689,7 @@ export function BowlTwinView({
       }),
       body: fill(t.evidenceRateBody, { uncertainty: bowl.uncertaintyMmYr }),
     },
+    measured,
     {
       summary: fill(t.evidenceProjection, { year: shownYear, meters: futureDrop.toFixed(2) }),
       body: t.evidenceProjectionBody,
@@ -1026,7 +1029,7 @@ export function BowlTwinView({
 
             <div className="flex flex-col gap-3 insight-card p-4">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <HugeiconsIcon icon={SparklesIcon} strokeWidth={2} className="size-4" />
+                <HugeiconsIcon icon={Analytics01Icon} strokeWidth={2} className="size-4" />
                 <span className="flex-1">{twin.insightTitle}</span>
                 <IconTip label={twin.insightEvidence}>
                   <Button
@@ -1152,7 +1155,7 @@ export function BowlTwinView({
 
                 <TabsContent value="evidence">
                   <div className="flex flex-col gap-2 pt-2">
-                    <p className="text-sm text-muted-foreground">{t.evidenceExample}</p>
+                    <p className="text-sm text-muted-foreground">{t.evidenceMixed}</p>
                     {evidence.map((item) => (
                       <details
                         key={item.summary}

@@ -87,7 +87,7 @@ The left panel shows how deep the bowl is, for the year on the timeline.
 
 ## Bowl look
 
-From the reference image (`/Users/heritsam/.t3/userdata/attachments/868366f7-4494-4e66-b8c5-4a1baccbb1e8-d990ced4-0265-4bce-92ff-2f81755022e8.png`):
+From the reference image (kept outside the repo):
 
 - Each bowl is a stack of 3 round tiers. The tiers get smaller toward the top.
 - Height and width grow with the sinking rate.
@@ -100,7 +100,7 @@ From the reference image (`/Users/heritsam/.t3/userdata/attachments/868366f7-449
 ## Done when
 
 - A test user passes the 3-minute task (PRD KPI 1) on desktop and on a 360 px phone.
-- Every number on the map has a source link (PRD KPI 4).
+- Every number on the map has a source link (PRD KPI 8).
 - Reduced motion, keyboard, and the 2D fallback still allow the task.
 - Layers 1–4 pass `bun run check-types` and the lint step. Layer 5 is optional for this goal.
 

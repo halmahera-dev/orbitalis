@@ -12,20 +12,39 @@ import { Skeleton } from "@repo/ui/components/skeleton";
 import { Switch } from "@repo/ui/components/switch";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
+import type { PriorityAreaSet } from "@/features/areas/areas-queries";
 import type { PublicBowl } from "@/features/bowls/bowls-queries";
 
 import { AppLogo } from "@/components/app-logo";
 import { Map, useMap } from "@/components/ui/map";
+import {
+  parsePriorityFilter,
+  priorityFilterParams,
+  rankAreas,
+  rankLeads,
+  type PriorityFilter as Filter,
+  type PriorityLayer,
+  type RankedArea,
+} from "@/features/areas/areas-priority";
 import { dropMeters, fastRateMmYr, slowRateMmYr } from "@/features/map/bowl-rates";
+import { AreaLayer } from "@/features/map/components/area-layer";
+import { AreaPanel } from "@/features/map/components/area-panel";
 import { BarTimeline, usePlayback } from "@/features/map/components/bar-timeline";
 import { BowlLayer } from "@/features/map/components/bowl-layer";
-import { MapBowlList } from "@/features/map/components/map-bowl-list";
+import { MapRankedList, type RankedListItem } from "@/features/map/components/map-ranked-list";
+import {
+  NisarCandidateLayer,
+  type CandidateRing,
+} from "@/features/map/components/nisar-candidate-layer";
+import { PriorityFilter } from "@/features/map/components/priority-filter";
+import { isPriorityLayer, mapLayers, parseMapLayer } from "@/features/map/map-layers";
 import { BuildingsLayer, InterferogramLayer } from "@/features/nisar/components/nisar-layers";
 import { interferogramCatalog } from "@/features/nisar/nisar-catalog";
 import { LanguageSwitch } from "@/features/shell/components/language-switch";
-import { fill, formatDate, type Dictionary, type Locale } from "@/lib/i18n";
+import { fill, formatDate, formatNumber, type Dictionary, type Locale } from "@/lib/i18n";
+import { cn } from "@/lib/utils";
 
 const globe = { type: "globe" } as const;
 const currentYear = 2026;
@@ -33,6 +52,7 @@ const defaultYear = 2035;
 const passesPerSecond = 1.25;
 const maxPitch = 75;
 const positionWriteDelayMs = 300;
+const areaListLimit = 50;
 
 type Option = { value: string; label: string };
 type Position = { center: [number, number]; zoom: number };
@@ -136,13 +156,48 @@ function HeaderSelect({
   );
 }
 
+function areaListValue(
+  ranked: RankedArea,
+  layer: PriorityLayer,
+  filter: Filter,
+  locale: Locale,
+  t: Dictionary["map"]["priority"],
+) {
+  const { area } = ranked;
+  switch (filter.rankBy) {
+    case "combined":
+      return fill(t.scoreValue, { score: ranked.score });
+    case "sinking":
+      return fill(t.sinkingValue, { value: area.sinkingMmYr });
+    case "population":
+      return layer === "pipe"
+        ? fill(t.unservedValue, { value: formatNumber(locale, area.unservedPeople) })
+        : fill(t.populationValue, { value: formatNumber(locale, area.populationPerKm2) });
+    case "economy":
+      return t.economyLevel[area.economy];
+  }
+}
+
+function priorityColorValues(ranked: RankedArea[], filter: Filter) {
+  const rankBy = filter.rankBy;
+  if (rankBy !== "combined") {
+    return ranked.map((item) => item.factors[rankBy]);
+  }
+  const topScore = Math.max(1, ...ranked.map((item) => item.score));
+  return ranked.map((item) => item.score / topScore);
+}
+
 export function OrbitalisMap({
   locale,
   bowls,
+  areaSet,
+  nisarCandidates,
   labels,
 }: {
   locale: Locale;
   bowls: PublicBowl[];
+  areaSet: PriorityAreaSet;
+  nisarCandidates: (CandidateRing & { relativeRateMmYr: number; uncertaintyMmYr: number })[];
   labels: { map: Dictionary["map"]; common: Dictionary["common"] };
 }) {
   const t = labels.map;
@@ -152,22 +207,78 @@ export function OrbitalisMap({
   const pairs = interferogramCatalog.pairs;
   const positionTimerRef = useRef(0);
 
-  const isBowls = searchParams.get("show") !== "radar";
+  const layer = parseMapLayer(searchParams.get("show"));
+  const isLeads = layer === "leads";
+  const isRadar = layer === "radar";
+  const priorityLayer = isPriorityLayer(layer) ? layer : null;
   const is2d = searchParams.get("view") === "2d";
+  const rateParam = searchParams.get("rate");
+  const populationParam = searchParams.get("pop");
+  const economyParam = searchParams.get("econ");
+  const rankParam = searchParams.get("rank");
+  const filter = useMemo(
+    () =>
+      parsePriorityFilter(
+        new URLSearchParams({
+          rate: rateParam ?? "",
+          pop: populationParam ?? "",
+          econ: economyParam ?? "",
+          rank: rankParam ?? "",
+        }),
+      ),
+    [rateParam, populationParam, economyParam, rankParam],
+  );
+  const selectedAreaId = priorityLayer ? searchParams.get("area") : null;
   const [startPosition] = useState(() => parsePosition(searchParams.get("at")));
   const [passIndex, setPassIndex] = useState(() =>
     parsePassIndex(searchParams.get("pass"), pairs.length),
   );
   const pair = pairs[passIndex];
 
-  function setParam(name: string, value: string | null) {
+  const rankedLeads = useMemo(
+    () => rankLeads(bowls, areaSet.areas, filter),
+    [bowls, areaSet.areas, filter],
+  );
+  const visibleBowls = useMemo(
+    () => rankedLeads.filter((ranked) => ranked.matches).map((ranked) => ranked.lead),
+    [rankedLeads],
+  );
+  const rankedAreas = useMemo(
+    () => (priorityLayer ? rankAreas(areaSet.areas, priorityLayer, filter) : []),
+    [areaSet.areas, priorityLayer, filter],
+  );
+  const areaCells = useMemo(() => {
+    const values = priorityColorValues(rankedAreas, filter);
+    return rankedAreas.map((ranked, index) => ({
+      area: ranked.area,
+      value: values[index],
+      matches: ranked.matches,
+    }));
+  }, [rankedAreas, filter]);
+  const selectedArea = rankedAreas.find((ranked) => ranked.area.id === selectedAreaId) ?? null;
+
+  function setParams(updates: Record<string, string | null>) {
     const nextParams = new URLSearchParams(window.location.search);
-    if (value === null) {
-      nextParams.delete(name);
-    } else {
-      nextParams.set(name, value);
+    for (const [name, value] of Object.entries(updates)) {
+      if (value === null) {
+        nextParams.delete(name);
+      } else {
+        nextParams.set(name, value);
+      }
     }
     window.history.replaceState(null, "", `${pathname}?${nextParams}`);
+  }
+
+  function setParam(name: string, value: string | null) {
+    setParams({ [name]: value });
+  }
+
+  function changeFilter(nextFilter: Filter) {
+    setParams(priorityFilterParams(nextFilter));
+  }
+
+  function selectArea(areaId: string | null) {
+    setParam("area", areaId);
   }
 
   function rememberPosition(position: Position) {
@@ -202,7 +313,8 @@ export function OrbitalisMap({
 
   function changeShow(value: string) {
     playback.pause();
-    setParam("show", value === "radar" ? "radar" : null);
+    const nextLayer = parseMapLayer(value);
+    setParams({ show: nextLayer === "leads" ? null : nextLayer, area: null });
   }
 
   function scrub(value: number) {
@@ -220,9 +332,63 @@ export function OrbitalisMap({
 
   const baselineYears = defaultYear - currentYear;
   const fastestBowl = bowls.toSorted((a, b) => b.rateAfterBanMmYr - a.rateAfterBanMmYr)[0];
+  const matchingAreas = rankedAreas.filter((ranked) => ranked.matches);
+  const matchingLeads = rankedLeads.filter((ranked) => ranked.matches);
+  const layerLabels = {
+    leads: t.showLeads,
+    recharge: t.showRecharge,
+    pipe: t.showPipe,
+    farming: t.showFarming,
+    radar: t.showRadar,
+  };
+
+  function leadListValue(ranked: (typeof rankedLeads)[number]) {
+    switch (filter.rankBy) {
+      case "combined":
+        return `−${dropMeters(ranked.lead, baselineYears, true).toFixed(2)} m`;
+      case "sinking":
+        return fill(t.priority.sinkingValue, { value: ranked.lead.rateAfterBanMmYr });
+      case "population":
+        return fill(t.priority.populationValue, {
+          value: formatNumber(locale, ranked.area?.populationPerKm2 ?? 0),
+        });
+      case "economy":
+        return t.priority.economyLevel[ranked.area?.economy ?? "low"];
+    }
+  }
+
+  function listItems(): RankedListItem[] {
+    if (priorityLayer) {
+      return matchingAreas.slice(0, areaListLimit).map((ranked) => ({
+        id: ranked.area.id,
+        rank: ranked.rank ?? 0,
+        name: ranked.area.kecamatan,
+        detail: fill(t.priority.areaTitle, { id: ranked.area.id }),
+        value: areaListValue(ranked, priorityLayer, filter, locale, t.priority),
+      }));
+    }
+    return matchingLeads.map((ranked) => ({
+      id: ranked.lead.id,
+      rank: ranked.rank ?? 0,
+      name: ranked.lead.name,
+      detail: ranked.lead.kecamatan,
+      value: leadListValue(ranked),
+      href: `/${locale}/bowls/${ranked.lead.id}`,
+    }));
+  }
 
   function describeView() {
-    if (!isBowls) {
+    if (priorityLayer) {
+      const topArea = matchingAreas[0]?.area;
+      return topArea
+        ? fill(t.priority.summary, {
+            kecamatan: topArea.kecamatan,
+            id: topArea.id,
+            count: matchingAreas.length,
+          })
+        : t.priority.noMatch;
+    }
+    if (isRadar) {
       return fill(t.radarSummary, {
         start: formatDate(locale, pair.referenceDate),
         end: formatDate(locale, pair.secondaryDate),
@@ -247,11 +413,8 @@ export function OrbitalisMap({
         </Link>
         <HeaderSelect
           label={t.show}
-          value={isBowls ? "bowls" : "radar"}
-          options={[
-            { value: "bowls", label: t.showBowls },
-            { value: "radar", label: t.showRadar },
-          ]}
+          value={layer}
+          options={mapLayers.map((mapLayer) => ({ value: mapLayer, label: layerLabels[mapLayer] }))}
           onChange={changeShow}
         />
         <div className="ml-auto flex items-center gap-3">
@@ -287,9 +450,10 @@ export function OrbitalisMap({
           onViewportChange={rememberPosition}
         >
           <BuildingsLayer />
-          {isBowls ? (
+          {isLeads && <NisarCandidateLayer candidates={nisarCandidates} />}
+          {isLeads && (
             <BowlLayer
-              bowls={bowls}
+              bowls={visibleBowls}
               years={baselineYears}
               withBan
               baselineYears={baselineYears}
@@ -297,13 +461,25 @@ export function OrbitalisMap({
               onSelect={openBowl}
               onDeselect={() => {}}
             />
-          ) : (
-            <InterferogramLayer pair={pair} />
           )}
+          {priorityLayer && (
+            <AreaLayer
+              cells={areaCells}
+              cellSizeM={areaSet.cellSizeM}
+              selectedAreaId={selectedArea?.area.id ?? null}
+              onSelect={selectArea}
+            />
+          )}
+          {isRadar && <InterferogramLayer pair={pair} />}
           <MapCamera is2d={is2d} hasStartPosition={startPosition !== null} />
         </Map>
-        <div className="absolute top-4 left-4 flex max-w-64 flex-col gap-2 rounded-4xl border border-transparent glass p-3 text-xs text-muted-foreground shadow-md">
-          {isBowls ? (
+        <div
+          className={cn(
+            "absolute top-4 bottom-4 left-4 flex h-fit max-w-64 flex-col gap-2 overflow-y-auto rounded-4xl border border-transparent glass p-3 text-xs text-muted-foreground shadow-md",
+            selectedArea && "max-md:hidden",
+          )}
+        >
+          {isLeads && (
             <>
               <div className="h-2 rounded-full bg-linear-to-r from-rate-slow via-rate-middle to-rate-fast" />
               <div className="flex justify-between tabular-nums">
@@ -311,26 +487,72 @@ export function OrbitalisMap({
                 <span>{fastRateMmYr} mm/yr</span>
               </div>
               <p>{fill(t.rateLegend, { year: defaultYear })}</p>
+              {nisarCandidates.length > 0 && (
+                <p>
+                  {fill(t.candidateLegend, {
+                    count: nisarCandidates.length,
+                    rate: Math.round(nisarCandidates[0].relativeRateMmYr),
+                    uncertainty: Math.round(nisarCandidates[0].uncertaintyMmYr),
+                  })}
+                </p>
+              )}
             </>
-          ) : (
+          )}
+          {priorityLayer && (
+            <>
+              <div className="h-2 rounded-full bg-linear-to-r from-rate-fast/10 to-rate-fast" />
+              <div className="flex justify-between">
+                <span>{t.priority.legendLow}</span>
+                <span>{t.priority.legendHigh}</span>
+              </div>
+              <p>{t.priority.layerLegend[priorityLayer]}</p>
+            </>
+          )}
+          {isRadar && (
             <>
               <div className="phase-cycle-legend h-2 rounded-full" />
               <p>{t.phaseLegend}</p>
             </>
           )}
+          {!isRadar && (
+            <PriorityFilter
+              locale={locale}
+              layer={priorityLayer}
+              filter={filter}
+              onChange={changeFilter}
+              labels={t.priority}
+            />
+          )}
         </div>
-        {isBowls && (
-          <MapBowlList
-            locale={locale}
-            bowls={bowls}
-            baselineYears={baselineYears}
-            title={t.listTitle}
+        {!isRadar && !selectedArea && (
+          <MapRankedList
+            items={listItems()}
+            title={priorityLayer ? t.priority.areaListTitle : t.listTitle}
+            summary={fill(t.priority.matchCount, {
+              count: priorityLayer ? matchingAreas.length : matchingLeads.length,
+              total: priorityLayer ? rankedAreas.length : rankedLeads.length,
+            })}
+            emptyText={t.priority.noMatch}
             rankTemplate={t.rankLabel}
-            showLabel={t.showList}
-            hideLabel={t.hideList}
+            showLabel={priorityLayer ? t.priority.showAreaList : t.showList}
+            hideLabel={priorityLayer ? t.priority.hideAreaList : t.hideList}
+            onSelect={selectArea}
           />
         )}
-        {!isBowls && (
+        {priorityLayer && selectedArea && (
+          <AreaPanel
+            key={selectedArea.area.id}
+            locale={locale}
+            layer={priorityLayer}
+            rankedArea={selectedArea}
+            cellSizeM={areaSet.cellSizeM}
+            evidence={areaSet.evidence}
+            isSynthetic={areaSet.synthetic}
+            labels={labels}
+            onClose={() => selectArea(null)}
+          />
+        )}
+        {isRadar && (
           <BarTimeline
             label={t.pass}
             bars={pairs.map((passPair) => ({

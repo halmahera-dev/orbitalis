@@ -52,4 +52,4 @@ flowchart LR
 - CNBC Indonesia, [groundwater permit rule](https://www.cnbcindonesia.com/news/20231113152455-4-488628/ngebor-air-tanah-wajib-izin-pemerintah-blak-blakan) (Kepmen ESDM 291.K/GL.01/MEM.G/2023), 13 November 2023
 - Handika, Widodo, Pravitasari, [PS-InSAR and MICMAC for Jakarta](https://ejournal.brin.go.id/JTL/article/view/1125/2515), Jurnal Teknologi Lingkungan 25(1), 2024
 - Fielding, [ARSET InSAR notebooks](https://github.com/EJFielding/ARSET_notebooks)
-- Katadata, [piped water coverage 82%](https://katadata.co.id/berita/nasional/6a60436dec29e/air-perpipaan-tembus-82-persen-pemprov-dki-kurangi-penggunaan-air-tanah), May 2026
+- Katadata, [piped water coverage 82%](https://katadata.co.id/berita/nasional/6a60436dec29e/air-perpipaan-tembus-82-persen-pemprov-dki-kurangi-penggunaan-air-tanah) (coverage in May 2026), 22 July 2026
