@@ -1,0 +1,2 @@
+ALTER TABLE "inspection" DROP CONSTRAINT "inspection_outcome_check";--> statement-breakpoint
+ALTER TABLE "inspection" ADD CONSTRAINT "inspection_outcome_check" CHECK ("inspection"."outcome" IN ('pump_found', 'no_pump', 'natural', 'measures_working', 'measures_failing'));

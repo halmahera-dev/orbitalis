@@ -5,7 +5,13 @@ import { user } from "./auth";
 import { bowl } from "./nisar";
 
 export const bowlStatuses = ["lead", "scheduled", "inspected", "closed", "dismissed"] as const;
-export const inspectionOutcomes = ["pump_found", "no_pump", "natural"] as const;
+export const inspectionOutcomes = [
+  "pump_found",
+  "no_pump",
+  "natural",
+  "measures_working",
+  "measures_failing",
+] as const;
 
 // One row per bowl. A bowl with no row is still a lead.
 export const inspection = pgTable(
@@ -29,7 +35,7 @@ export const inspection = pgTable(
     ),
     check(
       "inspection_outcome_check",
-      sql`${table.outcome} IN ('pump_found', 'no_pump', 'natural')`,
+      sql`${table.outcome} IN ('pump_found', 'no_pump', 'natural', 'measures_working', 'measures_failing')`,
     ),
   ],
 );

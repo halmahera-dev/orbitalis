@@ -29,6 +29,13 @@
       "when": 1794750448192,
       "tag": "0003_farming_sites_and_plans",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1794750671754,
+      "tag": "0004_site_visit_outcomes",
+      "breakpoints": true
     }
   ]
 }
