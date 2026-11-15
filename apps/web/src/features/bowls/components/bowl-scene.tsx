@@ -5,7 +5,7 @@ import { Canvas, useFrame, useThree, type ThreeEvent } from "@react-three/fiber"
 import { useEffect, useEffectEvent, useLayoutEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 
-import type { PublicBowl } from "@/features/bowls/bowls-queries";
+type SceneBowl = { center: [number, number]; radiusM: number; rateMmYr: number };
 
 import {
   blockHalfSize,
@@ -569,7 +569,7 @@ function GroundBlock({
   insets,
 }: {
   insets: SceneInsets;
-  bowl: PublicBowl;
+  bowl: SceneBowl;
   shape: Shape;
   depthMeters: number;
   exaggeration: number;
@@ -1084,7 +1084,7 @@ export function BowlScene({
 }: {
   insets: SceneInsets;
   layers: SceneLayers;
-  bowl: PublicBowl;
+  bowl: SceneBowl;
   depthMeters: number;
   deepestDepthMeters: number;
   seaDepthMeters: number;
@@ -1097,7 +1097,7 @@ export function BowlScene({
   label: string;
   labels: SceneLabels;
 }) {
-  const colors = useSceneColors(bowl.rateAfterBanMmYr);
+  const colors = useSceneColors(bowl.rateMmYr);
   const shape = useMemo(
     () => bowlShape(bowl.radiusM, deepestDepthMeters * exaggeration, seaDepthMeters * exaggeration),
     [bowl.radiusM, deepestDepthMeters, seaDepthMeters, exaggeration],

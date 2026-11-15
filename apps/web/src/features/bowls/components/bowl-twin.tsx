@@ -1,66 +1,26 @@
 import { Skeleton } from "@repo/ui/components/skeleton";
 import { notFound } from "next/navigation";
 
-import {
-  banDate,
-  getBowl,
-  getBowls,
-  getBowlSeries,
-  highTideM,
-} from "@/features/bowls/bowls-queries";
+import type { Locale } from "@/lib/i18n";
+
+import { getBowl, getBowls, getLatestRun } from "@/features/bowls/bowls-queries";
 import { BowlActions } from "@/features/bowls/components/bowl-actions";
 import { BowlTwinView } from "@/features/bowls/components/bowl-twin-view";
-import { nisarRateForBowl, nisarStack } from "@/features/nisar/nisar-queries";
 import { getActiveInspectorNames } from "@/features/team/team-queries";
 import { requireSession } from "@/features/user/user-queries";
-import { fill, formatDate, getDictionary, type Dictionary, type Locale } from "@/lib/i18n";
-
-function measuredEvidence(bowlId: string, locale: Locale, t: Dictionary["map"]) {
-  const rate = nisarRateForBowl(bowlId);
-  if (!rate.measured) {
-    return { summary: t.evidenceMeasuredNone, body: t.evidenceMeasuredNoneBody };
-  }
-  const [ascending, descending] = nisarStack.tracks;
-  return {
-    summary: fill(t.evidenceMeasured, {
-      rate: rate.verticalRateMmYr,
-      uncertainty: rate.verticalUncertaintyMmYr,
-    }),
-    body: fill(t.evidenceMeasuredBody, {
-      count: rate.pairs,
-      ascendingStart: formatDate(locale, ascending.period.start),
-      ascendingEnd: formatDate(locale, ascending.period.end),
-      descendingStart: formatDate(locale, descending.period.start),
-      descendingEnd: formatDate(locale, descending.period.end),
-      grid: nisarStack.gridM,
-      noise: nisarStack.noiseFloorMmYr,
-    }),
-  };
-}
-
-function nisarSeriesFor(bowlId: string) {
-  const rate = nisarRateForBowl(bowlId);
-  return rate.measured && rate.series.length > 0 ? rate.series : null;
-}
-
-function nisarVerticalRate(bowlId: string) {
-  const rate = nisarRateForBowl(bowlId);
-  return rate.measured
-    ? { rate: rate.verticalRateMmYr, uncertainty: rate.verticalUncertaintyMmYr }
-    : null;
-}
+import { fill, formatDate, getDictionary } from "@/lib/i18n";
 
 export async function BowlTwin({ locale, bowlId }: { locale: Locale; bowlId: string }) {
   await requireSession(locale);
   const dictionary = getDictionary(locale);
   const t = dictionary.bowls;
-  const [bowl, bowls, inspectors] = await Promise.all([
+  const [bowl, bowls, run, inspectors] = await Promise.all([
     getBowl(bowlId),
     getBowls(),
+    getLatestRun(),
     getActiveInspectorNames(),
   ]);
-  const series = getBowlSeries(bowlId);
-  if (!bowl || !series) {
+  if (!bowl) {
     notFound();
   }
 
@@ -68,16 +28,9 @@ export async function BowlTwin({ locale, bowlId }: { locale: Locale; bowlId: str
     <BowlTwinView
       locale={locale}
       bowl={bowl}
-      series={series}
-      banDate={banDate}
-      highTideM={highTideM}
-      bowlOptions={bowls
-        .map(({ id, name, rank }) => ({ id, name, rank }))
-        .sort((a, b) => a.rank - b.rank)}
+      run={run}
+      bowlOptions={bowls.map(({ id, name, rank }) => ({ id, name, rank }))}
       labels={{ map: dictionary.map, bowls: t, common: dictionary.common }}
-      measured={measuredEvidence(bowlId, locale, dictionary.map)}
-      nisarSeries={nisarSeriesFor(bowlId)}
-      nisarRate={nisarVerticalRate(bowlId)}
       actions={
         <BowlActions
           bowl={{ id: bowl.id, name: bowl.name }}

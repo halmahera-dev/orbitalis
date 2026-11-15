@@ -1,46 +1,42 @@
 "use client";
 
-import { Button } from "@repo/ui/components/button";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@repo/ui/components/select";
+  DashboardSpeed01Icon,
+  Flag01Icon,
+  Radar01Icon,
+  Target01Icon,
+  UserGroupIcon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { Button } from "@repo/ui/components/button";
 import { Skeleton } from "@repo/ui/components/skeleton";
 import { Switch } from "@repo/ui/components/switch";
+import { ToggleGroup, ToggleGroupItem } from "@repo/ui/components/toggle-group";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@repo/ui/components/tooltip";
 import Link from "next/link";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { usePathname, useSearchParams } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 
-import type { PriorityAreaSet } from "@/features/areas/areas-queries";
-import type { NisarLead, PublicBowl } from "@/features/bowls/bowls-queries";
+import type { Bowl, Cell } from "@/features/bowls/bowls-queries";
 
 import { AppLogo } from "@/components/app-logo";
 import { Map, useMap } from "@/components/ui/map";
-import {
-  candidateLabel,
-  parsePriorityFilter,
-  priorityFilterParams,
-  rankAreas,
-  rankCandidates,
-  rankLeads,
-  type PriorityFilter as Filter,
-  type PriorityLayer,
-  type RankedArea,
-} from "@/features/areas/areas-priority";
 import { BowlActions, type BowlActionLabels } from "@/features/bowls/components/bowl-actions";
-import { dropMeters, fastRateMmYr, slowRateMmYr } from "@/features/map/bowl-rates";
-import { AreaLayer } from "@/features/map/components/area-layer";
-import { AreaPanel } from "@/features/map/components/area-panel";
 import { BarTimeline, usePlayback } from "@/features/map/components/bar-timeline";
 import { BowlLayer } from "@/features/map/components/bowl-layer";
-import { CandidatePanel, type CandidateEvidence } from "@/features/map/components/candidate-panel";
-import { MapRankedList, type RankedListItem } from "@/features/map/components/map-ranked-list";
-import { NisarCandidateLayer } from "@/features/map/components/nisar-candidate-layer";
-import { PriorityFilter } from "@/features/map/components/priority-filter";
-import { isPriorityLayer, mapLayers, parseMapLayer } from "@/features/map/map-layers";
+import { CellLayer, type CellScale } from "@/features/map/components/cell-layer";
+import { BowlPanel, CellPanel } from "@/features/map/components/map-panels";
+import {
+  TriagePanel,
+  triageStatuses,
+  type TriageStatus,
+} from "@/features/map/components/triage-panel";
+import {
+  mapLayers,
+  parseMapLayer,
+  parseTriageSort,
+  type MapLayer,
+} from "@/features/map/map-layers";
 import { BuildingsLayer, InterferogramLayer } from "@/features/nisar/components/nisar-layers";
 import { interferogramCatalog } from "@/features/nisar/nisar-catalog";
 import { LanguageSwitch } from "@/features/shell/components/language-switch";
@@ -48,19 +44,28 @@ import { fill, formatDate, formatNumber, type Dictionary, type Locale } from "@/
 import { cn } from "@/lib/utils";
 
 const globe = { type: "globe" } as const;
-const currentYear = 2026;
-const defaultYear = 2035;
 const passesPerSecond = 1.25;
 const maxPitch = 75;
 const positionWriteDelayMs = 300;
-const areaListLimit = 50;
+const metersPerDegree = 111_320;
 
-type Option = { value: string; label: string };
+const layerIcons: Record<MapLayer, typeof Target01Icon> = {
+  leads: Target01Icon,
+  sinking: DashboardSpeed01Icon,
+  people: UserGroupIcon,
+  radar: Radar01Icon,
+};
+
+const cellScales: Record<"sinking" | "people", CellScale> = {
+  sinking: { kind: "sinking", stops: [0, 30, 60] },
+  people: { kind: "people", stops: [0, 20_000, 40_000] },
+};
+
 type Position = { center: [number, number]; zoom: number };
 
 const overviewCamera = {
-  center: [106.83, -6.2] as [number, number],
-  zoom: 10.9,
+  center: [106.82, -6.22] as [number, number],
+  zoom: 10.6,
   pitch: 45,
   bearing: -20,
 };
@@ -77,10 +82,38 @@ function formatPosition({ center, zoom }: Position) {
   return `${center[0].toFixed(4)},${center[1].toFixed(4)},${zoom.toFixed(2)}`;
 }
 
-function MapCamera({ is2d, hasStartPosition }: { is2d: boolean; hasStartPosition: boolean }) {
+function parseTriageStatus(value: string | null): TriageStatus {
+  return triageStatuses.find((status) => status === value) ?? "lead";
+}
+
+function parsePassIndex(value: string | null, passCount: number) {
+  const index = Number(value);
+  if (value !== null && Number.isInteger(index) && index >= 0 && index < passCount) {
+    return index;
+  }
+  return passCount - 1;
+}
+
+function distanceKm([lon1, lat1]: [number, number], [lon2, lat2]: [number, number]) {
+  const east = (lon2 - lon1) * metersPerDegree * Math.cos((((lat1 + lat2) / 2) * Math.PI) / 180);
+  const north = (lat2 - lat1) * metersPerDegree;
+  return Math.hypot(east, north) / 1000;
+}
+
+function MapCamera({
+  is2d,
+  hasStartPosition,
+  focus,
+}: {
+  is2d: boolean;
+  hasStartPosition: boolean;
+  focus: [number, number] | null;
+}) {
   const { map, isLoaded } = useMap();
   const hasFlownRef = useRef(false);
   const isFirstPitchRef = useRef(true);
+  const focusLongitude = focus?.[0];
+  const focusLatitude = focus?.[1];
 
   useEffect(() => {
     if (!map || !isLoaded || hasFlownRef.current) {
@@ -116,92 +149,107 @@ function MapCamera({ is2d, hasStartPosition }: { is2d: boolean; hasStartPosition
     map.easeTo({ pitch, duration: 600 });
   }, [map, isLoaded, is2d]);
 
+  useEffect(() => {
+    if (!map || !isLoaded || focusLongitude === undefined || focusLatitude === undefined) {
+      return;
+    }
+    const camera = {
+      center: [focusLongitude, focusLatitude] as [number, number],
+      zoom: Math.max(map.getZoom(), 13.5),
+    };
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      map.jumpTo(camera);
+      return;
+    }
+    map.easeTo({ ...camera, duration: 800 });
+  }, [map, isLoaded, focusLongitude, focusLatitude]);
+
   return null;
 }
 
-function parsePassIndex(value: string | null, passCount: number) {
-  const index = Number(value);
-  if (value !== null && Number.isInteger(index) && index >= 0 && index < passCount) {
-    return index;
-  }
-  return passCount - 1;
-}
-
-function HeaderSelect({
-  label,
-  value,
-  options,
-  onChange,
+function GradientLegend({
+  className,
+  low,
+  high,
+  unit,
 }: {
-  label: string;
-  value: string;
-  options: Option[];
-  onChange: (value: string) => void;
+  className: string;
+  low: string;
+  high: string;
+  unit: string;
 }) {
   return (
-    <label className="flex items-center gap-2 text-sm text-muted-foreground">
-      <span className="hidden lg:inline">{label}</span>
-      <Select items={options} value={value} onValueChange={(next) => next && onChange(next)}>
-        <SelectTrigger size="sm" aria-label={label}>
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          {options.map((option) => (
-            <SelectItem key={option.value} value={option.value}>
-              {option.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </label>
+    <div className="flex flex-col gap-1.5">
+      <div className={cn("h-2 rounded-full", className)} />
+      <div className="flex justify-between tabular-nums">
+        <span>{low}</span>
+        <span>{unit}</span>
+        <span>{high}</span>
+      </div>
+    </div>
   );
 }
 
-function areaListValue(
-  ranked: RankedArea,
-  layer: PriorityLayer,
-  filter: Filter,
-  locale: Locale,
-  t: Dictionary["map"]["priority"],
-) {
-  const { area } = ranked;
-  switch (filter.rankBy) {
-    case "combined":
-      return fill(t.scoreValue, { score: ranked.score });
-    case "sinking":
-      return fill(t.sinkingValue, { value: area.sinkingMmYr });
-    case "population":
-      return layer === "pipe"
-        ? fill(t.unservedValue, { value: formatNumber(locale, area.unservedPeople) })
-        : fill(t.populationValue, { value: formatNumber(locale, area.populationPerKm2) });
-    case "economy":
-      return t.economyLevel[area.economy];
-  }
-}
-
-function priorityColorValues(ranked: RankedArea[], filter: Filter) {
-  const rankBy = filter.rankBy;
-  if (rankBy !== "combined") {
-    return ranked.map((item) => item.factors[rankBy]);
-  }
-  const topScore = Math.max(1, ...ranked.map((item) => item.score));
-  return ranked.map((item) => item.score / topScore);
+function MapLegend({
+  layer,
+  locale,
+  labels,
+}: {
+  layer: MapLayer;
+  locale: Locale;
+  labels: { map: Dictionary["map"]; common: Dictionary["common"] };
+}) {
+  const t = labels.map;
+  return (
+    <div className="absolute top-4 left-4 flex w-56 flex-col gap-2 rounded-3xl border border-transparent glass p-3 text-xs text-muted-foreground shadow-md max-md:hidden">
+      {layer === "leads" || layer === "sinking" ? (
+        <GradientLegend
+          className="bg-linear-to-r from-rate-slow via-rate-middle to-rate-fast"
+          low={layer === "leads" ? "20" : "0"}
+          high={layer === "leads" ? "100+" : "60+"}
+          unit={labels.common.mmPerYear}
+        />
+      ) : null}
+      {layer === "people" ? (
+        <GradientLegend
+          className="bg-linear-to-r from-chart-5/20 to-chart-2"
+          low="0"
+          high={formatNumber(locale, 40_000)}
+          unit={t.unitPeople}
+        />
+      ) : null}
+      {layer === "radar" ? (
+        <GradientLegend className="phase-cycle-legend" low="0" high="12 cm" unit={t.legend.cycle} />
+      ) : null}
+      {layer === "leads" ? (
+        <ul className="flex flex-col gap-1">
+          <li className="flex items-center gap-2">
+            <span className="w-4 text-center">1×</span>
+            {t.legend.oneTrack}
+          </li>
+          <li className="flex items-center gap-2">
+            <HugeiconsIcon icon={Flag01Icon} strokeWidth={2} className="size-4" />
+            {t.legend.manual}
+          </li>
+        </ul>
+      ) : null}
+      {layer === "sinking" ? <p>{t.relativeNote}</p> : null}
+    </div>
+  );
 }
 
 export function OrbitalisMap({
   locale,
   bowls,
-  areaSet,
-  nisarLeads,
-  candidateEvidence,
+  cells,
+  cellSizeM,
   inspectors,
   labels,
 }: {
   locale: Locale;
-  bowls: PublicBowl[];
-  areaSet: PriorityAreaSet;
-  nisarLeads: NisarLead[];
-  candidateEvidence: CandidateEvidence;
+  bowls: Bowl[];
+  cells: Cell[];
+  cellSizeM: number;
   inspectors: string[];
   labels: {
     map: Dictionary["map"];
@@ -211,7 +259,6 @@ export function OrbitalisMap({
   };
 }) {
   const t = labels.map;
-  const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const pairs = interferogramCatalog.pairs;
@@ -220,59 +267,29 @@ export function OrbitalisMap({
   const layer = parseMapLayer(searchParams.get("show"));
   const isLeads = layer === "leads";
   const isRadar = layer === "radar";
-  const priorityLayer = isPriorityLayer(layer) ? layer : null;
+  const cellLayer = layer === "sinking" || layer === "people" ? layer : null;
   const is2d = searchParams.get("view") === "2d";
-  const rateParam = searchParams.get("rate");
-  const populationParam = searchParams.get("pop");
-  const economyParam = searchParams.get("econ");
-  const rankParam = searchParams.get("rank");
-  const filter = useMemo(
-    () =>
-      parsePriorityFilter(
-        new URLSearchParams({
-          rate: rateParam ?? "",
-          pop: populationParam ?? "",
-          econ: economyParam ?? "",
-          rank: rankParam ?? "",
-        }),
-      ),
-    [rateParam, populationParam, economyParam, rankParam],
-  );
-  const selectedAreaId = priorityLayer ? searchParams.get("area") : null;
+  const triageStatus = parseTriageStatus(searchParams.get("status"));
+  const triageSort = parseTriageSort(searchParams.get("sort"));
   const [startPosition] = useState(() => parsePosition(searchParams.get("at")));
   const [passIndex, setPassIndex] = useState(() =>
     parsePassIndex(searchParams.get("pass"), pairs.length),
   );
   const pair = pairs[passIndex];
 
-  const rankedLeads = useMemo(
-    () => rankLeads(bowls, areaSet.areas, filter),
-    [bowls, areaSet.areas, filter],
-  );
-  const visibleBowls = useMemo(
-    () => rankedLeads.filter((ranked) => ranked.matches).map((ranked) => ranked.lead),
-    [rankedLeads],
-  );
-  const rankedAreas = useMemo(
-    () => (priorityLayer ? rankAreas(areaSet.areas, priorityLayer, filter) : []),
-    [areaSet.areas, priorityLayer, filter],
-  );
-  const areaCells = useMemo(() => {
-    const values = priorityColorValues(rankedAreas, filter);
-    return rankedAreas.map((ranked, index) => ({
-      area: ranked.area,
-      value: values[index],
-      matches: ranked.matches,
-    }));
-  }, [rankedAreas, filter]);
-  const selectedArea = rankedAreas.find((ranked) => ranked.area.id === selectedAreaId) ?? null;
-  const rankedCandidates = useMemo(
-    () => rankCandidates(nisarLeads, areaSet.areas, filter),
-    [nisarLeads, areaSet.areas, filter],
-  );
-  const selectedLeadId = isLeads ? searchParams.get("lead") : null;
-  const selectedLead = nisarLeads.find((lead) => lead.id === selectedLeadId) ?? null;
-  const hasPanel = selectedArea !== null || selectedLead !== null;
+  const selectedBowl = isLeads
+    ? (bowls.find((bowl) => bowl.id === searchParams.get("lead")) ?? null)
+    : null;
+  const selectedCell = cellLayer
+    ? (cells.find((cell) => cell.id === searchParams.get("cell")) ?? null)
+    : null;
+  const nearestLead = selectedCell
+    ? (bowls
+        .map((bowl) => ({ bowl, distanceKm: distanceKm(bowl.center, selectedCell.center) }))
+        .toSorted((a, b) => a.distanceKm - b.distanceKm)[0] ?? null)
+    : null;
+  const visibleBowls = bowls.filter((bowl) => bowl.status !== "dismissed");
+  const hasPanel = selectedBowl !== null || selectedCell !== null;
 
   function setParams(updates: Record<string, string | null>) {
     const nextParams = new URLSearchParams(window.location.search);
@@ -290,16 +307,8 @@ export function OrbitalisMap({
     setParams({ [name]: value });
   }
 
-  function changeFilter(nextFilter: Filter) {
-    setParams(priorityFilterParams(nextFilter));
-  }
-
-  function selectArea(areaId: string | null) {
-    setParam("area", areaId);
-  }
-
-  function selectLead(leadId: string | null) {
-    setParam("lead", leadId);
+  function selectBowl(bowlId: string | null) {
+    setParams({ show: null, cell: null, lead: bowlId });
   }
 
   function rememberPosition(position: Position) {
@@ -307,10 +316,6 @@ export function OrbitalisMap({
     positionTimerRef.current = window.setTimeout(() => {
       setParam("at", formatPosition(position));
     }, positionWriteDelayMs);
-  }
-
-  function openBowl(bowlId: string) {
-    router.push(`/${locale}/bowls/${bowlId}`);
   }
 
   function showPass(value: number) {
@@ -332,10 +337,10 @@ export function OrbitalisMap({
     onStop: commitPass,
   });
 
-  function changeShow(value: string) {
+  function changeLayer(value: string) {
     playback.pause();
     const nextLayer = parseMapLayer(value);
-    setParams({ show: nextLayer === "leads" ? null : nextLayer, area: null, lead: null });
+    setParams({ show: nextLayer === "leads" ? null : nextLayer, cell: null, lead: null });
   }
 
   function scrub(value: number) {
@@ -351,95 +356,6 @@ export function OrbitalisMap({
     }
   }
 
-  const baselineYears = defaultYear - currentYear;
-  const fastestBowl = bowls.toSorted((a, b) => b.rateAfterBanMmYr - a.rateAfterBanMmYr)[0];
-  const matchingAreas = rankedAreas.filter((ranked) => ranked.matches);
-  const matchingLeads = rankedLeads.filter((ranked) => ranked.matches);
-  const layerLabels = {
-    leads: t.showLeads,
-    recharge: t.showRecharge,
-    pipe: t.showPipe,
-    farming: t.showFarming,
-    radar: t.showRadar,
-  };
-
-  function leadListValue(ranked: (typeof rankedLeads)[number]) {
-    switch (filter.rankBy) {
-      case "combined":
-        return `−${dropMeters(ranked.lead, baselineYears, true).toFixed(2)} m`;
-      case "sinking":
-        return fill(t.priority.sinkingValue, { value: ranked.lead.rateAfterBanMmYr });
-      case "population":
-        return fill(t.priority.populationValue, {
-          value: formatNumber(locale, ranked.area?.populationPerKm2 ?? 0),
-        });
-      case "economy":
-        return t.priority.economyLevel[ranked.area?.economy ?? "low"];
-    }
-  }
-
-  function listItems(): RankedListItem[] {
-    if (priorityLayer) {
-      return matchingAreas.slice(0, areaListLimit).map((ranked) => ({
-        id: ranked.area.id,
-        rank: ranked.rank ?? 0,
-        name: ranked.area.kecamatan,
-        detail: fill(t.priority.areaTitle, { id: ranked.area.id }),
-        value: areaListValue(ranked, priorityLayer, filter, locale, t.priority),
-      }));
-    }
-    const candidateItems = rankedCandidates
-      .filter((ranked) => ranked.matches)
-      .map((ranked) => ({
-        id: ranked.candidate.id,
-        rank: ranked.rank ?? 0,
-        name: fill(t.nearBowl, { name: ranked.candidate.name }),
-        detail:
-          candidateLabel(ranked.candidate.basis) === "oneTrack"
-            ? t.oneTrackOnly
-            : ranked.candidate.kecamatan,
-        value: fill(t.priority.sinkingValue, { value: ranked.candidate.rateMmYr }),
-        group: t.foundInNisar,
-      }));
-    const bowlItems = matchingLeads.map((ranked) => ({
-      id: ranked.lead.id,
-      rank: ranked.rank ?? 0,
-      name: ranked.lead.name,
-      detail: ranked.lead.kecamatan,
-      value: leadListValue(ranked),
-      href: `/${locale}/bowls/${ranked.lead.id}`,
-      group: candidateItems.length > 0 ? t.exampleBowls : undefined,
-    }));
-    return [...candidateItems, ...bowlItems];
-  }
-
-  function describeView() {
-    if (priorityLayer) {
-      const topArea = matchingAreas[0]?.area;
-      return topArea
-        ? fill(t.priority.summary, {
-            kecamatan: topArea.kecamatan,
-            id: topArea.id,
-            count: matchingAreas.length,
-          })
-        : t.priority.noMatch;
-    }
-    if (isRadar) {
-      return fill(t.radarSummary, {
-        start: formatDate(locale, pair.referenceDate),
-        end: formatDate(locale, pair.secondaryDate),
-        days: Math.round(
-          (Date.parse(pair.secondaryDate) - Date.parse(pair.referenceDate)) / 86_400_000,
-        ),
-      });
-    }
-    return fill(t.bowlSummary, {
-      name: fastestBowl.name,
-      meters: dropMeters(fastestBowl, baselineYears, true).toFixed(2),
-      year: defaultYear,
-    });
-  }
-
   return (
     <div className="flex h-svh flex-col bg-background">
       <header className="flex flex-wrap items-center gap-x-4 gap-y-2 border-b px-4 py-3">
@@ -447,12 +363,25 @@ export function OrbitalisMap({
           <AppLogo />
           ORBITALIS
         </Link>
-        <HeaderSelect
-          label={t.show}
-          value={layer}
-          options={mapLayers.map((mapLayer) => ({ value: mapLayer, label: layerLabels[mapLayer] }))}
-          onChange={changeShow}
-        />
+        <ToggleGroup
+          aria-label={t.show}
+          size="sm"
+          spacing={1}
+          value={[layer]}
+          onValueChange={(next) => next[0] && changeLayer(next[0])}
+        >
+          {mapLayers.map((option) => (
+            <Tooltip key={option}>
+              <TooltipTrigger
+                render={<ToggleGroupItem value={option} aria-label={t.layers[option]} />}
+              >
+                <HugeiconsIcon icon={layerIcons[option]} strokeWidth={2} />
+                <span className="hidden lg:inline">{t.layers[option]}</span>
+              </TooltipTrigger>
+              <TooltipContent className="lg:hidden">{t.layers[option]}</TooltipContent>
+            </Tooltip>
+          ))}
+        </ToggleGroup>
         <div className="ml-auto flex items-center gap-3">
           <label className="flex items-center gap-2 text-sm text-muted-foreground">
             <Switch
@@ -467,12 +396,6 @@ export function OrbitalisMap({
             {labels.common.openDesk}
           </Button>
         </div>
-        <p
-          className="w-full text-sm text-muted-foreground"
-          aria-live={playback.isPlaying ? "off" : "polite"}
-        >
-          {describeView()}
-        </p>
       </header>
 
       <div className="relative min-h-0 flex-1">
@@ -487,133 +410,72 @@ export function OrbitalisMap({
         >
           <BuildingsLayer />
           {isLeads && (
-            <NisarCandidateLayer
-              candidates={nisarLeads}
-              selectedId={selectedLead?.id ?? null}
-              onSelect={selectLead}
-            />
-          )}
-          {isLeads && (
             <BowlLayer
               bowls={visibleBowls}
-              years={baselineYears}
-              withBan
-              baselineYears={baselineYears}
-              selectedBowlId={null}
-              onSelect={openBowl}
-              onDeselect={() => {}}
+              selectedBowlId={selectedBowl?.id ?? null}
+              onSelect={(bowlId) => setParam("lead", bowlId)}
+              onDeselect={() => setParam("lead", null)}
             />
           )}
-          {priorityLayer && (
-            <AreaLayer
-              cells={areaCells}
-              cellSizeM={areaSet.cellSizeM}
-              selectedAreaId={selectedArea?.area.id ?? null}
-              onSelect={selectArea}
+          {cellLayer && (
+            <CellLayer
+              cells={cells}
+              cellSizeM={cellSizeM}
+              scale={cellScales[cellLayer]}
+              selectedCellId={selectedCell?.id ?? null}
+              onSelect={(cellId) => setParam("cell", cellId)}
             />
           )}
           {isRadar && <InterferogramLayer pair={pair} />}
-          <MapCamera is2d={is2d} hasStartPosition={startPosition !== null} />
+          <MapCamera
+            is2d={is2d}
+            hasStartPosition={startPosition !== null}
+            focus={selectedBowl?.center ?? null}
+          />
         </Map>
-        <div
-          className={cn(
-            "absolute top-4 bottom-4 left-4 flex h-fit max-w-64 flex-col gap-2 overflow-y-auto rounded-4xl border border-transparent glass p-3 text-xs text-muted-foreground shadow-md",
-            hasPanel && "max-md:hidden",
-          )}
-        >
-          {isLeads && (
-            <>
-              <div className="h-2 rounded-full bg-linear-to-r from-rate-slow via-rate-middle to-rate-fast" />
-              <div className="flex justify-between tabular-nums">
-                <span>{slowRateMmYr} mm/yr</span>
-                <span>{fastRateMmYr} mm/yr</span>
-              </div>
-              <p>{fill(t.rateLegend, { year: defaultYear })}</p>
-              {nisarLeads.length > 0 && (
-                <p>
-                  {fill(t.candidateLegend, {
-                    count: nisarLeads.length,
-                    rate: Math.round(nisarLeads[0].rateMmYr),
-                    uncertainty: Math.round(nisarLeads[0].uncertaintyMmYr),
-                  })}
-                  {candidateLabel(nisarLeads[0].basis) === "oneTrack" && ` ${t.oneTrackOnly}.`}
-                </p>
-              )}
-            </>
-          )}
-          {priorityLayer && (
-            <>
-              <div className="h-2 rounded-full bg-linear-to-r from-rate-fast/10 to-rate-fast" />
-              <div className="flex justify-between">
-                <span>{t.priority.legendLow}</span>
-                <span>{t.priority.legendHigh}</span>
-              </div>
-              <p>{t.priority.layerLegend[priorityLayer]}</p>
-            </>
-          )}
-          {isRadar && (
-            <>
-              <div className="phase-cycle-legend h-2 rounded-full" />
-              <p>{t.phaseLegend}</p>
-            </>
-          )}
-          {!isRadar && (
-            <PriorityFilter
-              locale={locale}
-              layer={priorityLayer}
-              filter={filter}
-              onChange={changeFilter}
-              labels={t.priority}
-            />
-          )}
-        </div>
-        {!isRadar && !hasPanel && (
-          <MapRankedList
-            items={listItems()}
-            title={priorityLayer ? t.priority.areaListTitle : t.listTitle}
-            summary={fill(t.priority.matchCount, {
-              count: priorityLayer
-                ? matchingAreas.length
-                : matchingLeads.length + rankedCandidates.filter((ranked) => ranked.matches).length,
-              total: priorityLayer
-                ? rankedAreas.length
-                : rankedLeads.length + rankedCandidates.length,
-            })}
-            emptyText={t.priority.noMatch}
-            rankTemplate={t.rankLabel}
-            showLabel={priorityLayer ? t.priority.showAreaList : t.showList}
-            hideLabel={priorityLayer ? t.priority.hideAreaList : t.hideList}
-            onSelect={priorityLayer ? selectArea : selectLead}
+
+        <MapLegend layer={layer} locale={locale} labels={labels} />
+
+        {isLeads && !hasPanel && (
+          <TriagePanel
+            locale={locale}
+            bowls={bowls}
+            status={triageStatus}
+            sort={triageSort}
+            selectedId={null}
+            onStatusChange={(status) => setParam("status", status === "lead" ? null : status)}
+            onSortChange={(sort) => setParam("sort", sort === "signal" ? null : sort)}
+            onSelect={(bowlId) => setParam("lead", bowlId)}
+            labels={labels}
           />
         )}
-        {selectedLead && (
-          <CandidatePanel
-            key={selectedLead.id}
-            lead={selectedLead}
-            evidence={candidateEvidence}
+        {selectedBowl && (
+          <BowlPanel
+            key={selectedBowl.id}
+            locale={locale}
+            bowl={selectedBowl}
             labels={labels}
+            onClose={() => setParam("lead", null)}
             actions={
               <BowlActions
-                bowl={{ id: selectedLead.id, name: fill(t.nearBowl, { name: selectedLead.name }) }}
-                status={selectedLead.status}
+                bowl={{ id: selectedBowl.id, name: selectedBowl.name }}
+                status={selectedBowl.status}
                 labels={labels.actions}
                 inspectors={inspectors}
               />
             }
-            onClose={() => selectLead(null)}
           />
         )}
-        {priorityLayer && selectedArea && (
-          <AreaPanel
-            key={selectedArea.area.id}
+        {selectedCell && (
+          <CellPanel
+            key={selectedCell.id}
             locale={locale}
-            layer={priorityLayer}
-            rankedArea={selectedArea}
-            cellSizeM={areaSet.cellSizeM}
-            evidence={areaSet.evidence}
-            isSynthetic={areaSet.synthetic}
+            cell={selectedCell}
+            cellSizeM={cellSizeM}
+            nearestLead={nearestLead}
             labels={labels}
-            onClose={() => selectArea(null)}
+            onClose={() => setParam("cell", null)}
+            onSelectBowl={selectBowl}
           />
         )}
         {isRadar && (
@@ -637,8 +499,7 @@ export function OrbitalisMap({
             valueLabel={`${passIndex + 1}/${pairs.length}`}
           >
             <p className="text-xs text-muted-foreground tabular-nums">
-              {formatDate(locale, pair.referenceDate)} – {formatDate(locale, pair.secondaryDate)}.{" "}
-              {fill(t.passHeight, { share: Math.round(pair.cleanSignalShare * 100) })}
+              {formatDate(locale, pair.referenceDate)} – {formatDate(locale, pair.secondaryDate)}
             </p>
           </BarTimeline>
         )}

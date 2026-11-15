@@ -1,6 +1,44 @@
 "use client";
 
-import { Alert, AlertDescription } from "@repo/ui/components/alert";
+import {
+  Alert02Icon,
+  ArrowLeft01Icon,
+  ArrowRight01Icon,
+  Building03Icon,
+  Calendar03Icon,
+  Calendar04Icon,
+  ChartLineData01Icon,
+  ClipboardIcon,
+  CompassIcon,
+  CubeIcon,
+  CursorPointer01Icon,
+  DashboardSpeed01Icon,
+  DrillIcon,
+  FileSearchIcon,
+  GridViewIcon,
+  House01Icon,
+  Layers01Icon,
+  Layers02Icon,
+  ListViewIcon,
+  Location01Icon,
+  Move01Icon,
+  Navigation03Icon,
+  Radar01Icon,
+  RoadIcon,
+  Rotate360Icon,
+  RulerIcon,
+  Satellite01Icon,
+  Scissor01Icon,
+  SignalFull02Icon,
+  SlidersHorizontalIcon,
+  Leaf01Icon,
+  PaletteIcon,
+  Tag01Icon,
+  Target01Icon,
+  UserGroupIcon,
+  ZoomInAreaIcon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { Badge } from "@repo/ui/components/badge";
 import { Button } from "@repo/ui/components/button";
 import {
@@ -20,47 +58,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@repo/ui/components/tooltip";
-import {
-  Alert02Icon,
-  Analytics01Icon,
-  ArrowDown01Icon,
-  ArrowLeft01Icon,
-  ArrowRight01Icon,
-  ArrowUp01Icon,
-  Building03Icon,
-  Calendar03Icon,
-  ChartLineData01Icon,
-  ClipboardIcon,
-  CompassIcon,
-  CubeIcon,
-  CursorPointer01Icon,
-  DrillIcon,
-  FileSearchIcon,
-  Grid02Icon,
-  GridViewIcon,
-  House01Icon,
-  Layers01Icon,
-  Layers02Icon,
-  ListViewIcon,
-  Location01Icon,
-  Move01Icon,
-  Navigation03Icon,
-  Radar01Icon,
-  RoadIcon,
-  Rotate360Icon,
-  RulerIcon,
-  Scissor01Icon,
-  ShieldCheckIcon,
-  ShieldOffIcon,
-  SlidersHorizontalIcon,
-  Leaf01Icon,
-  PaletteIcon,
-  Tag01Icon,
-  Target01Icon,
-  WavesIcon,
-  ZoomInAreaIcon,
-} from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -75,35 +72,20 @@ import {
   type ReactNode,
 } from "react";
 
-import type { Bowl, BowlSeries } from "@/features/bowls/bowls-queries";
-import type { NisarSeriesPoint } from "@/features/nisar/nisar-queries";
+import type { Bowl, NisarRunSummary } from "@/features/bowls/bowls-queries";
 import type { SceneLayers } from "@/features/bowls/components/bowl-scene";
 
-import {
-  banYearOf,
-  blockHalfSize,
-  depthShareAt,
-  firstYearBelow,
-  sinkingBetweenMeters,
-  soilLayers,
-} from "@/features/bowls/bowl-shape";
+import { blockHalfSize, depthShareAt, soilLayers } from "@/features/bowls/bowl-shape";
 import { BowlPlan } from "@/features/bowls/components/bowl-plan";
-import { dropMeters, fastRateMmYr, middleRateMmYr, slowRateMmYr } from "@/features/map/bowl-rates";
+import { fastRateMmYr, middleRateMmYr, slowRateMmYr } from "@/features/map/bowl-rates";
 import { BarTimeline, usePlayback } from "@/features/map/components/bar-timeline";
-import { BowlDepthView } from "@/features/map/components/bowl-depth-view";
-import { interferogramCatalog } from "@/features/nisar/nisar-catalog";
 import { LanguageSwitch } from "@/features/shell/components/language-switch";
-import { fill, formatDate, type Dictionary, type Locale } from "@/lib/i18n";
+import { fill, formatDate, formatNumber, type Dictionary, type Locale } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 const BowlScene = dynamic(
   () => import("@/features/bowls/components/bowl-scene").then((module) => module.BowlScene),
   { ssr: false, loading: () => <Skeleton className="size-full" /> },
-);
-
-const BowlChart = dynamic(
-  () => import("@/features/bowls/components/bowl-chart").then((module) => module.BowlChart),
-  { loading: () => <Skeleton className="h-44 w-full" /> },
 );
 
 const NisarSeriesChart = dynamic(
@@ -114,11 +96,9 @@ const NisarSeriesChart = dynamic(
   { loading: () => <Skeleton className="h-36 w-full" /> },
 );
 
-const firstYear = 2015;
 const currentYear = 2026;
+const firstYear = currentYear;
 const lastYear = 2050;
-const radarPairs = interferogramCatalog.pairs;
-const radarYear = Number(radarPairs[0].referenceDate.slice(0, 4));
 const defaultYear = 2035;
 const milestoneYears = [currentYear, 2030, 2035, 2040, 2050];
 const yearsPerSecond = 3;
@@ -126,16 +106,14 @@ const exaggerations = [1, 100, 250];
 const defaultExaggeration = 100;
 const views = ["overview", "cutaway", "street", "plan"] as const;
 const defaultView = "cutaway";
-const parts = ["center", "edge", "house", "clay", "well", "sea", "radar", "block"] as const;
-const insideParts: readonly string[] = ["clay", "well", "sea"];
+const parts = ["center", "edge", "house", "clay", "well", "radar", "block"] as const;
+const insideParts: readonly string[] = ["clay", "well"];
 const personHeightMeters = 1.7;
 const layerToggles = [
   { id: "buildings", icon: Building03Icon },
   { id: "scenery", icon: Leaf01Icon },
   { id: "contours", icon: ChartLineData01Icon },
-  { id: "banGrid", icon: Grid02Icon },
   { id: "rate", icon: PaletteIcon },
-  { id: "sea", icon: WavesIcon },
   { id: "labels", icon: Tag01Icon },
 ] as const;
 const guideSteps = [
@@ -163,7 +141,6 @@ const partIcons: Record<Part, Icon> = {
   house: House01Icon,
   clay: Layers02Icon,
   well: DrillIcon,
-  sea: WavesIcon,
   radar: Radar01Icon,
   block: CompassIcon,
 };
@@ -262,10 +239,23 @@ function Tile({ className, ...props }: ComponentProps<"div">) {
   return <div className={cn("rounded-4xl border glass p-4", className)} {...props} />;
 }
 
-function StatTile({ label, value, unit }: { label: string; value: string; unit?: string }) {
+function StatTile({
+  icon,
+  label,
+  value,
+  unit,
+}: {
+  icon: Icon;
+  label: string;
+  value: string;
+  unit?: string;
+}) {
   return (
     <Tile className="flex flex-col justify-between gap-3">
-      <span className="text-sm text-muted-foreground">{label}</span>
+      <span className="flex items-center gap-2 text-sm text-muted-foreground">
+        <HugeiconsIcon icon={icon} strokeWidth={2} className="size-4 shrink-0" />
+        <span className="truncate">{label}</span>
+      </span>
       <span className="type-title text-2xl tabular-nums">
         {value}
         {unit ? (
@@ -296,26 +286,16 @@ function Row({
 export function BowlTwinView({
   locale,
   bowl,
-  series,
-  banDate,
-  highTideM,
+  run,
   bowlOptions,
   labels,
-  measured,
-  nisarSeries,
-  nisarRate,
   actions,
   inspection,
 }: {
-  highTideM: number;
-  measured: { summary: string; body: string };
-  nisarSeries: NisarSeriesPoint[] | null;
-  nisarRate: { rate: number; uncertainty: number } | null;
   bowlOptions: { id: string; name: string; rank: number }[];
   locale: Locale;
   bowl: Bowl;
-  series: BowlSeries;
-  banDate: string;
+  run: NisarRunSummary | null;
   labels: { map: Dictionary["map"]; bowls: Dictionary["bowls"]; common: Dictionary["common"] };
   actions: ReactNode;
   inspection: ReactNode;
@@ -325,7 +305,6 @@ export function BowlTwinView({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const canShow3d = useSyncExternalStore(subscribeToNothing, supportsWebgl2, () => true);
-  const withBan = searchParams.get("ban") !== "off";
   const chosenView = parseView(searchParams.get("view"));
   const view = canShow3d ? chosenView : "plan";
   const exaggeration = parseExaggeration(searchParams.get("height"));
@@ -338,9 +317,9 @@ export function BowlTwinView({
     buildings: true,
     scenery: true,
     contours: true,
-    banGrid: true,
+    banGrid: false,
     rate: true,
-    sea: true,
+    sea: false,
     labels: true,
   });
   const otherBowls = bowlOptions
@@ -354,10 +333,6 @@ export function BowlTwinView({
     }
   }
 
-  function showEvidence() {
-    setTab("evidence");
-    tabsRef.current?.scrollIntoView({ block: "nearest" });
-  }
   const layerRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const [insets, setInsets] = useState({ top: 0, bottom: 0, left: 0, right: 0 });
@@ -436,99 +411,36 @@ export function BowlTwinView({
     }
   }
 
-  const todayMeters = bowl.depthCm / 100;
-  const banYear = banYearOf(banDate);
+  const rate = Math.max(bowl.rateMmYr ?? 0, 0);
+  const upperRate = rate + (bowl.uncertaintyMmYr ?? 0);
 
-  function depthAt(atYear: number, isWithBan: boolean) {
-    if (atYear >= currentYear) {
-      return todayMeters + dropMeters(bowl, atYear - currentYear, isWithBan);
-    }
-    const rates = { beforeBanMmYr: bowl.rateBeforeBanMmYr, afterBanMmYr: bowl.rateAfterBanMmYr };
-    const sinkingSoFar = sinkingBetweenMeters(rates, banYear, firstYear, atYear);
-    const sinkingTotal = sinkingBetweenMeters(rates, banYear, firstYear, currentYear);
-    return todayMeters * (sinkingSoFar / sinkingTotal);
+  function depthAt(atYear: number, rateMmYr = rate) {
+    return (rateMmYr * (atYear - currentYear)) / 1000;
   }
 
   const shownYear = Math.round(year);
-  const isMeasuredYear = year < currentYear;
-  const projectedMeters = depthAt(year, withBan);
-  const drop = projectedMeters - todayMeters;
-  const futureDrop = Math.max(drop, 0);
-  const dropWithBan = Math.max(depthAt(year, true) - todayMeters, 0);
-  const dropWithoutBan = Math.max(depthAt(year, false) - todayMeters, 0);
-  const ghostDepthMeters = depthAt(year, !withBan);
-  const hasGhost = Math.abs(ghostDepthMeters - projectedMeters) > 0.005;
-  const rate = isMeasuredYear
-    ? year < banYear
-      ? bowl.rateBeforeBanMmYr
-      : bowl.rateAfterBanMmYr
-    : withBan
-      ? bowl.rateAfterBanMmYr
-      : bowl.rateBeforeBanMmYr;
-  const rateChangePercent = Math.round((1 - bowl.rateAfterBanMmYr / bowl.rateBeforeBanMmYr) * 100);
+  const projectedMeters = depthAt(year);
+  const drop = projectedMeters;
   const centimeters = (meters: number) => Math.round(meters * 100);
-  const hasMovedRank = bowl.previousRank !== null && bowl.previousRank !== bowl.rank;
-  const mapReturn = `/${locale}/map?at=${bowl.center[0].toFixed(4)},${bowl.center[1].toFixed(4)},13.00`;
-  const deepestMeters = depthAt(lastYear, false);
+  const mapReturn = `/${locale}/map?lead=${bowl.id}&at=${bowl.center[0].toFixed(4)},${bowl.center[1].toFixed(4)},13.50`;
+  const deepestMeters = Math.max(depthAt(lastYear, upperRate), 0.01);
   const blockWidthMeters = blockHalfSize(bowl.radiusM) * 2;
-
-  function floorAt(atYear: number, isWithBan: boolean) {
-    return bowl.groundHeightM - (depthAt(atYear, isWithBan) - todayMeters);
-  }
-
-  const seaDepthMeters = Math.max(bowl.groundHeightM + todayMeters - highTideM, 0);
-  const belowSeaWithBan = firstYearBelow(
-    highTideM,
-    (atYear) => floorAt(atYear, true),
-    firstYear,
-    lastYear,
-  );
-  const belowSeaWithoutBan = firstYearBelow(
-    highTideM,
-    (atYear) => floorAt(atYear, false),
-    firstYear,
-    lastYear,
-  );
-  const belowSea = withBan ? belowSeaWithBan : belowSeaWithoutBan;
-  const sea = twin.sea;
-
-  function belowSeaText(atYear: number | null) {
-    if (atYear === null) {
-      return fill(sea.never, { year: lastYear });
-    }
-    return atYear === firstYear ? sea.already : String(atYear);
-  }
-
-  function belowSeaSentence() {
-    if (belowSea === null) {
-      return fill(sea.neverSentence, { year: lastYear });
-    }
-    if (belowSea === firstYear) {
-      return sea.alreadySentence;
-    }
-    return fill(belowSea < currentYear ? sea.pastSentence : sea.yearSentence, { year: belowSea });
-  }
+  const pairCount = run?.tracks.reduce((sum, track) => sum + track.pairCount, 0) ?? 0;
 
   const yearBars = Array.from({ length: lastYear - firstYear + 1 }, (_, index) => {
     const barYear = firstYear + index;
-    const withoutBan = depthAt(barYear, false);
-    const withTheBan = depthAt(barYear, true);
-    const isUnderSea = floorAt(barYear, withBan) <= highTideM;
-    const hasRadar = barYear === radarYear;
-    const yearLabel = fill(barYear < currentYear ? twin.yearBarMeasured : twin.yearBar, {
+    const hasRadar = barYear === currentYear;
+    const yearLabel = fill(twin.yearBar, {
       year: barYear,
-      without: withoutBan.toFixed(2),
-      with: withTheBan.toFixed(2),
+      cm: centimeters(depthAt(barYear)),
+      upper: centimeters(depthAt(barYear, upperRate)),
     });
     return {
       key: String(barYear),
-      label: [yearLabel, hasRadar ? twin.radar.bar : "", isUnderSea ? sea.underSea : ""]
-        .filter(Boolean)
-        .join(". "),
-      height: withoutBan / deepestMeters,
-      dotHeight: withTheBan / deepestMeters,
+      label: hasRadar ? `${yearLabel}. ${twin.radar.bar}` : yearLabel,
+      height: depthAt(barYear) / deepestMeters,
+      dotHeight: depthAt(barYear, upperRate) / deepestMeters,
       isProjected: barYear > currentYear,
-      isUnderSea,
       hasRadar,
     };
   });
@@ -556,11 +468,10 @@ export function BowlTwinView({
     return `${signed(String(Math.abs(cm)), cm)} cm`;
   }
 
-  const radarStart = radarPairs[0].referenceDate;
-  const radarEnd = radarPairs[radarPairs.length - 1].secondaryDate;
-  const radarCleanShare = Math.round(
-    (radarPairs.reduce((sum, pair) => sum + pair.cleanSignalShare, 0) / radarPairs.length) * 100,
-  );
+  const periodText = run
+    ? `${formatDate(locale, run.periodStart)} – ${formatDate(locale, run.periodEnd)}`
+    : "—";
+  const rateText = bowl.rateMmYr === null ? "—" : `${Math.round(bowl.rateMmYr)}`;
 
   const projectedCm = centimeters(projectedMeters);
   const edgeShare = depthShareAt(bowl.radiusM, bowl.radiusM);
@@ -576,7 +487,7 @@ export function BowlTwinView({
       facts: [
         { label: fill(facts.depthIn, { year: shownYear }), value: `${projectedCm} cm` },
         { label: facts.depthChange, value: `${signed(drop.toFixed(2), drop)} m` },
-        { label: t.statRate, value: `${rate} mm/yr` },
+        { label: twin.stats.rate, value: `${rateText} ${labels.common.mmPerYear}` },
       ],
     },
     edge: {
@@ -617,33 +528,19 @@ export function BowlTwinView({
       body: twin.parts.well.body,
       facts: [
         { label: labels.bowls.status, value: labels.bowls.statuses[bowl.status] },
-        { label: labels.bowls.rateAfterExample, value: `${bowl.rateAfterBanMmYr} mm/yr` },
-        { label: t.rateChangeExample, value: `−${rateChangePercent}%` },
+        { label: twin.stats.signal, value: bowl.snr === null ? "—" : `×${bowl.snr}` },
       ],
     },
     radar: {
-      key: String(radarPairs.length),
-      body: fill(twin.parts.radar.body, { count: radarPairs.length, year: radarYear }),
+      key: String(bowl.pairs ?? pairCount),
+      body: twin.parts.radar.body,
       facts: [
-        { label: facts.passes, value: String(radarPairs.length) },
+        { label: facts.passes, value: String(bowl.pairs ?? pairCount) },
+        { label: facts.period, value: periodText },
         {
-          label: facts.period,
-          value: `${formatDate(locale, radarStart)} – ${formatDate(locale, radarEnd)}`,
+          label: twin.stats.tracks,
+          value: bowl.isOneTrack ? t.legend.oneTrack : t.legend.twoTracks,
         },
-        { label: facts.cleanSignal, value: `${radarCleanShare}%` },
-      ],
-    },
-    sea: {
-      key: belowSeaText(belowSea),
-      body: fill(twin.parts.sea.body, { tide: highTideM.toFixed(2) }),
-      facts: [
-        {
-          label: fill(facts.floorHeight, { year: shownYear }),
-          value: `${floorAt(year, withBan).toFixed(2)} m`,
-        },
-        { label: facts.highTide, value: `${highTideM.toFixed(2)} m` },
-        { label: facts.belowSeaWithBan, value: belowSeaText(belowSeaWithBan) },
-        { label: facts.belowSeaWithoutBan, value: belowSeaText(belowSeaWithoutBan) },
       ],
     },
     block: {
@@ -658,29 +555,7 @@ export function BowlTwinView({
   };
   const partCard = partCards[part];
 
-  const summaryValues = { name: bowl.name, meters: futureDrop.toFixed(2), year: shownYear };
-  let dropSummary = fill(twin.measuredSummary, {
-    name: bowl.name,
-    cm: projectedCm,
-    year: shownYear,
-  });
-  if (!isMeasuredYear) {
-    dropSummary = withBan
-      ? fill(t.bowlSummary, summaryValues)
-      : fill(t.noBanSummary, {
-          ...summaryValues,
-          extra: (dropWithoutBan - dropWithBan).toFixed(2),
-        });
-  }
-  const radarSummary =
-    shownYear === radarYear
-      ? ` ${fill(twin.radar.summary, {
-          count: radarPairs.length,
-          start: formatDate(locale, radarStart),
-          end: formatDate(locale, radarEnd),
-        })}`
-      : "";
-  const summary = `${dropSummary} ${belowSeaSentence()}${radarSummary}`;
+  const summary = fill(twin.summary, { name: bowl.name, cm: projectedCm, year: shownYear });
 
   const sceneLabel = fill(twin.sceneDescription, {
     name: bowl.name,
@@ -690,24 +565,24 @@ export function BowlTwinView({
     year: shownYear,
   });
 
-  const evidence = [
-    {
-      summary: fill(t.evidenceDepth, { cm: bowl.depthCm }),
-      body: fill(t.evidenceDepthBody, { radius: bowl.radiusM }),
-    },
-    {
-      summary: fill(t.evidenceRate, {
-        before: bowl.rateBeforeBanMmYr,
-        after: bowl.rateAfterBanMmYr,
-      }),
-      body: fill(t.evidenceRateBody, { uncertainty: bowl.uncertaintyMmYr }),
-    },
-    measured,
-    {
-      summary: fill(t.evidenceProjection, { year: shownYear, meters: futureDrop.toFixed(2) }),
-      body: t.evidenceProjectionBody,
-    },
-  ];
+  const evidence: { icon: Icon; label: string; value: string }[] = run
+    ? [
+        { icon: Satellite01Icon, label: twin.evidence.product, value: twin.evidence.productValue },
+        {
+          icon: Radar01Icon,
+          label: twin.evidence.pairs,
+          value: fill(twin.evidence.pairsValue, { count: pairCount, tracks: run.tracks.length }),
+        },
+        { icon: Calendar04Icon, label: facts.period, value: periodText },
+        { icon: GridViewIcon, label: twin.evidence.grid, value: `${run.gridM} m` },
+        {
+          icon: SignalFull02Icon,
+          label: twin.evidence.noise,
+          value: `${run.noiseFloorMmYr} ${labels.common.mmPerYear}`,
+        },
+        { icon: RulerIcon, label: twin.evidence.method, value: twin.evidence.methodValue },
+      ]
+    : [];
 
   const viewSelector = (
     <IconSegmented
@@ -734,12 +609,11 @@ export function BowlTwinView({
       onChange={(next) => setParam("height", next === String(defaultExaggeration) ? null : next)}
     />
   );
-  const overlay = "pointer-events-auto rounded-4xl border border-transparent glass p-1";
 
   return (
     <TooltipProvider>
       <div
-        style={{ "--scene-glow": `var(${rateToken(bowl.rateAfterBanMmYr)})` } as CSSProperties}
+        style={{ "--scene-glow": `var(${rateToken(rate)})` } as CSSProperties}
         className="scene-backdrop bento-grid isolate min-h-svh gap-4 p-4"
       >
         <div className="pointer-events-none relative order-2 flex min-h-0 flex-col gap-4 xl:order-none xl:col-start-1 xl:row-start-1">
@@ -794,21 +668,21 @@ export function BowlTwinView({
                   })}
                   scaleLabel={twin.scaleBar}
                   part={part}
-                  seaDepthMeters={seaDepthMeters}
+                  seaDepthMeters={0}
                   insets={insets}
                 />
               ) : (
                 <BowlScene
-                  bowl={bowl}
+                  bowl={{ center: bowl.center, radiusM: bowl.radiusM, rateMmYr: rate }}
                   depthMeters={projectedMeters}
                   exaggeration={exaggeration}
                   view={view}
                   part={part}
-                  onPick={pickPart}
+                  onPick={(scenePart) => scenePart !== "sea" && pickPart(scenePart)}
                   deepestDepthMeters={deepestMeters}
-                  seaDepthMeters={seaDepthMeters}
-                  ghostDepthMeters={hasGhost ? ghostDepthMeters : null}
-                  isRadarYear={shownYear === radarYear}
+                  seaDepthMeters={0}
+                  ghostDepthMeters={null}
+                  isRadarYear={shownYear === currentYear}
                   label={sceneLabel}
                   insets={insets}
                   layers={layers}
@@ -816,29 +690,10 @@ export function BowlTwinView({
                     layers: twin.layers,
                     well: twin.wellLabel,
                     pressure: twin.pressureLabel,
-                    highTide: sea.highTideLabel,
+                    highTide: "",
                   }}
                 />
               )}
-            </div>
-            <div className={cn(overlay, "absolute top-3 right-3 flex items-center gap-1 xl:top-0 xl:right-0")}>
-              <IconSegmented
-                label={t.banScenario}
-                value={withBan ? "with" : "without"}
-                options={[
-                  {
-                    value: "with",
-                    label: twin.withBan,
-                    content: <HugeiconsIcon icon={ShieldCheckIcon} strokeWidth={2} />,
-                  },
-                  {
-                    value: "without",
-                    label: twin.withoutBan,
-                    content: <HugeiconsIcon icon={ShieldOffIcon} strokeWidth={2} />,
-                  },
-                ]}
-                onChange={(next) => setParam("ban", next === "with" ? null : "off")}
-              />
             </div>
           </div>
 
@@ -931,16 +786,8 @@ export function BowlTwinView({
             </Tabs>
             <ul className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
               <li className="flex items-center gap-1.5">
-                <HugeiconsIcon
-                  icon={ShieldCheckIcon}
-                  strokeWidth={2}
-                  className="size-4 text-brand"
-                />
-                {twin.legend.ban}
-              </li>
-              <li className="flex items-center gap-1.5">
-                <HugeiconsIcon icon={WavesIcon} strokeWidth={2} className="size-4 text-chart-2" />
-                {twin.legend.sea}
+                <span className="size-2 rounded-full bg-foreground" aria-hidden="true" />
+                {twin.legend.upper}
               </li>
               <li className="flex items-center gap-1.5">
                 <HugeiconsIcon icon={Radar01Icon} strokeWidth={2} className="size-4" />
@@ -964,26 +811,10 @@ export function BowlTwinView({
                   <h1 className="type-title">{bowl.name}</h1>
                   <Badge variant="secondary">{labels.bowls.statuses[bowl.status]}</Badge>
                 </div>
-                <p className="flex items-center gap-1 text-sm text-muted-foreground">
-                  <span className="truncate">
-                    {bowl.kecamatan}, {fill(t.rankLabel, { rank: bowl.rank }).toLowerCase()}
-                  </span>
-                  {hasMovedRank ? (
-                    <IconTip label={fill(t.rankWas, { rank: bowl.previousRank ?? "" })}>
-                      <HugeiconsIcon
-                        icon={
-                          bowl.rank < (bowl.previousRank ?? bowl.rank)
-                            ? ArrowUp01Icon
-                            : ArrowDown01Icon
-                        }
-                        strokeWidth={2}
-                        className="size-4"
-                      />
-                      <span className="sr-only">
-                        {fill(t.rankWas, { rank: bowl.previousRank ?? "" })}
-                      </span>
-                    </IconTip>
-                  ) : null}
+                <p className="truncate text-sm text-muted-foreground">
+                  {[bowl.kecamatan, fill(t.rankLabel, { rank: bowl.rank }).toLowerCase()]
+                    .filter(Boolean)
+                    .join(", ")}
                 </p>
               </div>
               <LanguageSwitch locale={locale} label={labels.common.switchLanguage} />
@@ -1018,82 +849,42 @@ export function BowlTwinView({
               </p>
             ) : null}
             {actions}
-            <Alert>
-              <HugeiconsIcon icon={Alert02Icon} strokeWidth={2} />
-              <AlertDescription>{labels.common.leadLabel}</AlertDescription>
-            </Alert>
+            <p className="flex items-start gap-2 text-xs text-muted-foreground">
+              <HugeiconsIcon icon={Alert02Icon} strokeWidth={2} className="size-4 shrink-0" />
+              {t.leadShort}
+            </p>
           </header>
 
           <div className="order-3 flex flex-col gap-4 xl:order-none">
             <div className="grid auto-rows-fr grid-cols-2 gap-4">
               <StatTile
+                icon={DashboardSpeed01Icon}
+                label={twin.stats.rate}
+                value={
+                  bowl.uncertaintyMmYr === null
+                    ? rateText
+                    : `${rateText} ±${Math.round(bowl.uncertaintyMmYr)}`
+                }
+                unit={labels.common.mmPerYear}
+              />
+              <StatTile
+                icon={Calendar03Icon}
                 label={fill(facts.depthIn, { year: shownYear })}
                 value={String(projectedCm)}
                 unit="cm"
               />
               <StatTile
-                label={facts.depthChange}
-                value={`${signed(drop.toFixed(2), drop)}`}
-                unit="m"
+                icon={SignalFull02Icon}
+                label={twin.stats.signal}
+                value={bowl.snr === null ? "—" : `×${bowl.snr}`}
               />
-              <StatTile label={t.statRate} value={String(rate)} unit="mm/yr" />
-              <StatTile label={sea.tile} value={belowSeaText(belowSea)} />
+              <StatTile
+                icon={UserGroupIcon}
+                label={twin.stats.people}
+                value={bowl.peoplePerKm2 === null ? "—" : formatNumber(locale, bowl.peoplePerKm2)}
+                unit={t.unitPeople}
+              />
             </div>
-
-            <div className="flex flex-col gap-3 insight-card p-4">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <HugeiconsIcon icon={Analytics01Icon} strokeWidth={2} className="size-4" />
-                <span className="flex-1">{twin.insightTitle}</span>
-                <IconTip label={twin.insightEvidence}>
-                  <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    aria-label={twin.insightEvidence}
-                    onClick={showEvidence}
-                  >
-                    <HugeiconsIcon icon={FileSearchIcon} strokeWidth={2} />
-                  </Button>
-                </IconTip>
-              </div>
-              <p className="type-title text-xl text-muted-foreground">
-                {fill(twin.insight, {
-                  saved: (dropWithoutBan - dropWithBan).toFixed(2),
-                  year: shownYear,
-                  rate,
-                  drop: drop.toFixed(2),
-                })
-                  .split("**")
-                  .map((part, index) =>
-                    index % 2 === 1 ? (
-                      <strong key={part} className="font-semibold text-foreground">
-                        {part}
-                      </strong>
-                    ) : (
-                      part
-                    ),
-                  )}
-              </p>
-            </div>
-
-            <Tile className="flex flex-col gap-2">
-              <div className="flex items-center gap-3">
-                <IconTip label={t.compareSaved}>
-                  <span className="flex size-8 items-center justify-center rounded-full bg-brand/12 text-brand-text">
-                    <HugeiconsIcon icon={ShieldCheckIcon} strokeWidth={2} className="size-4" />
-                    <span className="sr-only">{t.compareSaved}</span>
-                  </span>
-                </IconTip>
-                <span className="type-title text-2xl tabular-nums">
-                  {(dropWithoutBan - dropWithBan).toFixed(2)}
-                  <span className="ml-1 text-sm font-normal text-muted-foreground">m</span>
-                </span>
-              </div>
-              <dl className="flex flex-col divide-y">
-                <Row label={t.compareWith} value={`${dropWithBan.toFixed(2)} m`} />
-                <Row label={t.compareWithout} value={`${dropWithoutBan.toFixed(2)} m`} />
-              </dl>
-              <p className="text-xs text-muted-foreground">{t.predictionNote}</p>
-            </Tile>
 
             <Tile ref={tabsRef}>
               <Tabs value={tab} onValueChange={setTab}>
@@ -1167,73 +958,32 @@ export function BowlTwinView({
                 </TabsContent>
 
                 <TabsContent value="evidence">
-                  <div className="flex flex-col gap-2 pt-2">
-                    <p className="text-sm text-muted-foreground">{t.evidenceMixed}</p>
+                  <ul className="flex flex-col divide-y pt-2 text-sm">
                     {evidence.map((item) => (
-                      <details
-                        key={item.summary}
-                        className="group details-reveal border-t py-2 text-sm first:border-t-0"
-                      >
-                        <summary className="cursor-pointer list-none text-muted-foreground tabular-nums transition-colors group-open:text-foreground hover:text-foreground">
-                          {item.summary}
-                        </summary>
-                        <p className="pt-2 text-muted-foreground">{item.body}</p>
-                      </details>
+                      <li key={item.label} className="flex items-center gap-3 py-2">
+                        <HugeiconsIcon
+                          icon={item.icon}
+                          strokeWidth={2}
+                          className="size-4 shrink-0 text-muted-foreground"
+                        />
+                        <span className="flex-1 text-muted-foreground">{item.label}</span>
+                        <span className="text-right tabular-nums">{item.value}</span>
+                      </li>
                     ))}
-                  </div>
+                  </ul>
                 </TabsContent>
               </Tabs>
             </Tile>
 
             <Tile className="flex flex-col gap-2">
-              <BowlDepthView
-                todayMeters={todayMeters}
-                projectedMeters={projectedMeters}
-                description={fill(t.depthDescription, {
-                  name: bowl.name,
-                  today: centimeters(todayMeters),
-                  projected: centimeters(projectedMeters),
-                  year: shownYear,
-                })}
-                todayLabel={fill(t.depthToday, { cm: centimeters(todayMeters) })}
-                projectedLabel={fill(t.depthProjected, {
-                  year: shownYear,
-                  cm: centimeters(projectedMeters),
-                })}
-                depthLabel={`${centimeters(projectedMeters)} cm`}
-              />
-            </Tile>
-
-            <Tile className="flex flex-col gap-2">
-              <BowlChart
-                series={series}
-                banDate={banDate}
-                labels={{
-                  sentinel: labels.bowls.sentinel,
-                  banLine: labels.bowls.banLine,
-                  caption: labels.bowls.chartExampleCaption,
-                }}
-              />
               <NisarSeriesChart
-                points={nisarSeries}
+                points={bowl.series.length > 0 ? bowl.series : null}
                 labels={{
                   title: labels.bowls.nisarSeriesTitle,
                   note: labels.bowls.nisarSeriesNote,
                   empty: labels.bowls.nisarSeriesEmpty,
                 }}
               />
-              <dl className="flex flex-col divide-y">
-                <Row label={labels.bowls.sentinel} value={`${bowl.rateBeforeBanMmYr} mm/yr`} />
-                <Row
-                  label={labels.bowls.nisarVertical}
-                  value={
-                    nisarRate
-                      ? `${nisarRate.rate} ± ${nisarRate.uncertainty} mm/yr`
-                      : "—"
-                  }
-                  isStrong
-                />
-              </dl>
             </Tile>
           </div>
         </div>

@@ -10,10 +10,8 @@ import type {
 
 import { useEffect, useEffectEvent } from "react";
 
-import type { PublicBowl } from "@/features/bowls/bowls-queries";
-
 import { useMap } from "@/components/ui/map";
-import { dropMeters, fastRateMmYr, middleRateMmYr, slowRateMmYr } from "@/features/map/bowl-rates";
+import { fastRateMmYr, middleRateMmYr, slowRateMmYr } from "@/features/map/bowl-rates";
 import { firstSymbolLayerId, themeColor } from "@/features/nisar/components/nisar-layers";
 
 const sourceId = "orbitalis-bowls";
@@ -41,9 +39,9 @@ function rateColorExpression() {
 const emphasisFadeMs = 300;
 const circleSteps = 48;
 const metersPerDegree = 111_320;
-const stackRadiusShare = 0.7;
-const stackBaseHeightM = 260;
-const stackHeightPerDropM = 700;
+const minimumStackRadiusM = 220;
+const stackBaseHeightM = 200;
+const stackHeightPerRateM = 9;
 const tiers = [
   { radiusShare: 1, from: 0, to: 0.35 },
   { radiusShare: 0.72, from: 0.35, to: 0.62 },
@@ -53,14 +51,12 @@ const tiers = [
 const ringRadiusShares = [1.5, 2, 2.6];
 const glowRadiusShare = 2.2;
 
-export function predictionFor(
-  bowlId: string,
-  selectedBowlId: string | null,
-  chosen: { years: number; withBan: boolean },
-  baselineYears: number,
-) {
-  return bowlId === selectedBowlId ? chosen : { years: baselineYears, withBan: true };
-}
+export type MapBowl = {
+  id: string;
+  center: [number, number];
+  radiusM: number;
+  rateMmYr: number | null;
+};
 
 export function circle(center: [number, number], radiusM: number) {
   const [longitude, latitude] = center;
@@ -76,15 +72,10 @@ export function circle(center: [number, number], radiusM: number) {
   return { type: "Polygon" as const, coordinates: [ring] };
 }
 
-function bowlFeatures(
-  bowl: PublicBowl,
-  years: number,
-  withBan: boolean,
-  isSelected: boolean,
-): GeoJSON.Feature[] {
-  const rate = withBan ? bowl.rateAfterBanMmYr : bowl.rateBeforeBanMmYr;
-  const stackRadiusM = bowl.radiusM * stackRadiusShare;
-  const stackHeightM = stackBaseHeightM + dropMeters(bowl, years, withBan) * stackHeightPerDropM;
+function bowlFeatures(bowl: MapBowl, isSelected: boolean): GeoJSON.Feature[] {
+  const rate = bowl.rateMmYr ?? 0;
+  const stackRadiusM = Math.max(bowl.radiusM, minimumStackRadiusM);
+  const stackHeightM = stackBaseHeightM + Math.max(rate, 0) * stackHeightPerRateM;
   const properties = { id: bowl.id, rate, selected: isSelected ? 1 : 0 };
 
   const glow: GeoJSON.Feature = {
@@ -111,17 +102,12 @@ function bowlFeatures(
 }
 
 function toFeatureCollection(
-  bowls: PublicBowl[],
-  chosen: { years: number; withBan: boolean },
-  baselineYears: number,
+  bowls: MapBowl[],
   selectedBowlId: string | null,
 ): GeoJSON.FeatureCollection {
   return {
     type: "FeatureCollection",
-    features: bowls.flatMap((bowl) => {
-      const prediction = predictionFor(bowl.id, selectedBowlId, chosen, baselineYears);
-      return bowlFeatures(bowl, prediction.years, prediction.withBan, bowl.id === selectedBowlId);
-    }),
+    features: bowls.flatMap((bowl) => bowlFeatures(bowl, bowl.id === selectedBowlId)),
   };
 }
 
@@ -150,17 +136,11 @@ function applyEmphasis(map: MapLibreMap, hasSelection: boolean) {
 
 export function BowlLayer({
   bowls,
-  years,
-  withBan,
-  baselineYears,
   selectedBowlId,
   onSelect,
   onDeselect,
 }: {
-  bowls: PublicBowl[];
-  years: number;
-  withBan: boolean;
-  baselineYears: number;
+  bowls: MapBowl[];
   selectedBowlId: string | null;
   onSelect: (bowlId: string) => void;
   onDeselect: () => void;
@@ -177,7 +157,7 @@ export function BowlLayer({
     if (!map || !isLoaded) {
       return;
     }
-    const data = toFeatureCollection(bowls, { years, withBan }, baselineYears, selectedBowlId);
+    const data = toFeatureCollection(bowls, selectedBowlId);
     const source = map.getSource<GeoJSONSource>(sourceId);
     if (source) {
       source.setData(data);
@@ -251,7 +231,7 @@ export function BowlLayer({
       beforeLayerId,
     );
     applyEmphasis(map, selectedBowlId !== null);
-  }, [map, isLoaded, bowls, years, withBan, baselineYears, selectedBowlId]);
+  }, [map, isLoaded, bowls, selectedBowlId]);
 
   useEffect(() => {
     if (!map || !isLoaded) {

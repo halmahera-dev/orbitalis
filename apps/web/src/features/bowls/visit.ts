@@ -1,5 +1,13 @@
 import type { BowlStatus } from "@/features/bowls/bowls-queries";
 
+export const statusDotColors: Record<BowlStatus, string> = {
+  lead: "bg-brand",
+  scheduled: "bg-chart-2",
+  inspected: "bg-chart-3",
+  closed: "bg-chart-5",
+  dismissed: "bg-muted-foreground/40",
+};
+
 export type BowlVisitAction = "schedule" | "outcome" | "dismiss" | "restore";
 
 const actionsByStatus: Record<BowlStatus, readonly BowlVisitAction[]> = {

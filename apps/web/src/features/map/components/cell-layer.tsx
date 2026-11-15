@@ -4,19 +4,68 @@ import type { ExpressionSpecification, GeoJSONSource, MapLayerMouseEvent } from 
 
 import { useEffect, useEffectEvent } from "react";
 
-import type { PriorityArea } from "@/features/areas/areas-priority";
+import type { Cell } from "@/features/bowls/bowls-queries";
 
 import { useMap } from "@/components/ui/map";
 import { firstSymbolLayerId, themeColor } from "@/features/nisar/components/nisar-layers";
 
-const sourceId = "orbitalis-areas";
+const sourceId = "orbitalis-cells";
 const fillLayerId = `${sourceId}-fill`;
 const outlineLayerId = `${sourceId}-outline`;
 const layerIds = [fillLayerId, outlineLayerId];
 const metersPerDegree = 111_320;
 const selectedZoom = 14;
 
-export type AreaCell = { area: PriorityArea; value: number; matches: boolean };
+export type CellLayerKind = "sinking" | "people";
+
+export type CellScale = { kind: CellLayerKind; stops: [number, number, number] };
+
+function valueOf(cell: Cell, kind: CellLayerKind, cellAreaKm2: number) {
+  if (kind === "sinking") {
+    return cell.sinkingMmYr;
+  }
+  return cell.people === null ? null : cell.people / cellAreaKm2;
+}
+
+function colorExpression({ kind, stops }: CellScale): ExpressionSpecification {
+  const [low, middle, high] = stops;
+  if (kind === "people") {
+    return [
+      "interpolate",
+      ["linear"],
+      ["get", "value"],
+      low,
+      themeColor("--chart-5"),
+      high,
+      themeColor("--chart-2"),
+    ];
+  }
+  return [
+    "interpolate",
+    ["linear"],
+    ["get", "value"],
+    low,
+    themeColor("--rate-slow"),
+    middle,
+    themeColor("--rate-middle"),
+    high,
+    themeColor("--rate-fast"),
+  ];
+}
+
+function opacityExpression({ kind, stops }: CellScale): ExpressionSpecification {
+  const [low, , high] = stops;
+  const strength: ExpressionSpecification = [
+    "interpolate",
+    ["linear"],
+    ["get", "value"],
+    low,
+    0.04,
+    high,
+    kind === "people" ? 0.6 : 0.72,
+  ];
+  return ["*", strength, ["get", "covered"]];
+}
 
 function cellPolygon([longitude, latitude]: [number, number], sizeM: number) {
   const halfLatitude = sizeM / 2 / metersPerDegree;
@@ -40,72 +89,79 @@ function cellPolygon([longitude, latitude]: [number, number], sizeM: number) {
 }
 
 function toFeatureCollection(
-  cells: AreaCell[],
+  cells: Cell[],
+  kind: CellLayerKind,
   sizeM: number,
-  selectedAreaId: string | null,
+  selectedCellId: string | null,
 ): GeoJSON.FeatureCollection {
+  const areaKm2 = (sizeM / 1000) ** 2;
   return {
     type: "FeatureCollection",
-    features: cells.map((cell) => ({
-      type: "Feature",
-      properties: {
-        id: cell.area.id,
-        value: cell.value,
-        matches: cell.matches ? 1 : 0,
-        selected: cell.area.id === selectedAreaId ? 1 : 0,
-      },
-      geometry: cellPolygon(cell.area.center, sizeM),
-    })),
+    features: cells.flatMap((cell) => {
+      const value = valueOf(cell, kind, areaKm2);
+      if (value === null) {
+        return [];
+      }
+      return [
+        {
+          type: "Feature" as const,
+          properties: {
+            id: cell.id,
+            value,
+            covered: kind === "sinking" ? cell.coveredShare : 1,
+            selected: cell.id === selectedCellId ? 1 : 0,
+          },
+          geometry: cellPolygon(cell.center, sizeM),
+        },
+      ];
+    }),
   };
 }
 
-const isMatch: ExpressionSpecification = ["==", ["get", "matches"], 1];
 const isSelected: ExpressionSpecification = ["==", ["get", "selected"], 1];
 
 function prefersReducedMotion() {
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
-export function AreaLayer({
+export function CellLayer({
   cells,
   cellSizeM,
-  selectedAreaId,
+  scale,
+  selectedCellId,
   onSelect,
 }: {
-  cells: AreaCell[];
+  cells: Cell[];
   cellSizeM: number;
-  selectedAreaId: string | null;
-  onSelect: (areaId: string) => void;
+  scale: CellScale;
+  selectedCellId: string | null;
+  onSelect: (cellId: string) => void;
 }) {
   const { map, isLoaded } = useMap();
-  const selectArea = useEffectEvent(onSelect);
+  const selectCell = useEffectEvent(onSelect);
 
   useEffect(() => {
     if (!map || !isLoaded) {
       return;
     }
-    const data = toFeatureCollection(cells, cellSizeM, selectedAreaId);
+    const data = toFeatureCollection(cells, scale.kind, cellSizeM, selectedCellId);
     const source = map.getSource<GeoJSONSource>(sourceId);
     if (source) {
       source.setData(data);
+      map.setPaintProperty(fillLayerId, "fill-color", colorExpression(scale));
+      map.setPaintProperty(fillLayerId, "fill-opacity", opacityExpression(scale));
       return;
     }
     map.addSource(sourceId, { type: "geojson", data });
     const beforeLayerId = firstSymbolLayerId(map);
-    const priorityColor = themeColor("--rate-fast");
     map.addLayer(
       {
         id: fillLayerId,
         type: "fill",
         source: sourceId,
         paint: {
-          "fill-color": priorityColor,
-          "fill-opacity": [
-            "case",
-            isMatch,
-            ["interpolate", ["linear"], ["get", "value"], 0, 0.08, 1, 0.72],
-            0.02,
-          ] as ExpressionSpecification,
+          "fill-color": colorExpression(scale),
+          "fill-opacity": opacityExpression(scale),
         },
       },
       beforeLayerId,
@@ -115,22 +171,17 @@ export function AreaLayer({
         id: outlineLayerId,
         type: "line",
         source: sourceId,
+        filter: isSelected,
         paint: {
-          "line-color": [
-            "case",
-            isSelected,
-            themeColor("--foreground"),
-            priorityColor,
-          ] as ExpressionSpecification,
-          "line-width": ["case", isSelected, 3, 0.5] as ExpressionSpecification,
-          "line-opacity": ["case", isSelected, 1, isMatch, 0.35, 0] as ExpressionSpecification,
+          "line-color": themeColor("--foreground"),
+          "line-width": 3,
         },
       },
       beforeLayerId,
     );
-  }, [map, isLoaded, cells, cellSizeM, selectedAreaId]);
+  }, [map, isLoaded, cells, cellSizeM, scale, selectedCellId]);
 
-  const selectedCenter = cells.find((cell) => cell.area.id === selectedAreaId)?.area.center;
+  const selectedCenter = cells.find((cell) => cell.id === selectedCellId)?.center;
   const selectedLongitude = selectedCenter?.[0];
   const selectedLatitude = selectedCenter?.[1];
 
@@ -155,8 +206,8 @@ export function AreaLayer({
     }
     function handleClick(event: MapLayerMouseEvent) {
       const feature = event.features?.[0];
-      if (feature?.properties?.matches === 1 && typeof feature.properties.id === "string") {
-        selectArea(feature.properties.id);
+      if (typeof feature?.properties?.id === "string") {
+        selectCell(feature.properties.id);
       }
     }
     const canvas = map.getCanvas();

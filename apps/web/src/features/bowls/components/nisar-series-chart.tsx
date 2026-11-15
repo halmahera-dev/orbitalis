@@ -3,9 +3,9 @@
 import { ChartContainer, type ChartConfig } from "@repo/ui/components/chart";
 import { Area, CartesianGrid, ComposedChart, Line, XAxis, YAxis } from "recharts";
 
-import type { NisarSeriesPoint } from "@/features/nisar/nisar-queries";
+import type { BowlSeriesPoint } from "@/features/bowls/bowls-queries";
 
-function toChartPoints(points: NisarSeriesPoint[]) {
+function toChartPoints(points: BowlSeriesPoint[]) {
   return points.map((point) => {
     const verticalMm = -point.mm;
     return {
@@ -20,7 +20,7 @@ export function NisarSeriesChart({
   points,
   labels,
 }: {
-  points: NisarSeriesPoint[] | null;
+  points: BowlSeriesPoint[] | null;
   labels: { title: string; note: string; empty: string };
 }) {
   const config = { mm: { label: labels.title, color: "var(--brand)" } } satisfies ChartConfig;

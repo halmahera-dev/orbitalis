@@ -1,6 +1,4 @@
-import { priorityLayers, type PriorityLayer } from "@/features/areas/areas-priority";
-
-export const mapLayers = ["leads", ...priorityLayers, "radar"] as const;
+export const mapLayers = ["leads", "sinking", "people", "radar"] as const;
 
 export type MapLayer = (typeof mapLayers)[number];
 
@@ -8,6 +6,10 @@ export function parseMapLayer(value: string | null): MapLayer {
   return mapLayers.find((layer) => layer === value) ?? "leads";
 }
 
-export function isPriorityLayer(layer: MapLayer): layer is PriorityLayer {
-  return priorityLayers.some((priorityLayer) => priorityLayer === layer);
+export const triageSorts = ["signal", "rate", "people"] as const;
+
+export type TriageSort = (typeof triageSorts)[number];
+
+export function parseTriageSort(value: string | null): TriageSort {
+  return triageSorts.find((sort) => sort === value) ?? "signal";
 }

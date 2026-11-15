@@ -1,7 +1,5 @@
-import { getPriorityAreas } from "@/features/areas/areas-queries";
-import { getNisarLeads, getPublicBowls } from "@/features/bowls/bowls-queries";
+import { getBowls, getCells, getLatestRun } from "@/features/bowls/bowls-queries";
 import { OrbitalisMap } from "@/features/map/components/orbitalis-map";
-import { nisarStack } from "@/features/nisar/nisar-queries";
 import { getActiveInspectorNames } from "@/features/team/team-queries";
 import { requireSession } from "@/features/user/user-queries";
 import { getDictionary, type Locale } from "@/lib/i18n";
@@ -9,19 +7,18 @@ import { getDictionary, type Locale } from "@/lib/i18n";
 export async function MapExperience({ locale }: { locale: Locale }) {
   await requireSession(locale);
   const t = getDictionary(locale);
-  const [nisarLeads, inspectors] = await Promise.all([getNisarLeads(), getActiveInspectorNames()]);
+  const [bowls, cells, run, inspectors] = await Promise.all([
+    getBowls(),
+    getCells(),
+    getLatestRun(),
+    getActiveInspectorNames(),
+  ]);
   return (
     <OrbitalisMap
       locale={locale}
-      bowls={getPublicBowls()}
-      areaSet={getPriorityAreas()}
-      nisarLeads={nisarLeads}
-      candidateEvidence={{
-        pairCount: nisarStack.tracks.reduce((total, track) => total + track.pairCount, 0),
-        ascendingPairCount: nisarStack.tracks[0].pairCount,
-        noiseFloorMmYr: nisarStack.noiseFloorMmYr,
-        detectionSnr: nisarStack.detectionSnr,
-      }}
+      bowls={bowls}
+      cells={cells}
+      cellSizeM={run?.cellSizeM ?? 480}
       inspectors={inspectors}
       labels={{
         map: t.map,
