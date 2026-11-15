@@ -62,7 +62,7 @@ export const en = {
         after: " radar shows how fast Jakarta sinks, so water teams can decide where to act first.",
       },
     },
-    seeMap: "See the public map",
+    openMapAsGuest: "Open the map as a guest",
     attribution:
       "Radar data comes from NASA, JPL, and ISRO through the ASF DAAC. The basemap comes from OpenStreetMap contributors.",
     footer: {
@@ -174,7 +174,7 @@ export const en = {
       steps: [
         {
           name: "See where it sinks",
-          body: "Open the public map. Radar colors show ground motion. One bowl glows on the north coast.",
+          body: "Open the map as a guest. Radar colors show ground motion. One bowl glows on the north coast.",
           screenDescription: "A map of North Jakarta with ground-motion bowls. Bowl 04 is marked.",
         },
         {
@@ -202,14 +202,14 @@ export const en = {
     },
     howToStart: {
       title: "Three ways to start.",
-      lead: "Most people open the public map first. Guests can try the desk. Regulators sign in for schedules and outcomes.",
+      lead: "Most people open the map as a guest first. Guests can also try the desk. Regulators sign in for schedules and outcomes.",
       startHere: "Start here",
       seePass: "See the 12-day pass",
       offers: [
         {
-          name: "Public map",
-          body: "See North Jakarta sink without an account. Ground motion, bowls, and the sea plane.",
-          terms: "No sign-in",
+          name: "Guest map",
+          body: "See North Jakarta sink without your own account. Ground motion, bowls, and the sea plane.",
+          terms: "One click as a guest",
         },
         {
           name: "Try as guest",
@@ -296,8 +296,8 @@ export const en = {
             "No. A bowl is a lead for inspection. Only a visit can confirm a pump, natural compaction, or no pump.",
         },
         {
-          question: "Who can open the public map?",
-          answer: "Anyone. The public map needs no account.",
+          question: "Who can open the map?",
+          answer: "Anyone, as a guest. A guest needs no account of their own. A public area check is planned for later.",
         },
         {
           question: "What radar does ORBITALIS use?",
@@ -326,7 +326,7 @@ export const en = {
     },
     finalCta: {
       title: "Ready to read the coast?",
-      body: "Open the public map, or try the desk as a guest. Sign in when you need schedules and outcomes.",
+      body: "Open the map or the desk as a guest. Sign in when you need schedules and outcomes.",
     },
   },
   auth: {

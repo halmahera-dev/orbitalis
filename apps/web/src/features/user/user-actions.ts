@@ -4,7 +4,7 @@ import { auth } from "@repo/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
-import { defaultLocale, hasLocale } from "@/lib/i18n";
+import { guestDestinationPath } from "@/features/user/user-destination";
 
 // The guest account is public by design, so its password is not a secret.
 const guest = {
@@ -13,7 +13,7 @@ const guest = {
   password: "orbitalis-guest-demo",
 };
 
-export async function signInAsGuest(locale: string) {
+export async function signInAsGuest(locale: string, destination: unknown) {
   const requestHeaders = await headers();
   try {
     await auth.api.signInEmail({
@@ -23,5 +23,5 @@ export async function signInAsGuest(locale: string) {
   } catch {
     await auth.api.signUpEmail({ body: guest, headers: requestHeaders });
   }
-  redirect(`/${hasLocale(locale) ? locale : defaultLocale}`);
+  redirect(guestDestinationPath(locale, destination));
 }

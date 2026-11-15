@@ -41,14 +41,11 @@ export function FinalCta({
               {common.tryAsGuest}
             </Button>
           </form>
-          <Button
-            size="lg"
-            variant="link"
-            nativeButton={false}
-            render={<Link href={`/${locale}/map`} />}
-          >
-            {t.seeMap}
-          </Button>
+          <form action={signInAsGuest.bind(null, locale, "map")}>
+            <Button size="lg" type="submit" variant="link">
+              {t.openMapAsGuest}
+            </Button>
+          </form>
         </Reveal>
       </div>
     </section>

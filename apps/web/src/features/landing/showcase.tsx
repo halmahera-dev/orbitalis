@@ -9,6 +9,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { AppLogo } from "@/components/app-logo";
 import { SectionHeading } from "@/features/landing/components/section-heading";
+import { signInAsGuest } from "@/features/user/user-actions";
 import { fill, type Dictionary, type Locale } from "@/lib/i18n";
 
 type NavKey = keyof Dictionary["nav"];
@@ -151,9 +152,11 @@ export function Showcase({
           <Button variant="link" nativeButton={false} render={<Link href="#data" />}>
             {t.showcase.dataLink}
           </Button>
-          <Button variant="link" nativeButton={false} render={<Link href={`/${locale}/map`} />}>
-            {t.seeMap}
-          </Button>
+          <form action={signInAsGuest.bind(null, locale, "map")}>
+            <Button type="submit" variant="link">
+              {t.openMapAsGuest}
+            </Button>
+          </form>
         </div>
       </div>
     </section>

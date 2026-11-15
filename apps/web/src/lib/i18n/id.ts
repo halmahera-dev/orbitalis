@@ -66,7 +66,7 @@ export const id: Dictionary = {
           " menunjukkan seberapa cepat tanah Jakarta turun, sehingga tim air bisa memutuskan ke mana harus bertindak lebih dulu.",
       },
     },
-    seeMap: "Lihat peta publik",
+    openMapAsGuest: "Buka peta sebagai tamu",
     attribution:
       "Data radar berasal dari NASA, JPL, dan ISRO melalui ASF DAAC. Peta dasar berasal dari kontributor OpenStreetMap.",
     footer: {
@@ -178,7 +178,7 @@ export const id: Dictionary = {
       steps: [
         {
           name: "Lihat di mana tanah turun",
-          body: "Buka peta publik. Warna radar menunjukkan gerak tanah. Satu cekungan menyala di pantai utara.",
+          body: "Buka peta sebagai tamu. Warna radar menunjukkan gerak tanah. Satu cekungan menyala di pantai utara.",
           screenDescription:
             "Peta Jakarta Utara dengan cekungan gerak tanah. Cekungan 04 ditandai.",
         },
@@ -208,14 +208,14 @@ export const id: Dictionary = {
     },
     howToStart: {
       title: "Tiga cara memulai.",
-      lead: "Kebanyakan orang membuka peta publik lebih dulu. Tamu dapat mencoba meja. Regulator masuk untuk jadwal dan hasil.",
+      lead: "Kebanyakan orang membuka peta sebagai tamu lebih dulu. Tamu juga dapat mencoba meja. Regulator masuk untuk jadwal dan hasil.",
       startHere: "Mulai di sini",
       seePass: "Lihat lintasan 12 hari",
       offers: [
         {
-          name: "Peta publik",
-          body: "Lihat Jakarta Utara turun tanpa akun. Gerak tanah, cekungan, dan bidang laut.",
-          terms: "Tanpa masuk",
+          name: "Peta tamu",
+          body: "Lihat Jakarta Utara turun tanpa akun sendiri. Gerak tanah, cekungan, dan bidang laut.",
+          terms: "Satu klik sebagai tamu",
         },
         {
           name: "Coba sebagai tamu",
@@ -302,8 +302,8 @@ export const id: Dictionary = {
             "Tidak. Cekungan adalah petunjuk inspeksi. Hanya kunjungan yang dapat memastikan ada pompa, pemadatan alami, atau tidak ada pompa.",
         },
         {
-          question: "Siapa yang dapat membuka peta publik?",
-          answer: "Siapa saja. Peta publik tidak membutuhkan akun.",
+          question: "Siapa yang dapat membuka peta?",
+          answer: "Siapa saja, sebagai tamu. Tamu tidak perlu membuat akun sendiri. Cek area untuk publik direncanakan nanti.",
         },
         {
           question: "Radar apa yang dipakai ORBITALIS?",
@@ -333,7 +333,7 @@ export const id: Dictionary = {
     },
     finalCta: {
       title: "Siap membaca pantai?",
-      body: "Buka peta publik, atau coba meja sebagai tamu. Masuk bila Anda butuh jadwal dan hasil.",
+      body: "Buka peta atau meja sebagai tamu. Masuk bila Anda butuh jadwal dan hasil.",
     },
   },
   auth: {
